@@ -113,7 +113,6 @@ const WeeklyLeaderboard: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-medium text-gray-900">Scorul tău</h3>
-              <p className="text-sm text-gray-500">Compară-te cu alți elevi</p>
             </div>
           </div>
           <div className="flex items-center text-sm text-gray-500">
