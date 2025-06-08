@@ -407,6 +407,9 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
 
       // Notify parent component
       onTestCompleted(subject, correctAnswers);
+      
+      // IMPORTANT: Do NOT close the modal automatically
+      // The modal will stay open to show results until user manually closes it
     }
   };
 
