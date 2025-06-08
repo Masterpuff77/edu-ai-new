@@ -23,9 +23,10 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   const { addExperience } = useGamificationStore();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(10).fill(-1));
-  const [submitted, setSubmitted] = useState(false); // Changed from showResults to match ChallengeModal
+  const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     generateQuestions();
@@ -363,7 +364,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
-    if (submitted) return; // Changed from showResults to submitted
+    if (submitted) return;
     
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = answerIndex;
@@ -374,7 +375,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Calculate score and show results - EXACTLY like ChallengeModal
+      // Calculate score
       let correctAnswers = 0;
       questions.forEach((question, index) => {
         if (answers[index] === question.correctAnswer) {
@@ -382,34 +383,48 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
         }
       });
       setScore(correctAnswers);
-      setSubmitted(true); // Changed from setShowResults to setSubmitted
+      setSubmitted(true);
       
-      // Save test result to database
+      // Save test result to database - PREVENT PAGE REFRESH
       try {
-        await supabase
-          .from('subject_test_results')
-          .insert([{
-            userId: user?.id,
-            subject: subject,
-            score: correctAnswers,
-            totalQuestions: questions.length,
-            completedAt: new Date().toISOString()
-          }]);
-      } catch (error) {
-        console.error('Error saving test result:', error);
-      }
-      
-      // Award XP based on performance
-      const xpReward = correctAnswers * 50; // 50 XP per correct answer
-      if (xpReward > 0) {
-        addExperience(xpReward);
-      }
+        setSaving(true);
+        
+        // Use a more specific approach to prevent any navigation/refresh
+        if (user?.id) {
+          const { error } = await supabase
+            .from('subject_test_results')
+            .insert([{
+              userId: user.id,
+              subject: subject,
+              score: correctAnswers,
+              totalQuestions: questions.length,
+              completedAt: new Date().toISOString()
+            }]);
+          
+          if (error) {
+            console.error('Error saving test result:', error);
+            // Don't throw error - just log it to prevent any navigation
+          }
+        }
+        
+        // Award XP based on performance
+        const xpReward = correctAnswers * 50; // 50 XP per correct answer
+        if (xpReward > 0) {
+          await addExperience(xpReward);
+        }
 
-      // Notify parent component
-      onTestCompleted(subject, correctAnswers);
+        // Notify parent component
+        onTestCompleted(subject, correctAnswers);
+        
+      } catch (error) {
+        console.error('Error in test completion:', error);
+        // Don't re-throw error to prevent any navigation
+      } finally {
+        setSaving(false);
+      }
       
       // CRITICAL: Modal stays open - NO automatic closing!
-      // The modal will only close when user clicks "Închide" or "X"
+      // NO navigation, NO page refresh, NO automatic modal closing
     }
   };
 
@@ -427,7 +442,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   const handleRetry = () => {
     setCurrentQuestion(0);
     setAnswers(Array(10).fill(-1));
-    setSubmitted(false); // Changed from setShowResults to setSubmitted
+    setSubmitted(false);
     setScore(0);
   };
 
@@ -469,7 +484,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
               </button>
             </div>
 
-            {!submitted ? ( // Changed from !showResults to !submitted
+            {!submitted ? (
               <>
                 <div className="mb-6">
                   <div className="flex justify-between text-sm text-gray-500 mb-2">
@@ -534,10 +549,10 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
                   
                   <button
                     onClick={handleNext}
-                    disabled={answers[currentQuestion] === -1}
+                    disabled={answers[currentQuestion] === -1 || saving}
                     className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {currentQuestion < questions.length - 1 ? 'Următoarea' : 'Finalizează'}
+                    {saving ? 'Se salvează...' : (currentQuestion < questions.length - 1 ? 'Următoarea' : 'Finalizează')}
                   </button>
                 </div>
               </>
@@ -583,12 +598,22 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
                   </div>
                 </div>
 
-                <button
-                  onClick={handleComplete}
-                  className="px-8 py-3 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-                >
-                  Continuă
-                </button>
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={handleRetry}
+                    className="px-6 py-3 text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 transition-colors flex items-center"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Încearcă din nou
+                  </button>
+                  
+                  <button
+                    onClick={handleComplete}
+                    className="px-8 py-3 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                  >
+                    Continuă
+                  </button>
+                </div>
               </div>
             )}
           </div>
