@@ -6,6 +6,7 @@ import ChallengesList from '../components/dashboard/ChallengesList';
 import NotificationsList from '../components/dashboard/NotificationsList';
 import LearningAssistant from '../components/dashboard/LearningAssistant';
 import WeeklyLeaderboard from '../components/dashboard/WeeklyLeaderboard';
+import KnowledgeTestingBox from '../components/dashboard/KnowledgeTestingBox';
 import useAuthStore from '../store/authStore';
 import useStudyPlanStore from '../store/studyPlanStore';
 
@@ -76,6 +77,8 @@ const DashboardPage: React.FC = () => {
                 nextLessonId={nextLesson?.id || "1"}
                 nextLessonTitle={nextLesson?.title || defaultLessonTitle}
               />
+              
+              <KnowledgeTestingBox />
               
               <ChallengesList />
             </div>
