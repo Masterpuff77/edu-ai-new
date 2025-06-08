@@ -17,8 +17,8 @@ const WeeklyLeaderboard: React.FC = () => {
   const [userWeeklyXP, setUserWeeklyXP] = useState<number>(0);
 
   useEffect(() => {
-    // Mock data pentru top 3 + user
-    const mockLeaderboard: LeaderboardUser[] = [
+    // Mock data pentru top 3
+    const mockUsers: LeaderboardUser[] = [
       {
         id: '1',
         name: 'Alexandra M.',
@@ -42,36 +42,36 @@ const WeeklyLeaderboard: React.FC = () => {
       }
     ];
 
-    // Folosește XP-ul real al utilizatorului (nu un procent)
-    // Pentru liga săptămânală, considerăm că utilizatorul a câștigat acest XP în săptămâna curentă
+    // Folosește XP-ul real al utilizatorului
     const currentUserWeeklyXP = user?.experience || 0;
     
-    // Determină poziția utilizatorului
-    let rank = 4;
-    const updatedLeaderboard = [...mockLeaderboard];
-    
-    // Verifică dacă utilizatorul depășește pe cineva din top 3
-    for (let i = mockLeaderboard.length - 1; i >= 0; i--) {
-      if (currentUserWeeklyXP > mockLeaderboard[i].weeklyXP) {
-        rank = i + 1;
-        // Inserează utilizatorul în poziția corectă
-        updatedLeaderboard.splice(i, 0, {
-          id: user?.id || 'current-user',
-          name: user?.name || 'Tu',
-          avatar: user?.avatar,
-          weeklyXP: currentUserWeeklyXP,
-          rank: rank
-        });
-        // Actualizează rangurile celorlalți
-        for (let j = i + 1; j < updatedLeaderboard.length; j++) {
-          updatedLeaderboard[j].rank = j + 1;
-        }
-        break;
-      }
-    }
+    // Adaugă utilizatorul în listă
+    const currentUser: LeaderboardUser = {
+      id: user?.id || 'current-user',
+      name: user?.name || 'Tu',
+      avatar: user?.avatar,
+      weeklyXP: currentUserWeeklyXP,
+      rank: 4 // Temporar, va fi recalculat
+    };
 
-    setLeaderboard(updatedLeaderboard.slice(0, 4)); // Păstrează doar top 4
-    setUserRank(rank);
+    // Combină toți utilizatorii și sortează după XP descrescător
+    const allUsers = [...mockUsers, currentUser];
+    allUsers.sort((a, b) => b.weeklyXP - a.weeklyXP);
+
+    // Recalculează rangurile
+    allUsers.forEach((user, index) => {
+      user.rank = index + 1;
+    });
+
+    // Găsește poziția utilizatorului curent
+    const currentUserIndex = allUsers.findIndex(u => u.id === (user?.id || 'current-user'));
+    const newUserRank = currentUserIndex + 1;
+
+    // Păstrează doar top 4 pentru afișare
+    const topUsers = allUsers.slice(0, 4);
+
+    setLeaderboard(topUsers);
+    setUserRank(newUserRank);
     setUserWeeklyXP(currentUserWeeklyXP);
   }, [user]);
 
@@ -104,6 +104,10 @@ const WeeklyLeaderboard: React.FC = () => {
     }
   };
 
+  // Găsește utilizatorul curent în leaderboard
+  const currentUserInLeaderboard = leaderboard.find(u => u.id === (user?.id || 'current-user'));
+  const isUserInTop4 = currentUserInLeaderboard !== undefined;
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="p-6">
@@ -124,10 +128,10 @@ const WeeklyLeaderboard: React.FC = () => {
 
         <div className="space-y-3">
           {leaderboard.map((leaderUser, index) => {
-            const isCurrentUser = leaderUser.id === user?.id;
+            const isCurrentUser = leaderUser.id === (user?.id || 'current-user');
             return (
               <div
-                key={leaderUser.id}
+                key={`${leaderUser.id}-${index}`}
                 className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all duration-200 ${getRankColor(
                   leaderUser.rank,
                   isCurrentUser
@@ -183,8 +187,8 @@ const WeeklyLeaderboard: React.FC = () => {
             );
           })}
 
-          {/* Afișează utilizatorul dacă nu este în top 3 */}
-          {userRank > 3 && (
+          {/* Afișează utilizatorul dacă nu este în top 4 */}
+          {!isUserInTop4 && (
             <div className="border-t pt-3 mt-3">
               <div className={`flex items-center justify-between p-3 rounded-lg border-2 ${getRankColor(userRank, true)} transform scale-105 shadow-md`}>
                 <div className="flex items-center">
@@ -231,7 +235,7 @@ const WeeklyLeaderboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-purple-700">
-                {userRank <= 3 ? 'Felicitări! Ești în top 3!' : `Încă ${leaderboard[2]?.weeklyXP - userWeeklyXP + 1} XP până în top 3`}
+                {userRank <= 3 ? 'Felicitări! Ești în top 3!' : `Încă ${Math.max(0, (leaderboard[2]?.weeklyXP || 3500) - userWeeklyXP + 1)} XP până în top 3`}
               </p>
               <p className="text-xs text-purple-600">
                 {userRank <= 3 ? 'Continuă să înveți pentru a-ți menține poziția!' : 'Parcurge mai multe lecții pentru a urca în clasament!'}
