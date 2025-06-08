@@ -35,10 +35,14 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
   };
 
+  // Effect for generating questions - only depends on subject
   useEffect(() => {
-    addDebugLog('Component mounted');
+    addDebugLog('Component mounted - generating questions');
     generateQuestions();
-    
+  }, [subject]);
+
+  // Effect for handling navigation prevention - depends on submitted state
+  useEffect(() => {
     // Prevent any form of navigation during modal lifecycle
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (!submitted) {
@@ -56,11 +60,11 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     window.addEventListener('popstate', handlePopState);
 
     return () => {
-      addDebugLog('Component unmounting');
+      addDebugLog('Cleaning up event listeners');
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [subject, submitted]);
+  }, [submitted]);
 
   const generateQuestions = () => {
     addDebugLog('Generating questions');
@@ -341,7 +345,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
         {
           id: '5',
           question: 'Ce este un ecosistem?',
-          options: ['Comunitatea de organisme și mediul lor', 'O specie', 'O popolazione', 'Un habitat'],
+          options: ['Comunitatea de organisme și mediul lor', 'O specie', 'O populație', 'Un habitat'],
           correctAnswer: 0
         },
         {
