@@ -99,23 +99,29 @@ const useGamificationStore = create<GamificationState>((set, get) => ({
       const currentLevel = get().calculateLevel(user.experience);
       const newLevel = get().calculateLevel(newExperience);
       
-      // Update user experience
+      // Update user experience and level
       await useAuthStore.getState().updateUser({ 
         experience: newExperience,
         level: newLevel 
       });
 
-      // If level up, award a badge
+      // If level up, award a level badge
       if (newLevel > currentLevel) {
-        // Find level badge
-        const { data, error } = await supabase
-          .from('badges')
-          .select('id')
-          .eq('criteria', `level_${newLevel}`)
-          .maybeSingle();
-        
-        if (!error && data) {
-          await get().awardBadge(data.id);
+        // Check for level-specific badges
+        const levelBadges = ['level-5', 'level-10', 'level-20'];
+        for (const levelBadge of levelBadges) {
+          const requiredLevel = parseInt(levelBadge.split('-')[1]);
+          if (newLevel >= requiredLevel) {
+            const { data, error } = await supabase
+              .from('badges')
+              .select('id')
+              .eq('id', levelBadge)
+              .maybeSingle();
+            
+            if (!error && data) {
+              await get().awardBadge(data.id);
+            }
+          }
         }
       }
 
@@ -126,7 +132,8 @@ const useGamificationStore = create<GamificationState>((set, get) => ({
   },
 
   calculateLevel: (experience: number) => {
-    // Simple level calculation: level = sqrt(experience/100) + 1
+    // Improved level calculation: level = sqrt(experience/100) + 1
+    // This ensures consistent XP requirements across the app
     return Math.floor(Math.sqrt(experience / 100)) + 1;
   },
 }));

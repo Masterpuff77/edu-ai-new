@@ -14,7 +14,8 @@ import {
   Sunrise,
   Moon,
   Calendar,
-  CheckCircle
+  CheckCircle,
+  Coins
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useGamificationStore from '../../store/gamificationStore';
@@ -147,7 +148,7 @@ const ProgressSection: React.FC = () => {
   };
 
   const calculateNextLevelExp = () => {
-    if (!user) return 100;
+    if (!user) return { progress: 0, current: 0, total: 100 };
     const currentLevel = user.level;
     const nextLevelExp = Math.pow((currentLevel), 2) * 100;
     const currentLevelExp = Math.pow((currentLevel - 1), 2) * 100;
@@ -168,9 +169,30 @@ const ProgressSection: React.FC = () => {
       <div className="p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Progresul tău</h3>
         
+        {/* Punctele tale - nou adăugat */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <div className="p-2 bg-amber-100 rounded-lg mr-3">
+              <Coins className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-gray-700">Punctele tale</h4>
+              <p className="text-2xl font-bold text-amber-600">{user?.experience?.toLocaleString() || '0'} XP</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">Nivel {user?.level}</p>
+            <p className="text-xs text-gray-400">
+              {user?.level && user.level < 5 ? 'Începător' :
+               user?.level && user.level < 10 ? 'Avansat' :
+               user?.level && user.level < 15 ? 'Expert' : 'Maestru'}
+            </p>
+          </div>
+        </div>
+        
         <div className="mb-6">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>Progres general</span>
+            <span>Progres către nivelul următor</span>
             <span>Nivel {user?.level}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5">

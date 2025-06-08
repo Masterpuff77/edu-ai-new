@@ -47,7 +47,8 @@ const LessonPage: React.FC = () => {
   const handleQuizComplete = async (score: number) => {
     if (!user) return;
     
-    const expPerQuestion = 10;
+    // Consistent XP calculation: 20 XP per correct answer
+    const expPerQuestion = 20;
     const totalExp = score * expPerQuestion;
     
     await addExperience(totalExp);
@@ -75,8 +76,8 @@ const LessonPage: React.FC = () => {
 
       if (evalError) throw evalError;
 
-      // Award XP
-      await addExperience(50);
+      // Award consistent XP: 100 XP for completing a lesson
+      await addExperience(100);
 
       setIsLessonCompleted(true);
       setShowCompletedMessage(true);

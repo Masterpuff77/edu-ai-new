@@ -42,8 +42,9 @@ const WeeklyLeaderboard: React.FC = () => {
       }
     ];
 
-    // Calculează XP-ul săptămânal al utilizatorului (mock pentru acum)
-    const currentUserWeeklyXP = Math.floor((user?.experience || 0) * 0.3); // 30% din XP total ca XP săptămânal
+    // Folosește XP-ul real al utilizatorului (nu un procent)
+    // Pentru liga săptămânală, considerăm că utilizatorul a câștigat acest XP în săptămâna curentă
+    const currentUserWeeklyXP = user?.experience || 0;
     
     // Determină poziția utilizatorului
     let rank = 4;
