@@ -9,7 +9,6 @@ import LessonPage from './pages/LessonPage';
 import ProfilePage from './pages/ProfilePage';
 import useAuthStore from './store/authStore';
 import supabase from './config/supabase';
-import ElevenLabsWidget from './components/chat/ElevenLabsWidget';
 
 const App: React.FC = () => {
   const { user, isAuthenticated, loading, loadUserProfile, clearAuth } = useAuthStore();
@@ -84,7 +83,6 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      {isAuthenticated && isOnboardingComplete() && <ElevenLabsWidget />}
       <Routes>
         <Route 
           path="/" 
