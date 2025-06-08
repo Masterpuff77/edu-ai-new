@@ -257,30 +257,28 @@ const LearningAssistant: React.FC = () => {
           </button>
         </div>
         
-        {/* Chat container with purple gradient background - same as "Felicitări! Ești în top 3!" */}
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 mb-4">
-          <div className="bg-white rounded-lg h-[400px] overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
+        {/* Chat container with full purple gradient background */}
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 mb-4 h-[400px] overflow-y-auto space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+            >
               <div
-                key={message.id}
-                className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+                className={`max-w-[80%] rounded-lg p-3 ${
+                  message.isUser
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white shadow-sm text-gray-800'
+                }`}
               >
-                <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    message.isUser
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-1 block`}>
-                    {message.timestamp.toLocaleTimeString()}
-                  </span>
-                </div>
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-1 block`}>
+                  {message.timestamp.toLocaleTimeString()}
+                </span>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
         </div>
 
         <form onSubmit={handleSubmit} className="relative">
