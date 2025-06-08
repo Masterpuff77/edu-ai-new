@@ -5,6 +5,7 @@ import RecommendationCard from '../components/dashboard/RecommendationCard';
 import ChallengesList from '../components/dashboard/ChallengesList';
 import NotificationsList from '../components/dashboard/NotificationsList';
 import LearningAssistant from '../components/dashboard/LearningAssistant';
+import WeeklyLeaderboard from '../components/dashboard/WeeklyLeaderboard';
 import useAuthStore from '../store/authStore';
 import useStudyPlanStore from '../store/studyPlanStore';
 
@@ -81,6 +82,7 @@ const DashboardPage: React.FC = () => {
             
             <div className="lg:col-span-4 space-y-6">
               <LearningAssistant />
+              <WeeklyLeaderboard />
               <NotificationsList />
             </div>
           </div>
