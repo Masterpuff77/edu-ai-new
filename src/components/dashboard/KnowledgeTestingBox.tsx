@@ -286,18 +286,8 @@ const KnowledgeTestingBox: React.FC = () => {
                       </div>
                     </div>
                     
-                    {/* Progress bar for lessons - only show completion status */}
-                    <div className="mt-3">
-                      <div className="w-full bg-gray-200 rounded-full h-1.5">
-                        <div 
-                          className={`h-1.5 rounded-full transition-all duration-300 ${
-                            status.completedLessons >= 5 ? 'bg-green-500' : 'bg-gray-400'
-                          }`}
-                          style={{ width: `${Math.min(100, (status.completedLessons / 5) * 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
+                    {/* BARA VERDE ELIMINATĂ COMPLET - nu mai există nicio bară automată */}
+                    
                     {/* Test result progress bar - only show if test was completed */}
                     {status.hasCompletedTest && status.lastTestScore !== undefined && (
                       <div className="mt-3">
