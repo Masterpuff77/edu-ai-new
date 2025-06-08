@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Brain, Lock, CheckCircle, BookOpen, Trophy, Zap } from 'lucide-react';
+import { Brain, Lock, CheckCircle, BookOpen, Trophy, Zap, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import supabase from '../../config/supabase';
+import SubjectQuizModal from './SubjectQuizModal';
 
 interface SubjectTestStatus {
   subject: string;
@@ -17,6 +18,7 @@ const KnowledgeTestingBox: React.FC = () => {
   const [subjectStatuses, setSubjectStatuses] = useState<SubjectTestStatus[]>([]);
   const [hasCompletedInitialEvaluation, setHasCompletedInitialEvaluation] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -103,9 +105,7 @@ const KnowledgeTestingBox: React.FC = () => {
       return;
     }
     
-    // Navigate to a test page (to be implemented)
-    console.log(`Starting test for ${subject}`);
-    // navigate(`/test/${subject}`);
+    setSelectedSubject(subject);
   };
 
   const handleInitialEvaluation = async () => {
@@ -144,137 +144,147 @@ const KnowledgeTestingBox: React.FC = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-purple-100 via-blue-100 to-indigo-100 rounded-lg shadow-md overflow-hidden">
-      <div className="p-6">
-        <div className="flex items-center mb-6">
-          <div className="p-2 bg-purple-200 rounded-lg mr-3">
-            <Brain className="h-6 w-6 text-purple-600" />
-          </div>
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">Testează-ți cunoștințele</h3>
-            <p className="text-sm text-gray-600">Evaluează progresul la materiile tale</p>
-          </div>
-        </div>
-
-        {/* Initial Evaluation Section */}
-        <div className="mb-6">
-          <div 
-            className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg ${
-              hasCompletedInitialEvaluation 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 hover:border-indigo-300'
-            }`}
-            onClick={handleInitialEvaluation}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className={`p-2 rounded-full mr-3 ${
-                  hasCompletedInitialEvaluation ? 'bg-green-100' : 'bg-indigo-100'
-                }`}>
-                  {hasCompletedInitialEvaluation ? (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                  ) : (
-                    <Zap className="h-5 w-5 text-indigo-600" />
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Evaluarea Inițială</h4>
-                  <p className="text-sm text-gray-600">
-                    {hasCompletedInitialEvaluation 
-                      ? 'Planul de studiu a fost generat în urma rezultatului evaluării inițiale.'
-                      : 'Generează un plan de studiu personalizat'
-                    }
-                  </p>
-                </div>
-              </div>
-              {!hasCompletedInitialEvaluation && (
-                <div className="px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded-full">
-                  Începe
-                </div>
-              )}
+    <>
+      <div className="bg-gradient-to-br from-purple-100 via-blue-100 to-indigo-100 rounded-lg shadow-md overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-center mb-6">
+            <div className="p-2 bg-purple-200 rounded-lg mr-3">
+              <Brain className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">Testează-ți cunoștințele</h3>
+              <p className="text-sm text-gray-600">Evaluează progresul la materiile tale</p>
             </div>
           </div>
-        </div>
 
-        {/* Subject Tests Section */}
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-4">Teste pe materii</h4>
-          <div className="space-y-3">
-            {subjectStatuses.map((status) => {
-              const config = getSubjectConfig(status.subject);
-              
-              return (
-                <div
-                  key={status.subject}
-                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg ${
-                    status.canTakeTest
-                      ? 'bg-white border-gray-200 hover:border-gray-300'
-                      : 'bg-gray-50 border-gray-200 opacity-75'
-                  }`}
-                  onClick={() => handleSubjectTest(status.subject, status.canTakeTest)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className={`p-2 rounded-full mr-3 ${
-                        status.canTakeTest ? config.bgColor : 'bg-gray-100'
-                      }`}>
-                        {status.canTakeTest ? (
-                          <Trophy className={`h-5 w-5 ${config.color}`} />
-                        ) : (
-                          <Lock className="h-5 w-5 text-gray-400" />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className={`font-medium ${
-                          status.canTakeTest ? 'text-gray-900' : 'text-gray-500'
+          {/* Initial Evaluation Section */}
+          <div className="mb-6">
+            <div 
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg ${
+                hasCompletedInitialEvaluation 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 hover:border-indigo-300'
+              }`}
+              onClick={handleInitialEvaluation}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className={`p-2 rounded-full mr-3 ${
+                    hasCompletedInitialEvaluation ? 'bg-green-100' : 'bg-indigo-100'
+                  }`}>
+                    {hasCompletedInitialEvaluation ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <Zap className="h-5 w-5 text-indigo-600" />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Evaluarea Inițială</h4>
+                    <p className="text-sm text-gray-600">
+                      {hasCompletedInitialEvaluation 
+                        ? 'Planul de studiu a fost generat în urma rezultatului evaluării inițiale.'
+                        : 'Generează un plan de studiu personalizat'
+                      }
+                    </p>
+                  </div>
+                </div>
+                {!hasCompletedInitialEvaluation && (
+                  <div className="px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded-full">
+                    Începe
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Subject Tests Section */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-4">Teste pe materii</h4>
+            <div className="space-y-3">
+              {subjectStatuses.map((status) => {
+                const config = getSubjectConfig(status.subject);
+                
+                return (
+                  <div
+                    key={status.subject}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg ${
+                      status.canTakeTest
+                        ? 'bg-white border-gray-200 hover:border-gray-300'
+                        : 'bg-gray-50 border-gray-200 opacity-75'
+                    }`}
+                    onClick={() => handleSubjectTest(status.subject, status.canTakeTest)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className={`p-2 rounded-full mr-3 ${
+                          status.canTakeTest ? config.bgColor : 'bg-gray-100'
                         }`}>
-                          {config.name}
-                        </h4>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <BookOpen className="h-4 w-4 mr-1" />
-                          <span>{status.completedLessons}/5 lecții parcurse</span>
+                          {status.canTakeTest ? (
+                            <Play className={`h-5 w-5 ${config.color}`} />
+                          ) : (
+                            <Lock className="h-5 w-5 text-gray-400" />
+                          )}
                         </div>
+                        <div>
+                          <h4 className={`font-medium ${
+                            status.canTakeTest ? 'text-gray-900' : 'text-gray-500'
+                          }`}>
+                            {config.name}
+                          </h4>
+                          <div className="flex items-center text-sm text-gray-500">
+                            <BookOpen className="h-4 w-4 mr-1" />
+                            <span>{status.completedLessons}/5 lecții parcurse</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        {status.canTakeTest ? (
+                          <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                            Începe testul
+                          </div>
+                        ) : (
+                          <div className="px-3 py-1 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">
+                            Blocat
+                          </div>
+                        )}
                       </div>
                     </div>
                     
-                    <div className="text-right">
-                      {status.canTakeTest ? (
-                        <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                          Disponibil
-                        </div>
-                      ) : (
-                        <div className="px-3 py-1 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">
-                          Blocat
-                        </div>
-                      )}
+                    {/* Progress bar */}
+                    <div className="mt-3">
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div 
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            status.canTakeTest ? 'bg-green-500' : 'bg-gray-400'
+                          }`}
+                          style={{ width: `${Math.min(100, (status.completedLessons / 5) * 100)}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
-                  
-                  {/* Progress bar */}
-                  <div className="mt-3">
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
-                      <div 
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          status.canTakeTest ? 'bg-green-500' : 'bg-gray-400'
-                        }`}
-                        style={{ width: `${Math.min(100, (status.completedLessons / 5) * 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Info message */}
+          <div className="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-700">
+              <strong>Notă:</strong> Pentru a debloca testul la o materie, trebuie să parcurgi minimum 5 lecții din acea materie. Fiecare test conține 10 întrebări și îți oferă XP în funcție de performanță.
+            </p>
           </div>
         </div>
-
-        {/* Info message */}
-        <div className="mt-6 p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-700">
-            <strong>Notă:</strong> Pentru a debloca testul la o materie, trebuie să parcurgi minimum 5 lecții din acea materie.
-          </p>
-        </div>
       </div>
-    </div>
+
+      {/* Subject Quiz Modal */}
+      {selectedSubject && (
+        <SubjectQuizModal
+          subject={selectedSubject}
+          onClose={() => setSelectedSubject(null)}
+        />
+      )}
+    </>
   );
 };
 
