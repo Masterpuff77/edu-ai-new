@@ -408,7 +408,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     setAnswers(newAnswers);
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     addDebugLog(`handleNext called - current question: ${currentQuestion + 1}/${questions.length}`);
     
     if (currentQuestion < questions.length - 1) {
@@ -434,65 +434,8 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     // CRITICAL: Set submitted FIRST to prevent any re-execution
     setSubmitted(true);
     addDebugLog('Submitted state set to true');
+    addDebugLog('handleNext completed - results screen should be visible');
     
-    // Save test result - with comprehensive error handling
-    try {
-      addDebugLog('Starting save process');
-      setSaving(true);
-      
-      if (!user?.id) {
-        addDebugLog('ERROR: No user ID found');
-        throw new Error('User not found');
-      }
-      
-      addDebugLog(`Saving test result for user ${user.id}, subject ${subject}`);
-      
-      // Use a promise-based approach with explicit error handling
-      const savePromise = supabase
-        .from('subject_test_results')
-        .insert([{
-          userId: user.id,
-          subject: subject,
-          score: correctAnswers,
-          totalQuestions: questions.length,
-          completedAt: new Date().toISOString()
-        }]);
-      
-      const { error: saveError } = await savePromise;
-      
-      if (saveError) {
-        addDebugLog(`Database save error: ${saveError.message}`);
-        console.error('Database save error:', saveError);
-        // Don't throw - just log the error
-      } else {
-        addDebugLog('Test result saved successfully');
-      }
-      
-      // Award XP
-      const xpReward = correctAnswers * 50;
-      addDebugLog(`Awarding ${xpReward} XP`);
-      
-      if (xpReward > 0) {
-        await addExperience(xpReward);
-        addDebugLog('XP awarded successfully');
-      }
-
-      // Notify parent component
-      addDebugLog('Notifying parent component');
-      onTestCompleted(subject, correctAnswers);
-      
-    } catch (error) {
-      addDebugLog(`Error in save process: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      console.error('Error in test completion:', error);
-      // CRITICAL: Don't re-throw or do anything that could cause navigation
-    } finally {
-      setSaving(false);
-      addDebugLog('Save process completed');
-    }
-    
-    addDebugLog('handleNext completed - modal should remain open');
-    // CRITICAL: NO navigation, NO page refresh, NO automatic modal closing
-    // Modal stays open until user manually closes it
   };
 
   const handlePrevious = () => {
@@ -502,9 +445,40 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     }
   };
 
-  const handleComplete = () => {
-    addDebugLog('User clicked Continue - closing modal');
-    onClose();
+  const handleComplete = async () => {
+    addDebugLog('User clicked Continue - saving result and closing modal');
+    if (saving) return;
+    try {
+      setSaving(true);
+      if (!user?.id) {
+        addDebugLog('ERROR: No user ID found');
+        throw new Error('User not found');
+      }
+      const { error: saveError } = await supabase
+        .from('subject_test_results')
+        .insert([{ userId: user.id, subject, score, totalQuestions: questions.length, completedAt: new Date().toISOString() }]);
+      if (saveError) {
+        addDebugLog(`Database save error: ${saveError.message}`);
+        console.error('Database save error:', saveError);
+      } else {
+        addDebugLog('Test result saved successfully');
+      }
+      const xpReward = score * 50;
+      addDebugLog(`Awarding ${xpReward} XP`);
+      if (xpReward > 0) {
+        await addExperience(xpReward);
+        addDebugLog('XP awarded successfully');
+      }
+      addDebugLog('Notifying parent component');
+      onTestCompleted(subject, score);
+    } catch (error) {
+      addDebugLog(`Error in completion: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error in test completion:', error);
+    } finally {
+      setSaving(false);
+      addDebugLog('Completion process finished - closing modal');
+      onClose();
+    }
   };
 
   const handleRetry = () => {
