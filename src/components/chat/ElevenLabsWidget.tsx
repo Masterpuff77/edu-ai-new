@@ -5,6 +5,13 @@ const ElevenLabsWidget: React.FC = () => {
   const widgetMounted = useRef(false);
 
   useEffect(() => {
+    // Check if agent ID is configured
+    const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
+    if (!agentId) {
+      console.warn('ElevenLabs agent ID not configured. Please set VITE_ELEVENLABS_AGENT_ID in your .env file.');
+      return;
+    }
+
     // Prevent multiple initializations
     if (scriptLoaded.current && widgetMounted.current) {
       return;
@@ -49,7 +56,7 @@ const ElevenLabsWidget: React.FC = () => {
         // Create new widget element
         if (!widgetMounted.current) {
           const widget = document.createElement('elevenlabs-convai');
-          widget.setAttribute('agent-id', 'agent_01jwtq4zsef3cvgrpw0kzxk7ad');
+          widget.setAttribute('agent-id', agentId);
           
           // Add error handling attributes
           widget.setAttribute('fallback-mode', 'true');
@@ -62,11 +69,18 @@ const ElevenLabsWidget: React.FC = () => {
           // Add error event listener
           widget.addEventListener('error', (event) => {
             console.warn('ElevenLabs widget error:', event);
+            console.warn('Please verify that the agent ID is valid and active in your ElevenLabs account.');
             // Optionally retry or show fallback
+          });
+
+          // Add load event listener for debugging
+          widget.addEventListener('load', () => {
+            console.log('ElevenLabs widget loaded successfully');
           });
         }
       } catch (error) {
         console.warn('Error mounting ElevenLabs widget:', error);
+        console.warn('Please check your ElevenLabs agent configuration.');
       }
     };
 
