@@ -257,8 +257,8 @@ const LearningAssistant: React.FC = () => {
           </button>
         </div>
         
-        {/* Chat container with full purple gradient background */}
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 mb-4 h-[400px] overflow-y-auto space-y-4">
+        {/* Chat container with full purple gradient background and purple border */}
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border-2 border-purple-200">
           {messages.map((message) => (
             <div
               key={message.id}
