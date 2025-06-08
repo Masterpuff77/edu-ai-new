@@ -205,7 +205,7 @@ const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
         throw lessonsError;
       }
 
-      // Get completed lessons
+      // Get completed lessons (unique by lessonId to prevent duplicates)
       const { data: evaluations, error: evalError } = await supabase
         .from('evaluations')
         .select('subject, lessonId')
@@ -219,10 +219,19 @@ const useStudyPlanStore = create<StudyPlanState>((set, get) => ({
       // Calculate progress for each subject
       const progress = userData.subjects.map(subject => {
         const total = totalLessons.filter(l => l.subject === subject).length;
-        const completed = evaluations?.filter(e => e.subject === subject).length || 0;
+        
+        // Get unique completed lessons for this subject to prevent counting duplicates
+        const uniqueCompletedLessons = new Set(
+          evaluations?.filter(e => e.subject === subject).map(e => e.lessonId) || []
+        );
+        const completed = uniqueCompletedLessons.size;
+        
+        // Ensure progress never exceeds 100%
+        const progressPercentage = total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0;
+        
         return {
           subject,
-          progress: total > 0 ? Math.round((completed / total) * 100) : 0
+          progress: progressPercentage
         };
       });
 

@@ -34,7 +34,6 @@ const LessonPage: React.FC = () => {
         .from('evaluations')
         .select('id')
         .eq('userId', user.id)
-        .eq('subject', currentLesson?.subject)
         .eq('lessonId', lessonId)
         .maybeSingle();
 
@@ -63,7 +62,21 @@ const LessonPage: React.FC = () => {
     if (!user || !currentLesson || isLessonCompleted) return;
 
     try {
-      // Add evaluation record
+      // Check if lesson is already completed to prevent duplicates
+      const { data: existingEvaluation } = await supabase
+        .from('evaluations')
+        .select('id')
+        .eq('userId', user.id)
+        .eq('lessonId', lessonId)
+        .maybeSingle();
+
+      if (existingEvaluation) {
+        // Lesson already completed, just update UI
+        setIsLessonCompleted(true);
+        return;
+      }
+
+      // Add evaluation record only if it doesn't exist
       const { error: evalError } = await supabase
         .from('evaluations')
         .insert([{
