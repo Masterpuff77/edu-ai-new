@@ -3,6 +3,7 @@ import { X, CheckCircle, XCircle, Trophy, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
 import useGamificationStore from '../../store/gamificationStore';
+import supabase from '../../config/supabase';
 
 interface Question {
   id: string;
@@ -14,9 +15,10 @@ interface Question {
 interface SubjectQuizModalProps {
   subject: string;
   onClose: () => void;
+  onTestCompleted: (subject: string, score: number) => void;
 }
 
-const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose }) => {
+const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, onTestCompleted }) => {
   const { user } = useAuthStore();
   const { addExperience } = useGamificationStore();
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -368,7 +370,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose })
     setAnswers(newAnswers);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
@@ -382,11 +384,29 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose })
       setScore(correctAnswers);
       setShowResults(true);
       
+      // Save test result to database
+      try {
+        await supabase
+          .from('subject_test_results')
+          .insert([{
+            userId: user?.id,
+            subject: subject,
+            score: correctAnswers,
+            totalQuestions: questions.length,
+            completedAt: new Date().toISOString()
+          }]);
+      } catch (error) {
+        console.error('Error saving test result:', error);
+      }
+      
       // Award XP based on performance
       const xpReward = correctAnswers * 50; // 50 XP per correct answer
       if (xpReward > 0) {
         addExperience(xpReward);
       }
+
+      // Notify parent component
+      onTestCompleted(subject, correctAnswers);
     }
   };
 

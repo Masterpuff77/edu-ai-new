@@ -10,6 +10,8 @@ interface SubjectTestStatus {
   completedLessons: number;
   canTakeTest: boolean;
   hasInitialEvaluation: boolean;
+  lastTestScore?: number;
+  hasCompletedTest: boolean;
 }
 
 const KnowledgeTestingBox: React.FC = () => {
@@ -46,11 +48,25 @@ const KnowledgeTestingBox: React.FC = () => {
         const uniqueCompletedLessons = new Set(evaluations?.map(e => e.lessonId) || []);
         const completedCount = uniqueCompletedLessons.size;
 
+        // Check if user has completed a subject test
+        const { data: subjectTestResults } = await supabase
+          .from('subject_test_results')
+          .select('score')
+          .eq('userId', user.id)
+          .eq('subject', subject)
+          .order('completedAt', { ascending: false })
+          .limit(1);
+
+        const hasCompletedTest = subjectTestResults && subjectTestResults.length > 0;
+        const lastTestScore = hasCompletedTest ? subjectTestResults[0].score : undefined;
+
         statuses.push({
           subject,
           completedLessons: completedCount,
           canTakeTest: completedCount >= 5,
-          hasInitialEvaluation: false
+          hasInitialEvaluation: false,
+          lastTestScore,
+          hasCompletedTest
         });
       }
 
@@ -99,6 +115,14 @@ const KnowledgeTestingBox: React.FC = () => {
     return configs[subject] || { name: subject, color: 'text-gray-600', bgColor: 'bg-gray-100' };
   };
 
+  const getProgressColor = (score: number, total: number = 10) => {
+    const percentage = (score / total) * 100;
+    if (percentage >= 80) return 'bg-green-500';
+    if (percentage >= 60) return 'bg-yellow-500';
+    if (percentage >= 40) return 'bg-orange-500';
+    return 'bg-red-500';
+  };
+
   const handleSubjectTest = (subject: string, canTakeTest: boolean) => {
     if (!canTakeTest) {
       alert('Trebuie să parcurgi minimum 5 lecții din această materie înainte să îți testezi cunoștințele.');
@@ -106,6 +130,17 @@ const KnowledgeTestingBox: React.FC = () => {
     }
     
     setSelectedSubject(subject);
+  };
+
+  const handleTestCompleted = (subject: string, score: number) => {
+    // Update the subject status with the new test result
+    setSubjectStatuses(prev => 
+      prev.map(status => 
+        status.subject === subject 
+          ? { ...status, lastTestScore: score, hasCompletedTest: true }
+          : status
+      )
+    );
   };
 
   const handleInitialEvaluation = async () => {
@@ -241,7 +276,7 @@ const KnowledgeTestingBox: React.FC = () => {
                       <div className="text-right">
                         {status.canTakeTest ? (
                           <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                            Începe testul
+                            {status.hasCompletedTest ? 'Refă testul' : 'Începe testul'}
                           </div>
                         ) : (
                           <div className="px-3 py-1 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">
@@ -251,7 +286,7 @@ const KnowledgeTestingBox: React.FC = () => {
                       </div>
                     </div>
                     
-                    {/* Progress bar */}
+                    {/* Progress bar for lessons */}
                     <div className="mt-3">
                       <div className="w-full bg-gray-200 rounded-full h-1.5">
                         <div 
@@ -262,6 +297,22 @@ const KnowledgeTestingBox: React.FC = () => {
                         ></div>
                       </div>
                     </div>
+
+                    {/* Test result progress bar - only show if test was completed */}
+                    {status.hasCompletedTest && status.lastTestScore !== undefined && (
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs text-gray-600 mb-1">
+                          <span>Ultimul rezultat</span>
+                          <span>{status.lastTestScore}/10 corecte</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(status.lastTestScore)}`}
+                            style={{ width: `${(status.lastTestScore / 10) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -282,6 +333,7 @@ const KnowledgeTestingBox: React.FC = () => {
         <SubjectQuizModal
           subject={selectedSubject}
           onClose={() => setSelectedSubject(null)}
+          onTestCompleted={handleTestCompleted}
         />
       )}
     </>
