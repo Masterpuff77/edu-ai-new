@@ -29,10 +29,10 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   const [saving, setSaving] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
 
-  // Add debug logging function
+  // Add debug logging function - FIXED: Remove state update to prevent infinite re-renders
   const addDebugLog = (message: string) => {
     console.log(`[SubjectQuizModal] ${message}`);
-    setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+    // REMOVED: setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
   };
 
   // Effect for generating questions - only depends on subject
