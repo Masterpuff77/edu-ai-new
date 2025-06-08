@@ -216,7 +216,7 @@ const LearningAssistant: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 rounded-lg shadow-md">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <div className="p-2 bg-indigo-200 rounded-lg">
@@ -237,7 +237,7 @@ const LearningAssistant: React.FC = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 rounded-lg shadow-md">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -257,27 +257,30 @@ const LearningAssistant: React.FC = () => {
           </button>
         </div>
         
-        <div className="h-[400px] overflow-y-auto mb-4 space-y-4 pr-2">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-            >
+        {/* Chat container with gradient border */}
+        <div className="bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 rounded-lg p-1 mb-4">
+          <div className="bg-white rounded-lg h-[400px] overflow-y-auto p-4 space-y-4">
+            {messages.map((message) => (
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.isUser
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white shadow-sm text-gray-800'
-                }`}
+                key={message.id}
+                className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-1 block`}>
-                  {message.timestamp.toLocaleTimeString()}
-                </span>
+                <div
+                  className={`max-w-[80%] rounded-lg p-3 ${
+                    message.isUser
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-1 block`}>
+                    {message.timestamp.toLocaleTimeString()}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="relative">
@@ -286,7 +289,7 @@ const LearningAssistant: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Scrie un mesaj..."
-            className="w-full pr-12 pl-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full pr-12 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             disabled={loading}
           />
           <button
