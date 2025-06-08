@@ -26,6 +26,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [isCompleted, setIsCompleted] = useState(false); // Nou state pentru a controla afișarea
 
   useEffect(() => {
     generateQuestions();
@@ -383,6 +384,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
       });
       setScore(correctAnswers);
       setShowResults(true);
+      setIsCompleted(true); // Marchează testul ca fiind completat
       
       // Save test result to database
       try {
@@ -408,8 +410,9 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
       // Notify parent component
       onTestCompleted(subject, correctAnswers);
       
-      // IMPORTANT: Do NOT close the modal automatically
-      // The modal will stay open to show results until user manually closes it
+      // IMPORTANT: Nu închide modalul automat!
+      // Modalul va rămâne pe ecran pentru a afișa rezultatele
+      // Se va închide doar când utilizatorul apasă "Închide" sau "X"
     }
   };
 
@@ -424,6 +427,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     setAnswers(Array(10).fill(-1));
     setShowResults(false);
     setScore(0);
+    setIsCompleted(false);
   };
 
   const getProgressColor = (score: number, total: number) => {
@@ -442,7 +446,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     return { message: 'Trebuie să mai exersezi', color: 'text-red-600', emoji: '💪' };
   };
 
-  // Handle close - only allow manual close, no automatic closing
+  // Handle close - doar închidere manuală, niciodată automată
   const handleClose = () => {
     if (!showResults && answers.some(answer => answer !== -1)) {
       const confirmClose = window.confirm('Ești sigur că vrei să închizi testul? Progresul va fi pierdut.');
@@ -553,6 +557,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
                 </div>
               </>
             ) : (
+              // Ecranul de rezultate - identic cu cel de la provocări
               <div className="text-center py-8">
                 <div className={`w-20 h-20 mx-auto flex items-center justify-center rounded-full mb-6 ${
                   score >= 8 ? 'bg-green-100' : score >= 6 ? 'bg-yellow-100' : score >= 4 ? 'bg-orange-100' : 'bg-red-100'
@@ -618,7 +623,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
                     Încearcă din nou
                   </button>
                   <button
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="px-8 py-3 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
                   >
                     Închide
