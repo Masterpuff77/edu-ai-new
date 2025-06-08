@@ -27,12 +27,43 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   const [score, setScore] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [saving, setSaving] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+
+  // Add debug logging function
+  const addDebugLog = (message: string) => {
+    console.log(`[SubjectQuizModal] ${message}`);
+    setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
 
   useEffect(() => {
+    addDebugLog('Component mounted');
     generateQuestions();
-  }, [subject]);
+    
+    // Prevent any form of navigation during modal lifecycle
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!submitted) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    const handlePopState = (e: PopStateEvent) => {
+      e.preventDefault();
+      addDebugLog('PopState event prevented');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      addDebugLog('Component unmounting');
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [subject, submitted]);
 
   const generateQuestions = () => {
+    addDebugLog('Generating questions');
     const questionSets: Record<string, Question[]> = {
       matematica: [
         {
@@ -310,7 +341,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
         {
           id: '5',
           question: 'Ce este un ecosistem?',
-          options: ['Comunitatea de organisme și mediul lor', 'O specie', 'O populație', 'Un habitat'],
+          options: ['Comunitatea de organisme și mediul lor', 'O specie', 'O popolazione', 'Un habitat'],
           correctAnswer: 0
         },
         {
@@ -347,6 +378,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     };
 
     setQuestions(questionSets[subject] || []);
+    addDebugLog(`Questions generated for ${subject}: ${questionSets[subject]?.length || 0} questions`);
   };
 
   const getSubjectName = (subject: string) => {
@@ -366,96 +398,137 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   const handleAnswerSelect = (answerIndex: number) => {
     if (submitted) return;
     
+    addDebugLog(`Answer selected for question ${currentQuestion + 1}: option ${answerIndex + 1}`);
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = answerIndex;
     setAnswers(newAnswers);
   };
 
   const handleNext = async () => {
+    addDebugLog(`handleNext called - current question: ${currentQuestion + 1}/${questions.length}`);
+    
     if (currentQuestion < questions.length - 1) {
+      addDebugLog('Moving to next question');
       setCurrentQuestion(currentQuestion + 1);
-    } else {
-      // Calculate score
-      let correctAnswers = 0;
-      questions.forEach((question, index) => {
-        if (answers[index] === question.correctAnswer) {
-          correctAnswers++;
-        }
-      });
-      setScore(correctAnswers);
-      setSubmitted(true);
-      
-      // Save test result to database - PREVENT PAGE REFRESH
-      try {
-        setSaving(true);
-        
-        // Use a more specific approach to prevent any navigation/refresh
-        if (user?.id) {
-          const { error } = await supabase
-            .from('subject_test_results')
-            .insert([{
-              userId: user.id,
-              subject: subject,
-              score: correctAnswers,
-              totalQuestions: questions.length,
-              completedAt: new Date().toISOString()
-            }]);
-          
-          if (error) {
-            console.error('Error saving test result:', error);
-            // Don't throw error - just log it to prevent any navigation
-          }
-        }
-        
-        // Award XP based on performance
-        const xpReward = correctAnswers * 50; // 50 XP per correct answer
-        if (xpReward > 0) {
-          await addExperience(xpReward);
-        }
+      return;
+    }
 
-        // Notify parent component
-        onTestCompleted(subject, correctAnswers);
-        
-      } catch (error) {
-        console.error('Error in test completion:', error);
-        // Don't re-throw error to prevent any navigation
-      } finally {
-        setSaving(false);
+    // This is the final question - calculate and submit
+    addDebugLog('Final question reached - calculating score');
+    
+    // Calculate score
+    let correctAnswers = 0;
+    questions.forEach((question, index) => {
+      if (answers[index] === question.correctAnswer) {
+        correctAnswers++;
+      }
+    });
+    
+    addDebugLog(`Score calculated: ${correctAnswers}/${questions.length}`);
+    setScore(correctAnswers);
+    
+    // CRITICAL: Set submitted FIRST to prevent any re-execution
+    setSubmitted(true);
+    addDebugLog('Submitted state set to true');
+    
+    // Save test result - with comprehensive error handling
+    try {
+      addDebugLog('Starting save process');
+      setSaving(true);
+      
+      if (!user?.id) {
+        addDebugLog('ERROR: No user ID found');
+        throw new Error('User not found');
       }
       
-      // CRITICAL: Modal stays open - NO automatic closing!
-      // NO navigation, NO page refresh, NO automatic modal closing
+      addDebugLog(`Saving test result for user ${user.id}, subject ${subject}`);
+      
+      // Use a promise-based approach with explicit error handling
+      const savePromise = supabase
+        .from('subject_test_results')
+        .insert([{
+          userId: user.id,
+          subject: subject,
+          score: correctAnswers,
+          totalQuestions: questions.length,
+          completedAt: new Date().toISOString()
+        }]);
+      
+      const { error: saveError } = await savePromise;
+      
+      if (saveError) {
+        addDebugLog(`Database save error: ${saveError.message}`);
+        console.error('Database save error:', saveError);
+        // Don't throw - just log the error
+      } else {
+        addDebugLog('Test result saved successfully');
+      }
+      
+      // Award XP
+      const xpReward = correctAnswers * 50;
+      addDebugLog(`Awarding ${xpReward} XP`);
+      
+      if (xpReward > 0) {
+        await addExperience(xpReward);
+        addDebugLog('XP awarded successfully');
+      }
+
+      // Notify parent component
+      addDebugLog('Notifying parent component');
+      onTestCompleted(subject, correctAnswers);
+      
+    } catch (error) {
+      addDebugLog(`Error in save process: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error in test completion:', error);
+      // CRITICAL: Don't re-throw or do anything that could cause navigation
+    } finally {
+      setSaving(false);
+      addDebugLog('Save process completed');
     }
+    
+    addDebugLog('handleNext completed - modal should remain open');
+    // CRITICAL: NO navigation, NO page refresh, NO automatic modal closing
+    // Modal stays open until user manually closes it
   };
 
   const handlePrevious = () => {
     if (currentQuestion > 0) {
+      addDebugLog(`Moving to previous question: ${currentQuestion} -> ${currentQuestion - 1}`);
       setCurrentQuestion(currentQuestion - 1);
     }
   };
 
   const handleComplete = () => {
-    // This function is called when user clicks "Continuă" - exactly like ChallengeModal
+    addDebugLog('User clicked Continue - closing modal');
     onClose();
   };
 
   const handleRetry = () => {
+    addDebugLog('User clicked Retry - resetting quiz');
     setCurrentQuestion(0);
     setAnswers(Array(10).fill(-1));
     setSubmitted(false);
     setScore(0);
+    setDebugInfo([]);
   };
 
-  // Handle close - only manual closing, never automatic
   const handleClose = () => {
+    addDebugLog('User attempting to close modal');
     if (!submitted && answers.some(answer => answer !== -1)) {
       const confirmClose = window.confirm('Ești sigur că vrei să închizi testul? Progresul va fi pierdut.');
-      if (!confirmClose) return;
+      if (!confirmClose) {
+        addDebugLog('User cancelled close');
+        return;
+      }
     }
+    addDebugLog('Closing modal');
     onClose();
   };
 
-  if (questions.length === 0) return null;
+  if (questions.length === 0) {
+    addDebugLog('No questions available - not rendering modal');
+    return null;
+  }
 
   return (
     <AnimatePresence>
@@ -483,6 +556,20 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
                 <X className="h-5 w-5 text-gray-500" />
               </button>
             </div>
+
+            {/* Debug info - only show in development */}
+            {process.env.NODE_ENV === 'development' && debugInfo.length > 0 && (
+              <div className="mb-4 p-3 bg-gray-100 rounded-lg">
+                <details>
+                  <summary className="text-sm font-medium cursor-pointer">Debug Info ({debugInfo.length} logs)</summary>
+                  <div className="mt-2 text-xs space-y-1 max-h-32 overflow-y-auto">
+                    {debugInfo.slice(-10).map((log, index) => (
+                      <div key={index} className="text-gray-600">{log}</div>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            )}
 
             {!submitted ? (
               <>
