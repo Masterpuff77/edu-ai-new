@@ -439,7 +439,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     return { message: 'Trebuie să mai exersezi', color: 'text-red-600', emoji: '💪' };
   };
 
-  // Handle close with confirmation if test is in progress
+  // Handle close - only allow manual close, no automatic closing
   const handleClose = () => {
     if (!showResults && answers.some(answer => answer !== -1)) {
       const confirmClose = window.confirm('Ești sigur că vrei să închizi testul? Progresul va fi pierdut.');
