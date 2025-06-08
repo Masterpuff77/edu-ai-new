@@ -23,10 +23,9 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   const { addExperience } = useGamificationStore();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>(Array(10).fill(-1));
-  const [showResults, setShowResults] = useState(false);
+  const [submitted, setSubmitted] = useState(false); // Changed from showResults to match ChallengeModal
   const [score, setScore] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [isCompleted, setIsCompleted] = useState(false); // Nou state pentru a controla afișarea
 
   useEffect(() => {
     generateQuestions();
@@ -364,7 +363,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
-    if (showResults) return;
+    if (submitted) return; // Changed from showResults to submitted
     
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = answerIndex;
@@ -375,7 +374,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Calculate score and show results
+      // Calculate score and show results - EXACTLY like ChallengeModal
       let correctAnswers = 0;
       questions.forEach((question, index) => {
         if (answers[index] === question.correctAnswer) {
@@ -383,8 +382,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
         }
       });
       setScore(correctAnswers);
-      setShowResults(true);
-      setIsCompleted(true); // Marchează testul ca fiind completat
+      setSubmitted(true); // Changed from setShowResults to setSubmitted
       
       // Save test result to database
       try {
@@ -410,9 +408,8 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
       // Notify parent component
       onTestCompleted(subject, correctAnswers);
       
-      // IMPORTANT: Nu închide modalul automat!
-      // Modalul va rămâne pe ecran pentru a afișa rezultatele
-      // Se va închide doar când utilizatorul apasă "Închide" sau "X"
+      // CRITICAL: Modal stays open - NO automatic closing!
+      // The modal will only close when user clicks "Închide" or "X"
     }
   };
 
@@ -422,33 +419,21 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
     }
   };
 
+  const handleComplete = () => {
+    // This function is called when user clicks "Continuă" - exactly like ChallengeModal
+    onClose();
+  };
+
   const handleRetry = () => {
     setCurrentQuestion(0);
     setAnswers(Array(10).fill(-1));
-    setShowResults(false);
+    setSubmitted(false); // Changed from setShowResults to setSubmitted
     setScore(0);
-    setIsCompleted(false);
   };
 
-  const getProgressColor = (score: number, total: number) => {
-    const percentage = (score / total) * 100;
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-yellow-500';
-    if (percentage >= 40) return 'bg-orange-500';
-    return 'bg-red-500';
-  };
-
-  const getScoreMessage = (score: number, total: number) => {
-    const percentage = (score / total) * 100;
-    if (percentage >= 80) return { message: 'Excelent!', color: 'text-green-600', emoji: '🎉' };
-    if (percentage >= 60) return { message: 'Bine!', color: 'text-yellow-600', emoji: '👍' };
-    if (percentage >= 40) return { message: 'Satisfăcător', color: 'text-orange-600', emoji: '📚' };
-    return { message: 'Trebuie să mai exersezi', color: 'text-red-600', emoji: '💪' };
-  };
-
-  // Handle close - doar închidere manuală, niciodată automată
+  // Handle close - only manual closing, never automatic
   const handleClose = () => {
-    if (!showResults && answers.some(answer => answer !== -1)) {
+    if (!submitted && answers.some(answer => answer !== -1)) {
       const confirmClose = window.confirm('Ești sigur că vrei să închizi testul? Progresul va fi pierdut.');
       if (!confirmClose) return;
     }
@@ -484,7 +469,7 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
               </button>
             </div>
 
-            {!showResults ? (
+            {!submitted ? ( // Changed from !showResults to !submitted
               <>
                 <div className="mb-6">
                   <div className="flex justify-between text-sm text-gray-500 mb-2">
@@ -557,41 +542,25 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
                 </div>
               </>
             ) : (
-              // Ecranul de rezultate - identic cu cel de la provocări
+              // Results screen - EXACTLY like ChallengeModal
               <div className="text-center py-8">
                 <div className={`w-20 h-20 mx-auto flex items-center justify-center rounded-full mb-6 ${
                   score >= 8 ? 'bg-green-100' : score >= 6 ? 'bg-yellow-100' : score >= 4 ? 'bg-orange-100' : 'bg-red-100'
                 }`}>
-                  <Trophy className={`h-10 w-10 ${
-                    score >= 8 ? 'text-green-600' : score >= 6 ? 'text-yellow-600' : score >= 4 ? 'text-orange-600' : 'text-red-600'
-                  }`} />
+                  {score >= 8 ? (
+                    <CheckCircle className="h-10 w-10 text-green-600" />
+                  ) : (
+                    <XCircle className="h-10 w-10 text-red-600" />
+                  )}
                 </div>
                 
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
                   Test completat!
                 </h3>
                 
-                <div className="mb-6">
-                  <div className={`text-3xl font-bold mb-2 ${getScoreMessage(score, questions.length).color}`}>
-                    {getScoreMessage(score, questions.length).emoji} {getScoreMessage(score, questions.length).message}
-                  </div>
-                  <p className="text-lg text-gray-600">
-                    Ai răspuns corect la {score} din {questions.length} întrebări
-                  </p>
-                </div>
-
-                {/* Progress Bar with Color Coding */}
-                <div className="mb-6">
-                  <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
-                    <div 
-                      className={`h-4 rounded-full transition-all duration-500 ${getProgressColor(score, questions.length)}`}
-                      style={{ width: `${(score / questions.length) * 100}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    Scor: {Math.round((score / questions.length) * 100)}%
-                  </p>
-                </div>
+                <p className="text-lg text-gray-600 mb-6">
+                  Ai răspuns corect la {score} din {questions.length} întrebări
+                </p>
 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
                   <h4 className="font-medium text-gray-900 mb-3">Rezultate detaliate:</h4>
@@ -614,28 +583,12 @@ const SubjectQuizModal: React.FC<SubjectQuizModalProps> = ({ subject, onClose, o
                   </div>
                 </div>
 
-                <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={handleRetry}
-                    className="px-6 py-3 text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition-colors flex items-center"
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Încearcă din nou
-                  </button>
-                  <button
-                    onClick={handleClose}
-                    className="px-8 py-3 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-                  >
-                    Închide
-                  </button>
-                </div>
-
-                {/* XP Reward Message */}
-                <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                  <p className="text-sm text-green-700">
-                    <strong>+{score * 50} XP</strong> câștigați pentru performanța ta!
-                  </p>
-                </div>
+                <button
+                  onClick={handleComplete}
+                  className="px-8 py-3 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                >
+                  Continuă
+                </button>
               </div>
             )}
           </div>
