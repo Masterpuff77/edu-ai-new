@@ -22,11 +22,11 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
   const REPLICA_ID = 'r95fd27b5a37';
   const SCRIPT_ID = 'tavus-sdk-script';
 
-  // Official Tavus SDK URLs from documentation
+  // Updated Tavus SDK URLs with correct endpoints
   const SDK_URLS = [
-    'https://cdn.tavus.io/sdk/tavus-sdk-latest.js',
+    'https://cdn.tavus.io/tavus-sdk.js',
     'https://cdn.tavus.io/sdk/tavus-sdk.js',
-    'https://unpkg.com/@tavus/sdk@latest/dist/index.js'
+    'https://cdn.tavus.io/sdk/tavus-sdk-latest.js'
   ];
 
   const loadTavusSDK = () => {
