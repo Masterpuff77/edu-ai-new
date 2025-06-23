@@ -43,7 +43,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
       }
 
       const script = document.createElement('script');
-      script.src = 'https://cdn.tavusapi.com/tavus-sdk.js';
+      script.src = 'https://cdn.tavus.io/tavus-sdk.js';
       script.async = true;
       script.crossOrigin = 'anonymous';
       
