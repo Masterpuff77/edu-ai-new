@@ -62,11 +62,18 @@ const UserProfileCard: React.FC = () => {
           <div className="relative group mb-4">
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-gray-200">
               {user?.avatar ? (
-                <img 
-                  src={user.avatar} 
-                  alt="User avatar" 
-                  className="w-full h-full object-cover"
-                />
+                user.avatar.startsWith('data:image/svg+xml') ? (
+                  <div 
+                    className="w-full h-full"
+                    dangerouslySetInnerHTML={{ __html: atob(user.avatar.split(',')[1]) }}
+                  />
+                ) : (
+                  <img 
+                    src={user.avatar} 
+                    alt="User avatar" 
+                    className="w-full h-full object-cover"
+                  />
+                )
               ) : (
                 <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
                   <User className="h-12 w-12 text-indigo-400" />

@@ -10,17 +10,99 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  // Avatare ilustrate - 3 fete și 3 băieți
+  // Avatare ilustrate în stil modern - 3 fete și 3 băieți
   const avatarOptions = [
     // Fete ilustrate
-    'https://images.pexels.com/photos/8923533/pexels-photo-8923533.jpeg?auto=compress&cs=tinysrgb&w=150', // Ilustrație fată 1
-    'https://images.pexels.com/photos/8923534/pexels-photo-8923534.jpeg?auto=compress&cs=tinysrgb&w=150', // Ilustrație fată 2
-    'https://images.pexels.com/photos/8923535/pexels-photo-8923535.jpeg?auto=compress&cs=tinysrgb&w=150', // Ilustrație fată 3
-    
+    {
+      id: 'girl-1',
+      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="75" cy="75" r="75" fill="#FFE4E1"/>
+        <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
+        <path d="M50 45 Q75 25 100 45 Q100 65 75 65 Q50 65 50 45" fill="#8B4513"/>
+        <circle cx="65" cy="60" r="2" fill="#000"/>
+        <circle cx="85" cy="60" r="2" fill="#000"/>
+        <path d="M70 70 Q75 75 80 70" stroke="#000" stroke-width="1" fill="none"/>
+        <circle cx="60" cy="75" r="3" fill="#FF69B4"/>
+        <circle cx="90" cy="75" r="3" fill="#FF69B4"/>
+        <rect x="60" y="100" width="30" height="50" fill="#FF6B9D" rx="5"/>
+      </svg>`,
+      name: 'Fată 1'
+    },
+    {
+      id: 'girl-2',
+      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="75" cy="75" r="75" fill="#E6F3FF"/>
+        <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
+        <path d="M45 40 Q75 20 105 40 Q105 70 75 65 Q45 70 45 40" fill="#4A4A4A"/>
+        <circle cx="65" cy="60" r="2" fill="#000"/>
+        <circle cx="85" cy="60" r="2" fill="#000"/>
+        <path d="M70 70 Q75 75 80 70" stroke="#000" stroke-width="1" fill="none"/>
+        <circle cx="55" cy="50" r="8" fill="#FFD700"/>
+        <circle cx="95" cy="50" r="8" fill="#FFD700"/>
+        <rect x="60" y="100" width="30" height="50" fill="#4ECDC4" rx="5"/>
+      </svg>`,
+      name: 'Fată 2'
+    },
+    {
+      id: 'girl-3',
+      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="75" cy="75" r="75" fill="#FFF0E6"/>
+        <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
+        <path d="M50 35 Q75 15 100 35 Q100 75 75 65 Q50 75 50 35" fill="#D2691E"/>
+        <rect x="40" y="35" width="70" height="30" fill="#D2691E" rx="15"/>
+        <circle cx="65" cy="60" r="2" fill="#000"/>
+        <circle cx="85" cy="60" r="2" fill="#000"/>
+        <path d="M70 70 Q75 75 80 70" stroke="#000" stroke-width="1" fill="none"/>
+        <rect x="60" y="100" width="30" height="50" fill="#98D8C8" rx="5"/>
+        <circle cx="50" cy="45" r="4" fill="#FF1493"/>
+        <circle cx="100" cy="45" r="4" fill="#FF1493"/>
+      </svg>`,
+      name: 'Fată 3'
+    },
     // Băieți ilustrați
-    'https://images.pexels.com/photos/8923536/pexels-photo-8923536.jpeg?auto=compress&cs=tinysrgb&w=150', // Ilustrație băiat 1
-    'https://images.pexels.com/photos/8923537/pexels-photo-8923537.jpeg?auto=compress&cs=tinysrgb&w=150', // Ilustrație băiat 2
-    'https://images.pexels.com/photos/8923538/pexels-photo-8923538.jpeg?auto=compress&cs=tinysrgb&w=150', // Ilustrație băiat 3
+    {
+      id: 'boy-1',
+      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="75" cy="75" r="75" fill="#E1F5FE"/>
+        <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
+        <path d="M55 40 Q75 25 95 40 Q95 60 75 60 Q55 60 55 40" fill="#2E2E2E"/>
+        <circle cx="65" cy="60" r="2" fill="#000"/>
+        <circle cx="85" cy="60" r="2" fill="#000"/>
+        <path d="M70 70 Q75 75 80 70" stroke="#000" stroke-width="1" fill="none"/>
+        <rect x="60" y="100" width="30" height="50" fill="#2196F3" rx="5"/>
+        <circle cx="75" cy="110" r="3" fill="#FFF"/>
+      </svg>`,
+      name: 'Băiat 1'
+    },
+    {
+      id: 'boy-2',
+      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="75" cy="75" r="75" fill="#F3E5F5"/>
+        <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
+        <path d="M50 45 Q75 30 100 45 Q100 65 75 60 Q50 65 50 45" fill="#8B4513"/>
+        <circle cx="65" cy="60" r="2" fill="#000"/>
+        <circle cx="85" cy="60" r="2" fill="#000"/>
+        <path d="M70 70 Q75 75 80 70" stroke="#000" stroke-width="1" fill="none"/>
+        <rect x="60" y="100" width="30" height="50" fill="#4CAF50" rx="5"/>
+        <rect x="55" y="55" width="40" height="5" fill="#000" rx="2"/>
+      </svg>`,
+      name: 'Băiat 2'
+    },
+    {
+      id: 'boy-3',
+      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="75" cy="75" r="75" fill="#FFF3E0"/>
+        <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
+        <path d="M60 35 Q75 20 90 35 Q90 55 75 55 Q60 55 60 35" fill="#654321"/>
+        <circle cx="65" cy="60" r="2" fill="#000"/>
+        <circle cx="85" cy="60" r="2" fill="#000"/>
+        <path d="M70 70 Q75 75 80 70" stroke="#000" stroke-width="1" fill="none"/>
+        <rect x="60" y="100" width="30" height="50" fill="#FF9800" rx="5"/>
+        <rect x="65" y="105" width="20" height="3" fill="#FFF"/>
+        <rect x="65" y="110" width="20" height="3" fill="#FFF"/>
+      </svg>`,
+      name: 'Băiat 3'
+    }
   ];
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +124,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
       setUploading(true);
       setUploadError(null);
 
-      // Convertim imaginea în base64 pentru stocare temporară
+      // Convertim imaginea în base64 pentru stocare
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64String = e.target?.result as string;
@@ -63,7 +145,9 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
     }
   };
 
-  const isCustomAvatar = selectedAvatar && !avatarOptions.includes(selectedAvatar);
+  const isCustomAvatar = selectedAvatar && !avatarOptions.some(option => 
+    selectedAvatar.includes(option.id) || selectedAvatar === `data:image/svg+xml;base64,${btoa(option.svg)}`
+  );
 
   return (
     <div className="w-full">
@@ -71,40 +155,33 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
       
       {/* Avatare predefinite */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        {avatarOptions.map((avatar, index) => (
-          <button
-            key={index}
-            type="button"
-            className={`relative overflow-hidden rounded-full h-20 w-20 mx-auto flex items-center justify-center border-2 transition-all duration-200 transform hover:scale-105 ${
-              selectedAvatar === avatar
-                ? 'border-indigo-600 ring-2 ring-indigo-300 shadow-lg'
-                : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
-            }`}
-            onClick={() => onSelect(avatar)}
-          >
-            <img
-              src={avatar}
-              alt={`Avatar ilustrat ${index + 1}`}
-              className="h-full w-full object-cover"
-              onError={(e) => {
-                // Fallback pentru avatare ilustrate
-                const target = e.target as HTMLImageElement;
-                target.src = `data:image/svg+xml;base64,${btoa(`
-                  <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="80" height="80" fill="#e5e7eb"/>
-                    <circle cx="40" cy="30" r="12" fill="#9ca3af"/>
-                    <path d="M20 65 C20 55, 28 50, 40 50 C52 50, 60 55, 60 65" fill="#9ca3af"/>
-                  </svg>
-                `)}`;
-              }}
-            />
-            {selectedAvatar === avatar && (
-              <div className="absolute inset-0 bg-indigo-600 bg-opacity-20 flex items-center justify-center">
-                <Check className="h-6 w-6 text-indigo-600" />
-              </div>
-            )}
-          </button>
-        ))}
+        {avatarOptions.map((avatar) => {
+          const avatarDataUrl = `data:image/svg+xml;base64,${btoa(avatar.svg)}`;
+          const isSelected = selectedAvatar === avatarDataUrl || selectedAvatar?.includes(avatar.id);
+          
+          return (
+            <button
+              key={avatar.id}
+              type="button"
+              className={`relative overflow-hidden rounded-full h-20 w-20 mx-auto flex items-center justify-center border-2 transition-all duration-200 transform hover:scale-105 ${
+                isSelected
+                  ? 'border-indigo-600 ring-2 ring-indigo-300 shadow-lg'
+                  : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+              }`}
+              onClick={() => onSelect(avatarDataUrl)}
+            >
+              <div 
+                className="h-full w-full rounded-full"
+                dangerouslySetInnerHTML={{ __html: avatar.svg }}
+              />
+              {isSelected && (
+                <div className="absolute inset-0 bg-indigo-600 bg-opacity-20 flex items-center justify-center rounded-full">
+                  <Check className="h-6 w-6 text-indigo-600" />
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Separator */}
@@ -117,7 +194,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
       {/* Upload personalizat */}
       <div className="space-y-4">
         {/* Preview pentru imaginea încărcată */}
-        {isCustomAvatar && (
+        {isCustomAvatar && selectedAvatar && (
           <div className="flex justify-center">
             <div className="relative">
               <img

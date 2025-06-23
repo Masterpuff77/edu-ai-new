@@ -40,9 +40,8 @@ const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ loading: true, error: null });
 
-      // Dacă este string (base64), îl salvăm direct
+      // Dacă este string (base64 sau URL), îl salvăm direct
       if (typeof file === 'string') {
-        // Actualizăm profilul cu imaginea base64
         await get().updateUser({ avatar: file });
         set({ loading: false });
         return file;
@@ -58,12 +57,12 @@ const useAuthStore = create<AuthState>((set, get) => ({
             set({ loading: false });
             resolve(base64String);
           } catch (error) {
-            set({ loading: false });
+            set({ loading: false, error: 'Eroare la salvarea avatarului' });
             reject(error);
           }
         };
         reader.onerror = () => {
-          set({ loading: false });
+          set({ loading: false, error: 'Eroare la citirea fișierului' });
           reject(new Error('Failed to read file'));
         };
         reader.readAsDataURL(file);
