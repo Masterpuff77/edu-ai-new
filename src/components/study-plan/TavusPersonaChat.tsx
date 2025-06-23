@@ -15,11 +15,11 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
   const [sdkLoadAttempts, setSdkLoadAttempts] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const conversationRef = useRef<any>(null);
-  const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   const TAVUS_API_KEY = '7b9fff8fda7d400d96a9d3b769828de2';
   const PERSONA_ID = 'p7636ec0d04c';
   const REPLICA_ID = 'r95fd27b5a37';
+  const SCRIPT_ID = 'tavus-sdk-script';
 
   const loadTavusSDK = () => {
     return new Promise<void>((resolve, reject) => {
@@ -30,44 +30,51 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
         return;
       }
 
-      // Remove existing script if any - with proper parent check
-      if (scriptRef.current) {
-        try {
-          if (scriptRef.current.parentNode === document.head) {
-            document.head.removeChild(scriptRef.current);
+      // Check if script is already in DOM
+      const existingScript = document.getElementById(SCRIPT_ID);
+      if (existingScript) {
+        // Script exists but SDK might not be ready yet, wait for it
+        const checkSDK = () => {
+          if (typeof (window as any).Tavus !== 'undefined') {
+            setIsTavusSdkLoaded(true);
+            resolve();
+          } else {
+            setTimeout(checkSDK, 100);
           }
-        } catch (e) {
-          console.warn('Could not remove existing script:', e);
-        }
-        scriptRef.current = null;
+        };
+        checkSDK();
+        return;
       }
 
       const script = document.createElement('script');
+      script.id = SCRIPT_ID;
       script.src = 'https://cdn.tavus.io/tavus-sdk.js';
       script.async = true;
       
       script.onload = () => {
-        console.log('Tavus SDK loaded successfully');
-        // Wait a bit for the SDK to initialize
+        console.log('Tavus SDK script loaded successfully');
+        // Give the SDK more time to initialize (increased from 500ms to 2000ms)
         setTimeout(() => {
           if (typeof (window as any).Tavus !== 'undefined') {
             setIsTavusSdkLoaded(true);
             setError(null);
             resolve();
           } else {
-            scriptRef.current = null;
-            reject(new Error('Tavus SDK loaded but not available'));
+            reject(new Error('Tavus SDK loaded but not available after initialization timeout'));
           }
-        }, 500);
+        }, 2000);
       };
       
       script.onerror = (e) => {
         console.error('Failed to load Tavus SDK:', e);
-        scriptRef.current = null;
+        // Remove the failed script
+        const failedScript = document.getElementById(SCRIPT_ID);
+        if (failedScript) {
+          failedScript.remove();
+        }
         reject(new Error('Failed to load Tavus SDK - network error or CDN unavailable'));
       };
 
-      scriptRef.current = script;
       document.head.appendChild(script);
     });
   };
@@ -93,16 +100,6 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
           console.warn('Error ending conversation:', e);
         }
       }
-      if (scriptRef.current) {
-        try {
-          if (scriptRef.current.parentNode === document.head) {
-            document.head.removeChild(scriptRef.current);
-          }
-        } catch (e) {
-          console.warn('Could not remove script in cleanup:', e);
-        }
-        scriptRef.current = null;
-      }
     };
   }, []);
 
@@ -110,6 +107,13 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
     setError(null);
     setIsTavusSdkLoaded(false);
     setSdkLoadAttempts(prev => prev + 1);
+    
+    // Remove existing script if it exists
+    const existingScript = document.getElementById(SCRIPT_ID);
+    if (existingScript) {
+      existingScript.remove();
+    }
+    
     try {
       await loadTavusSDK();
     } catch (error: any) {
