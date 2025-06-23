@@ -60,6 +60,7 @@ const SubjectSelector: React.FC<SubjectSelectorProps> = ({ selectedSubjects, onT
           { id: 'fizica', name: 'Fizică' },
           { id: 'chimie', name: 'Chimie' },
           { id: 'biologie', name: 'Biologie' },
+          { id: 'informatica', name: 'Informatică' },
         ],
       };
 
