@@ -15,7 +15,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
     // Fete ilustrate
     {
       id: 'girl-1',
-      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+      svg: `<svg width="100%" height="100%" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
         <circle cx="75" cy="75" r="75" fill="#FFE4E1"/>
         <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
         <path d="M50 45 Q75 25 100 45 Q100 65 75 65 Q50 65 50 45" fill="#8B4513"/>
@@ -30,7 +30,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
     },
     {
       id: 'girl-2',
-      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+      svg: `<svg width="100%" height="100%" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
         <circle cx="75" cy="75" r="75" fill="#E6F3FF"/>
         <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
         <path d="M45 40 Q75 20 105 40 Q105 70 75 65 Q45 70 45 40" fill="#4A4A4A"/>
@@ -45,7 +45,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
     },
     {
       id: 'girl-3',
-      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+      svg: `<svg width="100%" height="100%" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
         <circle cx="75" cy="75" r="75" fill="#FFF0E6"/>
         <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
         <path d="M50 35 Q75 15 100 35 Q100 75 75 65 Q50 75 50 35" fill="#D2691E"/>
@@ -62,7 +62,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
     // Băieți ilustrați
     {
       id: 'boy-1',
-      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+      svg: `<svg width="100%" height="100%" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
         <circle cx="75" cy="75" r="75" fill="#E1F5FE"/>
         <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
         <path d="M55 40 Q75 25 95 40 Q95 60 75 60 Q55 60 55 40" fill="#2E2E2E"/>
@@ -76,7 +76,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
     },
     {
       id: 'boy-2',
-      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+      svg: `<svg width="100%" height="100%" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
         <circle cx="75" cy="75" r="75" fill="#F3E5F5"/>
         <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
         <path d="M50 45 Q75 30 100 45 Q100 65 75 60 Q50 65 50 45" fill="#8B4513"/>
@@ -90,7 +90,7 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
     },
     {
       id: 'boy-3',
-      svg: `<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+      svg: `<svg width="100%" height="100%" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
         <circle cx="75" cy="75" r="75" fill="#FFF3E0"/>
         <circle cx="75" cy="65" r="35" fill="#FDBCB4"/>
         <path d="M60 35 Q75 20 90 35 Q90 55 75 55 Q60 55 60 35" fill="#654321"/>
@@ -171,7 +171,12 @@ const AvatarSelector: React.FC<AvatarSelectorProps> = ({ selectedAvatar, onSelec
               onClick={() => onSelect(avatarDataUrl)}
             >
               <div 
-                className="h-full w-full rounded-full"
+                className="h-full w-full rounded-full flex items-center justify-center"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
                 dangerouslySetInnerHTML={{ __html: avatar.svg }}
               />
               {isSelected && (

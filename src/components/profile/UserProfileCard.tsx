@@ -54,31 +54,48 @@ const UserProfileCard: React.FC = () => {
     }
   };
 
+  const renderAvatar = () => {
+    if (!user?.avatar) {
+      return (
+        <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
+          <User className="h-12 w-12 text-indigo-400" />
+        </div>
+      );
+    }
+
+    // Dacă este SVG (avatar ilustrat)
+    if (user.avatar.startsWith('data:image/svg+xml')) {
+      return (
+        <div 
+          className="w-full h-full flex items-center justify-center"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          dangerouslySetInnerHTML={{ __html: atob(user.avatar.split(',')[1]) }}
+        />
+      );
+    }
+
+    // Dacă este imagine obișnuită
+    return (
+      <img 
+        src={user.avatar} 
+        alt="User avatar" 
+        className="w-full h-full object-cover"
+      />
+    );
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="p-6">
         <div className="flex flex-col items-center">
           {/* Avatar cu opțiune de upload */}
           <div className="relative group mb-4">
-            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-gray-200">
-              {user?.avatar ? (
-                user.avatar.startsWith('data:image/svg+xml') ? (
-                  <div 
-                    className="w-full h-full"
-                    dangerouslySetInnerHTML={{ __html: atob(user.avatar.split(',')[1]) }}
-                  />
-                ) : (
-                  <img 
-                    src={user.avatar} 
-                    alt="User avatar" 
-                    className="w-full h-full object-cover"
-                  />
-                )
-              ) : (
-                <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
-                  <User className="h-12 w-12 text-indigo-400" />
-                </div>
-              )}
+            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-gray-200 flex items-center justify-center">
+              {renderAvatar()}
             </div>
             
             {/* Upload overlay */}
