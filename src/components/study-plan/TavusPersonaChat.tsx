@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff, User, Loader2 } from 'lucide-react';
+import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff, User, Loader2, AlertCircle } from 'lucide-react';
 
 interface TavusPersonaChatProps {
   activeSubject: string;
@@ -12,47 +12,109 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isTavusSdkLoaded, setIsTavusSdkLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sdkLoadAttempts, setSdkLoadAttempts] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const conversationRef = useRef<any>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   const TAVUS_API_KEY = '7b9fff8fda7d400d96a9d3b769828de2';
   const PERSONA_ID = 'p7636ec0d04c';
   const REPLICA_ID = 'r95fd27b5a37';
 
+  const loadTavusSDK = () => {
+    return new Promise<void>((resolve, reject) => {
+      // Check if SDK is already loaded
+      if (typeof (window as any).Tavus !== 'undefined') {
+        setIsTavusSdkLoaded(true);
+        resolve();
+        return;
+      }
+
+      // Remove existing script if any
+      if (scriptRef.current) {
+        document.head.removeChild(scriptRef.current);
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://cdn.tavusapi.com/tavus-sdk.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      
+      script.onload = () => {
+        console.log('Tavus SDK loaded successfully');
+        // Wait a bit for the SDK to initialize
+        setTimeout(() => {
+          if (typeof (window as any).Tavus !== 'undefined') {
+            setIsTavusSdkLoaded(true);
+            setError(null);
+            resolve();
+          } else {
+            reject(new Error('Tavus SDK loaded but not available'));
+          }
+        }, 500);
+      };
+      
+      script.onerror = (e) => {
+        console.error('Failed to load Tavus SDK:', e);
+        reject(new Error('Failed to load Tavus SDK'));
+      };
+
+      scriptRef.current = script;
+      document.head.appendChild(script);
+    });
+  };
+
   useEffect(() => {
-    // Load Tavus SDK
-    const script = document.createElement('script');
-    script.src = 'https://cdn.tavusapi.com/tavus-sdk.js';
-    script.async = true;
-    script.onload = () => {
-      console.log('Tavus SDK loaded successfully');
-      setIsTavusSdkLoaded(true);
+    const initSDK = async () => {
+      try {
+        await loadTavusSDK();
+      } catch (error: any) {
+        console.error('SDK loading error:', error);
+        setError(error.message || 'Failed to load Tavus SDK');
+        setSdkLoadAttempts(prev => prev + 1);
+      }
     };
-    script.onerror = () => {
-      setError('Failed to load Tavus SDK');
-    };
-    document.head.appendChild(script);
+
+    initSDK();
 
     return () => {
       if (conversationRef.current) {
-        conversationRef.current.endConversation();
+        try {
+          conversationRef.current.endConversation();
+        } catch (e) {
+          console.warn('Error ending conversation:', e);
+        }
       }
-      document.head.removeChild(script);
+      if (scriptRef.current && document.head.contains(scriptRef.current)) {
+        document.head.removeChild(scriptRef.current);
+      }
     };
   }, []);
+
+  const retrySDKLoad = async () => {
+    setError(null);
+    setIsTavusSdkLoaded(false);
+    try {
+      await loadTavusSDK();
+    } catch (error: any) {
+      setError(error.message || 'Failed to load Tavus SDK');
+      setSdkLoadAttempts(prev => prev + 1);
+    }
+  };
 
   const startConversation = async () => {
     try {
       setIsConnecting(true);
       setError(null);
 
-      // Check if Tavus SDK is loaded
-      if (typeof window.Tavus === 'undefined') {
-        throw new Error('Tavus SDK not loaded');
+      // Double check if Tavus SDK is loaded
+      if (typeof (window as any).Tavus === 'undefined') {
+        throw new Error('Tavus SDK not loaded. Please try refreshing the page.');
       }
 
       // Create conversation with persona
-      const conversation = new window.Tavus.Conversation({
+      const TavusClass = (window as any).Tavus;
+      const conversation = new TavusClass.Conversation({
         apiKey: TAVUS_API_KEY,
         personaId: PERSONA_ID,
         replicaId: REPLICA_ID,
@@ -68,7 +130,8 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
           console.log('Conversation ended');
         },
         onError: (error: any) => {
-          setError(error.message || 'An error occurred');
+          console.error('Conversation error:', error);
+          setError(error.message || 'An error occurred during conversation');
           setIsConnecting(false);
           setIsConnected(false);
         }
@@ -88,7 +151,11 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
 
   const endConversation = () => {
     if (conversationRef.current) {
-      conversationRef.current.endConversation();
+      try {
+        conversationRef.current.endConversation();
+      } catch (e) {
+        console.warn('Error ending conversation:', e);
+      }
       conversationRef.current = null;
     }
     setIsConnected(false);
@@ -97,23 +164,31 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
 
   const toggleMute = () => {
     if (conversationRef.current) {
-      if (isMuted) {
-        conversationRef.current.unmute();
-      } else {
-        conversationRef.current.mute();
+      try {
+        if (isMuted) {
+          conversationRef.current.unmute();
+        } else {
+          conversationRef.current.mute();
+        }
+        setIsMuted(!isMuted);
+      } catch (e) {
+        console.warn('Error toggling mute:', e);
       }
-      setIsMuted(!isMuted);
     }
   };
 
   const toggleVideo = () => {
     if (conversationRef.current) {
-      if (isVideoOn) {
-        conversationRef.current.pauseVideo();
-      } else {
-        conversationRef.current.resumeVideo();
+      try {
+        if (isVideoOn) {
+          conversationRef.current.pauseVideo();
+        } else {
+          conversationRef.current.resumeVideo();
+        }
+        setIsVideoOn(!isVideoOn);
+      } catch (e) {
+        console.warn('Error toggling video:', e);
       }
-      setIsVideoOn(!isVideoOn);
     }
   };
 
@@ -236,18 +311,45 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
         {/* Error Message */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 text-sm">{error}</p>
-            <button
-              onClick={() => setError(null)}
-              className="mt-2 text-red-600 hover:text-red-800 text-sm underline"
-            >
-              Încearcă din nou
-            </button>
+            <div className="flex items-start">
+              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-red-700 text-sm font-medium">Eroare de conectare</p>
+                <p className="text-red-600 text-sm mt-1">{error}</p>
+                <div className="mt-3 flex space-x-3">
+                  <button
+                    onClick={retrySDKLoad}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                  >
+                    Încearcă din nou
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                  >
+                    Reîncarcă pagina
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading Status */}
+        {!isTavusSdkLoaded && !error && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center">
+              <Loader2 className="h-5 w-5 text-blue-600 animate-spin mr-3" />
+              <div>
+                <p className="text-blue-700 text-sm font-medium">Se încarcă SDK-ul Tavus...</p>
+                <p className="text-blue-600 text-sm">Vă rugăm să așteptați câteva secunde.</p>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Instructions */}
-        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200">
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border-2 border-purple-200">
           <h4 className="font-medium text-purple-900 mb-2">Cum să folosești profesorul virtual:</h4>
           <ul className="text-sm text-purple-800 space-y-1">
             <li>• Începe conversația apăsând butonul "Începe conversația"</li>
