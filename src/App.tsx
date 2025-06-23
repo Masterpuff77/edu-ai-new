@@ -10,7 +10,6 @@ import ProfilePage from './pages/ProfilePage';
 import useAuthStore from './store/authStore';
 import supabase from './config/supabase';
 import ElevenLabsWidget from './components/chat/ElevenLabsWidget';
-import DebugPanel from './components/debug/DebugPanel';
 
 const App: React.FC = () => {
   const { user, isAuthenticated, loading, loadUserProfile, clearAuth } = useAuthStore();
@@ -86,8 +85,6 @@ const App: React.FC = () => {
   return (
     <Router>
       {isAuthenticated && isOnboardingComplete() && <ElevenLabsWidget />}
-      {/* Add debug panel in development */}
-      {process.env.NODE_ENV === 'development' && <DebugPanel />}
       <Routes>
         <Route 
           path="/" 
