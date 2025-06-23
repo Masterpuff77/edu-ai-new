@@ -48,7 +48,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
 
       const script = document.createElement('script');
       script.id = SCRIPT_ID;
-      script.src = 'https://cdn.tavus.io/tavus-sdk.js';
+      script.src = 'https://cdn.tavus.io/tavus-sdk.min.js';
       script.async = true;
       
       script.onload = () => {
