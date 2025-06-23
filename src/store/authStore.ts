@@ -15,6 +15,7 @@ interface AuthState {
   updateUser: (userData: Partial<User>) => Promise<void>;
   loadUserProfile: (authUser: AuthUser) => Promise<void>;
   clearAuth: () => void;
+  uploadAvatar: (file: File | string) => Promise<string>;
 }
 
 const useAuthStore = create<AuthState>((set, get) => ({
@@ -30,6 +31,47 @@ const useAuthStore = create<AuthState>((set, get) => ({
       loading: false,
       error: null,
     });
+  },
+
+  uploadAvatar: async (file: File | string) => {
+    const { user } = get();
+    if (!user) throw new Error('User not authenticated');
+
+    try {
+      set({ loading: true, error: null });
+
+      // Dacă este string (base64), îl salvăm direct
+      if (typeof file === 'string') {
+        // Actualizăm profilul cu imaginea base64
+        await get().updateUser({ avatar: file });
+        set({ loading: false });
+        return file;
+      }
+
+      // Dacă este File object, îl convertim în base64
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const base64String = e.target?.result as string;
+            await get().updateUser({ avatar: base64String });
+            set({ loading: false });
+            resolve(base64String);
+          } catch (error) {
+            set({ loading: false });
+            reject(error);
+          }
+        };
+        reader.onerror = () => {
+          set({ loading: false });
+          reject(new Error('Failed to read file'));
+        };
+        reader.readAsDataURL(file);
+      });
+    } catch (error: any) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
   },
 
   loadUserProfile: async (authUser: AuthUser) => {

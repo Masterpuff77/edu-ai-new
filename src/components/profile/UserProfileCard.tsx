@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { User, Edit2, Save } from 'lucide-react';
+import { User, Edit2, Save, Upload, Check } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 
 const UserProfileCard: React.FC = () => {
-  const { user, updateUser, loading } = useAuthStore();
+  const { user, updateUser, uploadAvatar, loading } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     class: user?.class || '',
@@ -27,28 +28,78 @@ const UserProfileCard: React.FC = () => {
     }
   };
 
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validare fișier
+    if (!file.type.startsWith('image/')) {
+      alert('Te rugăm să selectezi o imagine validă.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      alert('Imaginea este prea mare. Dimensiunea maximă este 5MB.');
+      return;
+    }
+
+    try {
+      setUploadingAvatar(true);
+      await uploadAvatar(file);
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      alert('Eroare la încărcarea imaginii. Te rugăm să încerci din nou.');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="p-6">
         <div className="flex flex-col items-center">
-          {/* Avatar */}
-          <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-gray-200 mb-4">
-            {user?.avatar ? (
-              <img 
-                src={user.avatar} 
-                alt="User avatar" 
-                className="w-full h-full object-cover"
+          {/* Avatar cu opțiune de upload */}
+          <div className="relative group mb-4">
+            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-gray-200">
+              {user?.avatar ? (
+                <img 
+                  src={user.avatar} 
+                  alt="User avatar" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
+                  <User className="h-12 w-12 text-indigo-400" />
+                </div>
+              )}
+            </div>
+            
+            {/* Upload overlay */}
+            <label
+              htmlFor="avatar-upload"
+              className={`absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer ${
+                uploadingAvatar ? 'opacity-100' : ''
+              }`}
+            >
+              {uploadingAvatar ? (
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              ) : (
+                <Upload className="h-6 w-6 text-white" />
+              )}
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+                disabled={uploadingAvatar}
               />
-            ) : (
-              <div className="w-full h-full bg-indigo-100 flex items-center justify-center">
-                <User className="h-12 w-12 text-indigo-400" />
-              </div>
-            )}
+            </label>
           </div>
           
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="mb-6 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
+            className="mb-6 inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition-colors"
           >
             {isEditing ? (
               <>
