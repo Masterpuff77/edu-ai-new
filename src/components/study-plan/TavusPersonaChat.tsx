@@ -10,6 +10,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isTavusSdkLoaded, setIsTavusSdkLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const conversationRef = useRef<any>(null);
@@ -25,6 +26,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
     script.async = true;
     script.onload = () => {
       console.log('Tavus SDK loaded successfully');
+      setIsTavusSdkLoaded(true);
     };
     script.onerror = () => {
       setError('Failed to load Tavus SDK');
@@ -175,10 +177,15 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
                 </p>
                 <button
                   onClick={startConversation}
-                  className="inline-flex items-center px-6 py-3 bg-white text-purple-900 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                  disabled={!isTavusSdkLoaded}
+                  className={`inline-flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
+                    isTavusSdkLoaded
+                      ? 'bg-white text-purple-900 hover:bg-gray-100'
+                      : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  }`}
                 >
                   <Video className="h-5 w-5 mr-2" />
-                  Începe conversația
+                  {isTavusSdkLoaded ? 'Începe conversația' : 'Se încarcă...'}
                 </button>
               </div>
             </div>
