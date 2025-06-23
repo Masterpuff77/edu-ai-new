@@ -4,8 +4,7 @@ import Navbar from '../components/layout/Navbar';
 import CalendarView from '../components/study-plan/CalendarView';
 import SubjectProgress from '../components/study-plan/SubjectProgress';
 import SubjectTabs from '../components/study-plan/SubjectTabs';
-import TavusPersonaChat from '../components/study-plan/TavusPersonaChat';
-import { LightbulbIcon, BookOpen, CheckCircle, Video } from 'lucide-react';
+import { LightbulbIcon, BookOpen, CheckCircle } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import useStudyPlanStore from '../store/studyPlanStore';
 import supabase from '../config/supabase';
@@ -22,7 +21,6 @@ const StudyPlanPage: React.FC = () => {
     fetchSubjectProgress 
   } = useStudyPlanStore();
   const [activeSubject, setActiveSubject] = useState('');
-  const [activeTab, setActiveTab] = useState<'lessons' | 'persona'>('lessons');
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
   // Load active subject from localStorage or default to first subject
@@ -118,114 +116,72 @@ const StudyPlanPage: React.FC = () => {
                   onSubjectChange={handleSubjectChange}
                 />
                 
-                {/* Tab Navigation */}
-                <div className="mb-6">
-                  <div className="border-b border-gray-200">
-                    <nav className="flex space-x-8" aria-label="Tabs">
-                      <button
-                        onClick={() => setActiveTab('lessons')}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                          activeTab === 'lessons'
-                            ? 'border-indigo-500 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center">
-                          <BookOpen className="h-4 w-4 mr-2" />
-                          Lecții și Calendar
+                <CalendarView 
+                  schedule={studyPlan?.schedule || []}
+                  lessonMap={lessonMap}
+                  currentDay={currentDay}
+                  activeSubject={activeSubject}
+                  lessons={lessons}
+                />
+                
+                <hr className="my-6" />
+                
+                <div>
+                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                    Acces rapid la lecții
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {filteredLessons.slice(0, 8).map(lesson => {
+                      const isCompleted = completedLessons.includes(lesson.id);
+                      return (
+                        <div 
+                          key={lesson.id} 
+                          className={`flex items-center justify-between p-3 border rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
+                            isCompleted 
+                              ? 'bg-green-50 border-green-200 hover:bg-green-100 hover:border-green-300' 
+                              : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                          }`}
+                          onClick={() => navigate(`/lessons/${lesson.id}`)}
+                        >
+                          <div className="flex items-center">
+                            <div className={`p-1.5 rounded-full transition-all duration-200 ${
+                              isCompleted ? 'bg-green-100' : 'bg-indigo-100'
+                            }`}>
+                              {isCompleted ? (
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <BookOpen className={`h-4 w-4 ${
+                                  isCompleted ? 'text-green-500' : 'text-indigo-600'
+                                }`} />
+                              )}
+                            </div>
+                            <span className={`ml-2 text-sm font-medium transition-colors duration-200 ${
+                              isCompleted ? 'text-green-700' : 'text-gray-800'
+                            }`}>
+                              {lesson.title}
+                            </span>
+                          </div>
+                          <button
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 transform hover:scale-105 ${
+                              isCompleted
+                                ? 'text-green-700 bg-green-100 hover:bg-green-200 hover:shadow-md'
+                                : 'text-white bg-indigo-600 hover:bg-indigo-700 hover:shadow-md'
+                            }`}
+                          >
+                            {isCompleted ? 'Recapitulare' : 'Deschide'}
+                          </button>
                         </div>
-                      </button>
-                      
-                      <button
-                        onClick={() => setActiveTab('persona')}
-                        className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                          activeTab === 'persona'
-                            ? 'border-indigo-500 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center">
-                          <Video className="h-4 w-4 mr-2" />
-                          Profesor Virtual
-                        </div>
-                      </button>
-                    </nav>
+                      );
+                    })}
+                    
+                    {filteredLessons.length === 0 && (
+                      <div className="text-sm text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                        Nicio lecție disponibilă pentru această materie.
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {/* Tab Content */}
-                {activeTab === 'lessons' ? (
-                  <>
-                    <CalendarView 
-                      schedule={studyPlan?.schedule || []}
-                      lessonMap={lessonMap}
-                      currentDay={currentDay}
-                      activeSubject={activeSubject}
-                      lessons={lessons}
-                    />
-                    
-                    <hr className="my-6" />
-                    
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-700 mb-4">
-                        Acces rapid la lecții
-                      </h3>
-                      
-                      <div className="space-y-4">
-                        {filteredLessons.slice(0, 8).map(lesson => {
-                          const isCompleted = completedLessons.includes(lesson.id);
-                          return (
-                            <div 
-                              key={lesson.id} 
-                              className={`flex items-center justify-between p-3 border rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg cursor-pointer ${
-                                isCompleted 
-                                  ? 'bg-green-50 border-green-200 hover:bg-green-100 hover:border-green-300' 
-                                  : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
-                              }`}
-                              onClick={() => navigate(`/lessons/${lesson.id}`)}
-                            >
-                              <div className="flex items-center">
-                                <div className={`p-1.5 rounded-full transition-all duration-200 ${
-                                  isCompleted ? 'bg-green-100' : 'bg-indigo-100'
-                                }`}>
-                                  {isCompleted ? (
-                                    <CheckCircle className="h-4 w-4 text-green-500" />
-                                  ) : (
-                                    <BookOpen className={`h-4 w-4 ${
-                                      isCompleted ? 'text-green-500' : 'text-indigo-600'
-                                    }`} />
-                                  )}
-                                </div>
-                                <span className={`ml-2 text-sm font-medium transition-colors duration-200 ${
-                                  isCompleted ? 'text-green-700' : 'text-gray-800'
-                                }`}>
-                                  {lesson.title}
-                                </span>
-                              </div>
-                              <button
-                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 transform hover:scale-105 ${
-                                  isCompleted
-                                    ? 'text-green-700 bg-green-100 hover:bg-green-200 hover:shadow-md'
-                                    : 'text-white bg-indigo-600 hover:bg-indigo-700 hover:shadow-md'
-                                }`}
-                              >
-                                {isCompleted ? 'Recapitulare' : 'Deschide'}
-                              </button>
-                            </div>
-                          );
-                        })}
-                        
-                        {filteredLessons.length === 0 && (
-                          <div className="text-sm text-gray-500 text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
-                            Nicio lecție disponibilă pentru această materie.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <TavusPersonaChat activeSubject={activeSubject} />
-                )}
               </div>
             </div>
             
