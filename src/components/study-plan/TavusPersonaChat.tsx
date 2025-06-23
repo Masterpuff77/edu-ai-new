@@ -16,23 +16,23 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
   const videoRef = useRef<HTMLVideoElement>(null);
   const conversationRef = useRef<any>(null);
 
+  // Official Tavus configuration
   const TAVUS_API_KEY = '7b9fff8fda7d400d96a9d3b769828de2';
   const PERSONA_ID = 'p7636ec0d04c';
   const REPLICA_ID = 'r95fd27b5a37';
   const SCRIPT_ID = 'tavus-sdk-script';
 
-  // Multiple CDN URLs to try
+  // Official Tavus SDK URLs from documentation
   const SDK_URLS = [
-    'https://cdn.tavus.io/tavus-sdk.min.js',
-    'https://cdn.tavus.io/tavus-sdk.js',
-    'https://cdn.tavusapi.com/tavus-sdk.js',
-    'https://unpkg.com/@tavus/sdk@latest/dist/tavus-sdk.min.js'
+    'https://cdn.tavus.io/sdk/tavus-sdk-latest.js',
+    'https://cdn.tavus.io/sdk/tavus-sdk.js',
+    'https://unpkg.com/@tavus/sdk@latest/dist/index.js'
   ];
 
   const loadTavusSDK = () => {
     return new Promise<void>((resolve, reject) => {
       // Check if SDK is already loaded
-      if (typeof (window as any).Tavus !== 'undefined') {
+      if (typeof (window as any).TavusSDK !== 'undefined') {
         setIsTavusSdkLoaded(true);
         resolve();
         return;
@@ -62,7 +62,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
           console.log(`Tavus SDK script loaded successfully from: ${SDK_URLS[currentUrlIndex]}`);
           // Give the SDK time to initialize
           setTimeout(() => {
-            if (typeof (window as any).Tavus !== 'undefined') {
+            if (typeof (window as any).TavusSDK !== 'undefined') {
               setIsTavusSdkLoaded(true);
               setError(null);
               resolve();
@@ -106,9 +106,9 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
     return () => {
       if (conversationRef.current) {
         try {
-          conversationRef.current.endConversation();
+          conversationRef.current.disconnect();
         } catch (e) {
-          console.warn('Error ending conversation:', e);
+          console.warn('Error disconnecting conversation:', e);
         }
       }
     };
@@ -138,14 +138,18 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
       setError(null);
 
       // Double check if Tavus SDK is loaded
-      if (typeof (window as any).Tavus === 'undefined') {
+      if (typeof (window as any).TavusSDK === 'undefined') {
         throw new Error('SDK-ul Tavus nu este încărcat. Vă rugăm să reîncărcați pagina.');
       }
 
+      // Initialize Tavus SDK with API key
+      const TavusSDK = (window as any).TavusSDK;
+      await TavusSDK.init({
+        apiKey: TAVUS_API_KEY
+      });
+
       // Create conversation with persona
-      const TavusClass = (window as any).Tavus;
-      const conversation = new TavusClass.Conversation({
-        apiKey: TAVUS_API_KEY,
+      const conversation = await TavusSDK.createConversation({
         personaId: PERSONA_ID,
         replicaId: REPLICA_ID,
         videoElement: videoRef.current,
@@ -170,7 +174,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
       conversationRef.current = conversation;
 
       // Start the conversation
-      await conversation.start();
+      await conversation.connect();
 
     } catch (error: any) {
       console.error('Error starting conversation:', error);
@@ -182,7 +186,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
   const endConversation = () => {
     if (conversationRef.current) {
       try {
-        conversationRef.current.endConversation();
+        conversationRef.current.disconnect();
       } catch (e) {
         console.warn('Error ending conversation:', e);
       }
