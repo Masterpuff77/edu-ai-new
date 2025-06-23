@@ -21,6 +21,14 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
   const REPLICA_ID = 'r95fd27b5a37';
   const SCRIPT_ID = 'tavus-sdk-script';
 
+  // Multiple CDN URLs to try
+  const SDK_URLS = [
+    'https://cdn.tavus.io/tavus-sdk.min.js',
+    'https://cdn.tavus.io/tavus-sdk.js',
+    'https://cdn.tavusapi.com/tavus-sdk.js',
+    'https://unpkg.com/@tavus/sdk@latest/dist/tavus-sdk.min.js'
+  ];
+
   const loadTavusSDK = () => {
     return new Promise<void>((resolve, reject) => {
       // Check if SDK is already loaded
@@ -33,59 +41,62 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
       // Check if script is already in DOM
       const existingScript = document.getElementById(SCRIPT_ID);
       if (existingScript) {
-        // Script exists but SDK might not be ready yet, wait for it
-        const checkSDK = () => {
-          if (typeof (window as any).Tavus !== 'undefined') {
-            setIsTavusSdkLoaded(true);
-            resolve();
-          } else {
-            setTimeout(checkSDK, 100);
-          }
-        };
-        checkSDK();
-        return;
+        existingScript.remove();
       }
 
-      const script = document.createElement('script');
-      script.id = SCRIPT_ID;
-      script.src = 'https://cdn.tavus.io/tavus-sdk.min.js';
-      script.async = true;
-      
-      script.onload = () => {
-        console.log('Tavus SDK script loaded successfully');
-        // Give the SDK more time to initialize (increased from 500ms to 2000ms)
-        setTimeout(() => {
-          if (typeof (window as any).Tavus !== 'undefined') {
-            setIsTavusSdkLoaded(true);
-            setError(null);
-            resolve();
-          } else {
-            reject(new Error('Tavus SDK loaded but not available after initialization timeout'));
-          }
-        }, 2000);
-      };
-      
-      script.onerror = (e) => {
-        console.error('Failed to load Tavus SDK:', e);
-        // Remove the failed script
-        const failedScript = document.getElementById(SCRIPT_ID);
-        if (failedScript) {
-          failedScript.remove();
+      let currentUrlIndex = 0;
+
+      const tryLoadScript = () => {
+        if (currentUrlIndex >= SDK_URLS.length) {
+          reject(new Error('Failed to load Tavus SDK from all available CDNs'));
+          return;
         }
-        reject(new Error('Failed to load Tavus SDK - network error or CDN unavailable'));
+
+        const script = document.createElement('script');
+        script.id = SCRIPT_ID;
+        script.src = SDK_URLS[currentUrlIndex];
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        
+        script.onload = () => {
+          console.log(`Tavus SDK script loaded successfully from: ${SDK_URLS[currentUrlIndex]}`);
+          // Give the SDK time to initialize
+          setTimeout(() => {
+            if (typeof (window as any).Tavus !== 'undefined') {
+              setIsTavusSdkLoaded(true);
+              setError(null);
+              resolve();
+            } else {
+              console.warn(`SDK loaded but not available from: ${SDK_URLS[currentUrlIndex]}`);
+              script.remove();
+              currentUrlIndex++;
+              tryLoadScript();
+            }
+          }, 1000);
+        };
+        
+        script.onerror = (e) => {
+          console.error(`Failed to load Tavus SDK from: ${SDK_URLS[currentUrlIndex]}`, e);
+          script.remove();
+          currentUrlIndex++;
+          tryLoadScript();
+        };
+
+        document.head.appendChild(script);
       };
 
-      document.head.appendChild(script);
+      tryLoadScript();
     });
   };
 
   useEffect(() => {
     const initSDK = async () => {
       try {
+        setError(null);
         await loadTavusSDK();
       } catch (error: any) {
         console.error('SDK loading error:', error);
-        setError(error.message || 'Failed to load Tavus SDK');
+        setError('Nu s-a putut încărca SDK-ul Tavus. Serviciul poate fi temporar indisponibil.');
         setSdkLoadAttempts(prev => prev + 1);
       }
     };
@@ -117,7 +128,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
     try {
       await loadTavusSDK();
     } catch (error: any) {
-      setError(error.message || 'Failed to load Tavus SDK');
+      setError('Nu s-a putut încărca SDK-ul Tavus. Serviciul poate fi temporar indisponibil.');
     }
   };
 
@@ -128,7 +139,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
 
       // Double check if Tavus SDK is loaded
       if (typeof (window as any).Tavus === 'undefined') {
-        throw new Error('Tavus SDK not loaded. Please try refreshing the page.');
+        throw new Error('SDK-ul Tavus nu este încărcat. Vă rugăm să reîncărcați pagina.');
       }
 
       // Create conversation with persona
@@ -150,7 +161,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
         },
         onError: (error: any) => {
           console.error('Conversation error:', error);
-          setError(error.message || 'An error occurred during conversation');
+          setError(error.message || 'A apărut o eroare în timpul conversației');
           setIsConnecting(false);
           setIsConnected(false);
         }
@@ -163,7 +174,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
 
     } catch (error: any) {
       console.error('Error starting conversation:', error);
-      setError(error.message || 'Failed to start conversation');
+      setError(error.message || 'Nu s-a putut începe conversația');
       setIsConnecting(false);
     }
   };
@@ -224,6 +235,81 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
     };
     return names[subject] || subject;
   };
+
+  // Fallback UI when SDK fails to load
+  const renderFallbackUI = () => (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <div className="p-2 bg-purple-100 rounded-lg mr-3">
+              <User className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-medium text-gray-900">Profesor Virtual AI</h3>
+              <p className="text-sm text-gray-600">
+                Serviciul temporar indisponibil
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative bg-gradient-to-br from-purple-900 to-indigo-900 rounded-lg overflow-hidden mb-6" style={{ aspectRatio: '16/9' }}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full mx-auto flex items-center justify-center mb-4">
+                <AlertCircle className="h-12 w-12 text-white" />
+              </div>
+              <h4 className="text-white text-lg font-medium mb-2">Serviciu temporar indisponibil</h4>
+              <p className="text-white text-opacity-80 text-sm mb-6">
+                Profesorul virtual nu poate fi accesat momentan. Vă rugăm să încercați mai târziu.
+              </p>
+              <div className="space-y-3">
+                <button
+                  onClick={retrySDKLoad}
+                  className="inline-flex items-center px-6 py-3 rounded-lg font-medium bg-white text-purple-900 hover:bg-gray-100 transition-colors"
+                >
+                  <Loader2 className="h-5 w-5 mr-2" />
+                  Încearcă din nou
+                </button>
+                <div>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-white text-opacity-80 hover:text-white text-sm underline"
+                  >
+                    Reîncarcă pagina
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" />
+            <div>
+              <h4 className="font-medium text-amber-900 mb-2">Alternativă disponibilă</h4>
+              <p className="text-amber-800 text-sm mb-3">
+                În timp ce profesorul virtual nu este disponibil, poți folosi asistentul AI din secțiunea Dashboard pentru întrebări despre {getSubjectName(activeSubject)}.
+              </p>
+              <button
+                onClick={() => window.location.href = '/dashboard'}
+                className="text-amber-700 hover:text-amber-900 text-sm font-medium underline"
+              >
+                Mergi la Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Show fallback UI if SDK failed to load after multiple attempts
+  if (error && sdkLoadAttempts >= 2) {
+    return renderFallbackUI();
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -328,42 +414,27 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
         </div>
 
         {/* Error Message */}
-        {error && (
+        {error && sdkLoadAttempts < 2 && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-start">
               <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
               <div className="flex-1">
                 <p className="text-red-700 text-sm font-medium">Eroare de conectare</p>
                 <p className="text-red-600 text-sm mt-1">{error}</p>
-                {sdkLoadAttempts < 3 && (
-                  <div className="mt-3 flex space-x-3">
-                    <button
-                      onClick={retrySDKLoad}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium underline"
-                    >
-                      Încearcă din nou ({sdkLoadAttempts}/3)
-                    </button>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium underline"
-                    >
-                      Reîncarcă pagina
-                    </button>
-                  </div>
-                )}
-                {sdkLoadAttempts >= 3 && (
-                  <div className="mt-3">
-                    <p className="text-red-600 text-sm">
-                      Serviciul Tavus pare să nu fie disponibil momentan. Vă rugăm să încercați mai târziu.
-                    </p>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="mt-2 text-red-600 hover:text-red-800 text-sm font-medium underline"
-                    >
-                      Reîncarcă pagina
-                    </button>
-                  </div>
-                )}
+                <div className="mt-3 flex space-x-3">
+                  <button
+                    onClick={retrySDKLoad}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                  >
+                    Încearcă din nou ({sdkLoadAttempts}/2)
+                  </button>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                  >
+                    Reîncarcă pagina
+                  </button>
+                </div>
               </div>
             </div>
           </div>
