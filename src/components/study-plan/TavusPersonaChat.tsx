@@ -45,7 +45,6 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
       const script = document.createElement('script');
       script.src = 'https://cdn.tavus.io/tavus-sdk.js';
       script.async = true;
-      script.crossOrigin = 'anonymous';
       
       script.onload = () => {
         console.log('Tavus SDK loaded successfully');
