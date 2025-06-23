@@ -30,9 +30,16 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
         return;
       }
 
-      // Remove existing script if any
+      // Remove existing script if any - with proper parent check
       if (scriptRef.current) {
-        document.head.removeChild(scriptRef.current);
+        try {
+          if (scriptRef.current.parentNode === document.head) {
+            document.head.removeChild(scriptRef.current);
+          }
+        } catch (e) {
+          console.warn('Could not remove existing script:', e);
+        }
+        scriptRef.current = null;
       }
 
       const script = document.createElement('script');
@@ -49,6 +56,7 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
             setError(null);
             resolve();
           } else {
+            scriptRef.current = null;
             reject(new Error('Tavus SDK loaded but not available'));
           }
         }, 500);
@@ -56,7 +64,8 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
       
       script.onerror = (e) => {
         console.error('Failed to load Tavus SDK:', e);
-        reject(new Error('Failed to load Tavus SDK'));
+        scriptRef.current = null;
+        reject(new Error('Failed to load Tavus SDK - network error or CDN unavailable'));
       };
 
       scriptRef.current = script;
@@ -85,8 +94,15 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
           console.warn('Error ending conversation:', e);
         }
       }
-      if (scriptRef.current && document.head.contains(scriptRef.current)) {
-        document.head.removeChild(scriptRef.current);
+      if (scriptRef.current) {
+        try {
+          if (scriptRef.current.parentNode === document.head) {
+            document.head.removeChild(scriptRef.current);
+          }
+        } catch (e) {
+          console.warn('Could not remove script in cleanup:', e);
+        }
+        scriptRef.current = null;
       }
     };
   }, []);
@@ -94,11 +110,11 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
   const retrySDKLoad = async () => {
     setError(null);
     setIsTavusSdkLoaded(false);
+    setSdkLoadAttempts(prev => prev + 1);
     try {
       await loadTavusSDK();
     } catch (error: any) {
       setError(error.message || 'Failed to load Tavus SDK');
-      setSdkLoadAttempts(prev => prev + 1);
     }
   };
 
@@ -316,20 +332,35 @@ const TavusPersonaChat: React.FC<TavusPersonaChatProps> = ({ activeSubject }) =>
               <div className="flex-1">
                 <p className="text-red-700 text-sm font-medium">Eroare de conectare</p>
                 <p className="text-red-600 text-sm mt-1">{error}</p>
-                <div className="mt-3 flex space-x-3">
-                  <button
-                    onClick={retrySDKLoad}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium underline"
-                  >
-                    Încearcă din nou
-                  </button>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium underline"
-                  >
-                    Reîncarcă pagina
-                  </button>
-                </div>
+                {sdkLoadAttempts < 3 && (
+                  <div className="mt-3 flex space-x-3">
+                    <button
+                      onClick={retrySDKLoad}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                    >
+                      Încearcă din nou ({sdkLoadAttempts}/3)
+                    </button>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium underline"
+                    >
+                      Reîncarcă pagina
+                    </button>
+                  </div>
+                )}
+                {sdkLoadAttempts >= 3 && (
+                  <div className="mt-3">
+                    <p className="text-red-600 text-sm">
+                      Serviciul Tavus pare să nu fie disponibil momentan. Vă rugăm să încercați mai târziu.
+                    </p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="mt-2 text-red-600 hover:text-red-800 text-sm font-medium underline"
+                    >
+                      Reîncarcă pagina
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
