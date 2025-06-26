@@ -7,8 +7,14 @@ const ElevenLabsWidget: React.FC = () => {
   useEffect(() => {
     // Check if agent ID is configured
     const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
-    if (!agentId) {
-      console.warn('ElevenLabs agent ID not configured. Please set VITE_ELEVENLABS_AGENT_ID in your .env file.');
+    
+    // Don't initialize if agent ID is missing, placeholder, or invalid
+    if (!agentId || 
+        agentId === 'your_elevenlabs_agent_id_here' || 
+        agentId.includes('your_') || 
+        agentId.includes('_here') ||
+        agentId.length < 10) {
+      console.warn('ElevenLabs agent ID not properly configured. Please set a valid VITE_ELEVENLABS_AGENT_ID in your .env file.');
       return;
     }
 
