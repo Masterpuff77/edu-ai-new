@@ -8,7 +8,7 @@ import StudyPlanPage from './pages/StudyPlanPage';
 import LessonPage from './pages/LessonPage';
 import ProfilePage from './pages/ProfilePage';
 import useAuthStore from './store/authStore';
-import supabase from './config/supabase';
+import supabase, { isSupabaseAvailable } from './config/supabase';
 import ElevenLabsWidget from './components/chat/ElevenLabsWidget';
 
 const App: React.FC = () => {
@@ -18,6 +18,14 @@ const App: React.FC = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Check if Supabase is available before proceeding
+        if (!isSupabaseAvailable || !supabase) {
+          console.warn('Supabase is not available. Please check your environment variables.');
+          clearAuth();
+          setAppReady(true);
+          return;
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -47,16 +55,24 @@ const App: React.FC = () => {
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || !session?.user) {
-        clearAuth();
-      } else if (session?.user) {
-        await loadUserProfile(session.user);
-      }
-    });
+    // Only set up auth state change listener if Supabase is available
+    let subscription: { unsubscribe: () => void } | null = null;
+    
+    if (isSupabaseAvailable && supabase) {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_OUT' || !session?.user) {
+          clearAuth();
+        } else if (session?.user) {
+          await loadUserProfile(session.user);
+        }
+      });
+      subscription = authSubscription;
+    }
 
     return () => {
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, [loadUserProfile, clearAuth]);
 
