@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { User } from '../types';
-import supabase from '../config/supabase';
+import supabase, { isSupabaseAvailable } from '../config/supabase';
 import { AuthUser } from '@supabase/supabase-js';
 
 interface AuthState {
@@ -74,6 +74,13 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   loadUserProfile: async (authUser: AuthUser) => {
+    // If Supabase is not available, skip profile loading
+    if (!isSupabaseAvailable || !supabase) {
+      console.warn('Supabase not available, cannot load user profile');
+      set({ error: 'Database connection not available', loading: false });
+      return;
+    }
+
     try {
       set({ loading: true, error: null });
       
@@ -131,6 +138,15 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signUp: async (email: string, password: string) => {
+    // If Supabase is not available, show appropriate error
+    if (!isSupabaseAvailable || !supabase) {
+      set({ 
+        error: 'Authentication service is not available. Please check your configuration.', 
+        loading: false 
+      });
+      return;
+    }
+
     try {
       set({ loading: true, error: null });
       const { data, error } = await supabase.auth.signUp({ email, password });
@@ -148,6 +164,15 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signIn: async (email: string, password: string) => {
+    // If Supabase is not available, show appropriate error
+    if (!isSupabaseAvailable || !supabase) {
+      set({ 
+        error: 'Authentication service is not available. Please check your configuration.', 
+        loading: false 
+      });
+      return;
+    }
+
     try {
       set({ loading: true, error: null });
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -165,6 +190,15 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signInWithGoogle: async () => {
+    // If Supabase is not available, show appropriate error
+    if (!isSupabaseAvailable || !supabase) {
+      set({ 
+        error: 'Authentication service is not available. Please check your configuration.', 
+        loading: false 
+      });
+      return;
+    }
+
     try {
       set({ loading: true, error: null });
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -182,6 +216,11 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
+    if (!isSupabaseAvailable || !supabase) {
+      get().clearAuth();
+      return;
+    }
+
     try {
       await supabase.auth.signOut();
       get().clearAuth();
@@ -193,6 +232,15 @@ const useAuthStore = create<AuthState>((set, get) => ({
   updateUser: async (userData: Partial<User>) => {
     const { user } = get();
     if (!user) return;
+
+    // If Supabase is not available, just update local state
+    if (!isSupabaseAvailable || !supabase) {
+      set({
+        user: { ...user, ...userData },
+        loading: false,
+      });
+      return;
+    }
 
     try {
       set({ loading: true, error: null });

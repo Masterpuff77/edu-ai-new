@@ -752,20 +752,21 @@ export const mockNotifications: Notification[] = [
 
 // Initialize mock data with proper error handling
 export const initMockData = async (supabase: any) => {
-  // If Supabase is not available, skip initialization
+  // If Supabase is not available, skip initialization completely
   if (!supabase) {
     console.log('Supabase not available, skipping mock data initialization');
     return;
   }
 
   try {
-    // Test connection first with a simple query
+    // Test connection first with a simple query that won't fail if tables don't exist
     const { error: connectionError } = await supabase
       .from('lessons')
       .select('id')
       .limit(1);
 
-    if (connectionError) {
+    // If we get a connection error (not a table doesn't exist error), skip initialization
+    if (connectionError && connectionError.code !== 'PGRST116') {
       console.warn('Supabase connection test failed:', connectionError.message);
       return;
     }
@@ -776,7 +777,8 @@ export const initMockData = async (supabase: any) => {
       .select('id')
       .limit(1);
 
-    if (checkError) {
+    // If we get an error checking for existing lessons, skip initialization
+    if (checkError && checkError.code !== 'PGRST116') {
       console.warn('Error checking existing lessons:', checkError.message);
       return;
     }
