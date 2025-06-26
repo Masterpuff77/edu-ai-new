@@ -153,11 +153,11 @@ export const mockLessons: Lesson[] = [
       </ul>
       
       <h4>Primul program</h4>
-      <pre><code>#include &lt;iostream&gt;
+      <pre><code>#include <iostream>
 using namespace std;
 
 int main() {
-    cout &lt;&lt; "Hello, World!" &lt;&lt; endl;
+    cout << "Hello, World!" << endl;
     return 0;
 }</code></pre>
       
@@ -479,7 +479,7 @@ public:
         <li>Moduri de acces (citire, scriere, adăugare)</li>
       </ul>
       
-      <pre><code>#include &lt;fstream&gt;
+      <pre><code>#include <fstream>
 
 // Scriere în fișier
 ofstream fout("date.txt");
@@ -750,14 +750,36 @@ export const mockNotifications: Notification[] = [
   },
 ];
 
-// Initialize mock data
+// Initialize mock data with proper error handling
 export const initMockData = async (supabase: any) => {
+  // If Supabase is not available, skip initialization
+  if (!supabase) {
+    console.log('Supabase not available, skipping mock data initialization');
+    return;
+  }
+
   try {
-    // First check if data already exists in the lessons table
-    const { data: existingLessons } = await supabase
+    // Test connection first with a simple query
+    const { error: connectionError } = await supabase
       .from('lessons')
       .select('id')
       .limit(1);
+
+    if (connectionError) {
+      console.warn('Supabase connection test failed:', connectionError.message);
+      return;
+    }
+
+    // Check if data already exists in the lessons table
+    const { data: existingLessons, error: checkError } = await supabase
+      .from('lessons')
+      .select('id')
+      .limit(1);
+
+    if (checkError) {
+      console.warn('Error checking existing lessons:', checkError.message);
+      return;
+    }
 
     // If we already have data, skip initialization
     if (existingLessons && existingLessons.length > 0) {
@@ -773,7 +795,8 @@ export const initMockData = async (supabase: any) => {
       .upsert(mockLessons);
     
     if (lessonsError) {
-      throw lessonsError;
+      console.error('Error inserting lessons:', lessonsError.message);
+      return;
     }
 
     // Insert other public data
@@ -782,7 +805,7 @@ export const initMockData = async (supabase: any) => {
       .upsert(mockBadges);
     
     if (badgesError) {
-      console.error('Error inserting badges:', badgesError);
+      console.warn('Error inserting badges:', badgesError.message);
     }
 
     const { error: challengesError } = await supabase
@@ -790,12 +813,12 @@ export const initMockData = async (supabase: any) => {
       .upsert(mockChallenges);
     
     if (challengesError) {
-      console.error('Error inserting challenges:', challengesError);
+      console.warn('Error inserting challenges:', challengesError.message);
     }
 
     console.log('Mock data initialized successfully!');
   } catch (error) {
-    console.error('Error initializing mock data:', error);
-    throw error; // Re-throw to handle in the app initialization
+    console.warn('Error initializing mock data:', error);
+    // Don't throw the error, just log it and continue
   }
 };
