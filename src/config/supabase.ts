@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://iecycqxhlhjpkriqswzx.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllY3ljcXhobGhqcGtyaXFzd3p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4MTIxOTEsImV4cCI6MjA2NDM4ODE5MX0.tKAnc9nlDrC9pMj6Lwn4ra89cufYELxmR4NvBJ_peWQ';
 
 // Check if environment variables are properly configured (not placeholder values)
 const hasValidSupabaseConfig = 
@@ -25,6 +25,7 @@ if (hasValidSupabaseConfig) {
         detectSessionInUrl: true
       }
     });
+    console.log('Supabase client initialized successfully');
   } catch (error) {
     console.warn('Failed to initialize Supabase client:', error);
     supabase = null;
