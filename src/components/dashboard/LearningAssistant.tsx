@@ -180,10 +180,28 @@ const LearningAssistant: React.FC = () => {
         })
       });
 
-      const data = await response.json();
+      let data;
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get response');
+      // Check if response is ok before attempting to parse JSON
+      if (response.ok) {
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          console.error('Error parsing successful response JSON:', jsonError);
+          throw new Error('Răspunsul serverului nu este valid');
+        }
+      } else {
+        // Handle error responses - attempt to parse error JSON safely
+        let errorMessage = 'A apărut o eroare la server';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (jsonError) {
+          // If error response is not valid JSON, use status text or generic message
+          console.error('Error parsing error response JSON:', jsonError);
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       const aiMessage: Message = {
