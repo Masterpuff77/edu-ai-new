@@ -5,19 +5,9 @@ const ElevenLabsWidget: React.FC = () => {
   const widgetMounted = useRef(false);
 
   useEffect(() => {
-    // Check if agent ID is configured
-    const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
+    // Use the specific agent ID provided
+    const agentId = 'agent_01jwtq4zsef3cvgrpw0kzxk7ad';
     
-    // Don't initialize if agent ID is missing, placeholder, or invalid
-    if (!agentId || 
-        agentId === 'your_elevenlabs_agent_id_here' || 
-        agentId.includes('your_') || 
-        agentId.includes('_here') ||
-        agentId.length < 10) {
-      console.warn('ElevenLabs agent ID not properly configured. Please set a valid VITE_ELEVENLABS_AGENT_ID in your .env file.');
-      return;
-    }
-
     // Prevent multiple initializations
     if (scriptLoaded.current && widgetMounted.current) {
       return;
@@ -30,6 +20,7 @@ const ElevenLabsWidget: React.FC = () => {
           const script = document.createElement('script');
           script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
           script.async = true;
+          script.type = 'text/javascript';
           
           script.onload = () => {
             scriptLoaded.current = true;
@@ -64,10 +55,6 @@ const ElevenLabsWidget: React.FC = () => {
           const widget = document.createElement('elevenlabs-convai');
           widget.setAttribute('agent-id', agentId);
           
-          // Add error handling attributes
-          widget.setAttribute('fallback-mode', 'true');
-          widget.setAttribute('retry-attempts', '3');
-          
           // Add widget to body
           document.body.appendChild(widget);
           widgetMounted.current = true;
@@ -76,7 +63,6 @@ const ElevenLabsWidget: React.FC = () => {
           widget.addEventListener('error', (event) => {
             console.warn('ElevenLabs widget error:', event);
             console.warn('Please verify that the agent ID is valid and active in your ElevenLabs account.');
-            // Optionally retry or show fallback
           });
 
           // Add load event listener for debugging
