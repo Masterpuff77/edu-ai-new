@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { LessonQuiz } from '../../types';
 import { Play, Trophy, CheckCircle } from 'lucide-react';
 import LessonQuizModal from './LessonQuizModal';
+import { getRandomQuestions } from '../../data/quizQuestions';
 
 interface QuizWidgetProps {
-  quizData: LessonQuiz[];
+  lessonId: string;
   onComplete: (score: number) => void;
   lessonTitle?: string;
 }
 
-const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete, lessonTitle = "Lecția curentă" }) => {
+const QuizWidget: React.FC<QuizWidgetProps> = ({ lessonId, onComplete, lessonTitle = "Lecția curentă" }) => {
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [lastScore, setLastScore] = useState<number | null>(null);
@@ -30,6 +30,9 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete, lessonTit
     setLastScore(null);
     setShowQuizModal(true);
   };
+
+  // Get quiz questions for this lesson
+  const quizQuestions = getRandomQuestions(lessonId, 3);
 
   return (
     <>
@@ -106,7 +109,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete, lessonTit
       {showQuizModal && (
         <LessonQuizModal
           lessonTitle={lessonTitle}
-          quizData={quizData}
+          quizData={quizQuestions}
           onClose={() => setShowQuizModal(false)}
           onTestCompleted={handleQuizComplete}
         />

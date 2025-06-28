@@ -3,18 +3,11 @@ import { X, CheckCircle, XCircle, Trophy, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
 import useGamificationStore from '../../store/gamificationStore';
-import { LessonQuiz } from '../../types';
-
-interface Question {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
+import { QuizQuestion } from '../../data/quizQuestions';
 
 interface LessonQuizModalProps {
   lessonTitle: string;
-  quizData: LessonQuiz[];
+  quizData: QuizQuestion[];
   onClose: () => void;
   onTestCompleted: (score: number) => void;
 }
@@ -28,35 +21,10 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
   const { user } = useAuthStore();
   const { addExperience } = useGamificationStore();
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<number[]>(Array(3).fill(-1));
+  const [answers, setAnswers] = useState<number[]>(Array(quizData.length).fill(-1));
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
-  const [questions, setQuestions] = useState<Question[]>([]);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    // Generează 3 întrebări din quizData
-    const generateQuestions = () => {
-      if (quizData.length === 0) return [];
-      
-      // Ia primele 3 întrebări sau repetă dacă sunt mai puține
-      const selectedQuestions: Question[] = [];
-      for (let i = 0; i < 3; i++) {
-        const quizIndex = i % quizData.length;
-        const quiz = quizData[quizIndex];
-        selectedQuestions.push({
-          id: `${i + 1}`,
-          question: quiz.question,
-          options: quiz.options,
-          correctAnswer: quiz.correctAnswer
-        });
-      }
-      return selectedQuestions;
-    };
-
-    setQuestions(generateQuestions());
-    setAnswers(Array(3).fill(-1));
-  }, [quizData]);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (submitted) return;
@@ -67,14 +35,14 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
   };
 
   const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
+    if (currentQuestion < quizData.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       return;
     }
 
     // Calculează scorul și finalizează
     let correctAnswers = 0;
-    questions.forEach((question, index) => {
+    quizData.forEach((question, index) => {
       if (answers[index] === question.correctAnswer) {
         correctAnswers++;
       }
@@ -113,7 +81,7 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
 
   const handleRetry = () => {
     setCurrentQuestion(0);
-    setAnswers(Array(3).fill(-1));
+    setAnswers(Array(quizData.length).fill(-1));
     setSubmitted(false);
     setScore(0);
   };
@@ -128,7 +96,7 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
     onClose();
   };
 
-  if (questions.length === 0) {
+  if (quizData.length === 0) {
     return null;
   }
 
@@ -163,24 +131,24 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
               <>
                 <div className="mb-6">
                   <div className="flex justify-between text-sm text-gray-500 mb-2">
-                    <span>Întrebarea {currentQuestion + 1} din {questions.length}</span>
-                    <span>{answers.filter(a => a !== -1).length}/{questions.length} răspunsuri</span>
+                    <span>Întrebarea {currentQuestion + 1} din {quizData.length}</span>
+                    <span>{answers.filter(a => a !== -1).length}/{quizData.length} răspunsuri</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                      style={{ width: `${((currentQuestion + 1) / quizData.length) * 100}%` }}
                     ></div>
                   </div>
                 </div>
 
                 <div className="mb-8">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    {questions[currentQuestion].question}
+                    {quizData[currentQuestion].question}
                   </h3>
                   
                   <div className="space-y-3">
-                    {questions[currentQuestion].options.map((option, index) => (
+                    {quizData[currentQuestion].options.map((option, index) => (
                       <button
                         key={index}
                         onClick={() => handleAnswerSelect(index)}
@@ -227,17 +195,17 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
                     disabled={answers[currentQuestion] === -1 || saving}
                     className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {saving ? 'Se salvează...' : (currentQuestion < questions.length - 1 ? 'Următoarea' : 'Finalizează')}
+                    {saving ? 'Se salvează...' : (currentQuestion < quizData.length - 1 ? 'Următoarea' : 'Finalizează')}
                   </button>
                 </div>
               </>
             ) : (
-              // Results screen - exact ca la testele pe materii
+              // Results screen
               <div className="text-center py-8">
                 <div className={`w-20 h-20 mx-auto flex items-center justify-center rounded-full mb-6 ${
-                  score >= 3 ? 'bg-green-100' : score >= 2 ? 'bg-yellow-100' : score >= 1 ? 'bg-orange-100' : 'bg-red-100'
+                  score >= Math.ceil(quizData.length * 0.7) ? 'bg-green-100' : score >= Math.ceil(quizData.length * 0.5) ? 'bg-yellow-100' : 'bg-red-100'
                 }`}>
-                  {score >= 2 ? (
+                  {score >= Math.ceil(quizData.length * 0.7) ? (
                     <CheckCircle className="h-10 w-10 text-green-600" />
                   ) : (
                     <XCircle className="h-10 w-10 text-red-600" />
@@ -249,13 +217,13 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
                 </h3>
                 
                 <p className="text-lg text-gray-600 mb-6">
-                  Ai răspuns corect la {score} din {questions.length} întrebări
+                  Ai răspuns corect la {score} din {quizData.length} întrebări
                 </p>
 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
                   <h4 className="font-medium text-gray-900 mb-3">Rezultate detaliate:</h4>
                   <div className="space-y-2">
-                    {questions.map((question, index) => (
+                    {quizData.map((question, index) => (
                       <div key={index} className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Întrebarea {index + 1}</span>
                         <div className="flex items-center">

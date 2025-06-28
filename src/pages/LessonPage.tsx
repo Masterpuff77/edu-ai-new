@@ -216,13 +216,7 @@ const LessonPage: React.FC = () => {
           </div>
 
           <QuizWidget 
-            quizData={currentLesson.quiz || [
-              {
-                question: 'Care este răspunsul corect?',
-                options: ['Opțiunea 1', 'Opțiunea 2', 'Opțiunea 3'],
-                correctAnswer: 1
-              }
-            ]}
+            lessonId={lessonId || ''}
             lessonTitle={currentLesson.title}
             onComplete={handleQuizComplete}
           />
