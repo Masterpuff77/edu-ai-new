@@ -16,75 +16,136 @@ const DashboardPage: React.FC = () => {
   const [nextLesson, setNextLesson] = useState<{ id: string; title: string } | null>(null);
   const [recommendation, setRecommendation] = useState<string>('');
 
-  // MOST AGGRESSIVE scroll to top approach
+  // ULTIMATE scroll prevention - block ALL automatic scrolling
   useEffect(() => {
-    // Multiple immediate scroll attempts
-    const scrollToTop = () => {
+    // Store original scroll position
+    const originalScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Force immediate scroll to top
+    const forceScrollTop = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
       
-      // Also try setting scroll on the main element if it exists
-      const main = document.querySelector('main');
-      if (main) {
-        main.scrollTop = 0;
-      }
-      
-      // Try setting on any scrollable containers
-      const scrollableElements = document.querySelectorAll('[style*="overflow"]');
+      // Also handle any scrollable containers
+      const scrollableElements = document.querySelectorAll('*');
       scrollableElements.forEach(el => {
-        if (el instanceof HTMLElement) {
+        if (el instanceof HTMLElement && (
+          el.scrollTop > 0 || 
+          getComputedStyle(el).overflowY === 'scroll' ||
+          getComputedStyle(el).overflowY === 'auto'
+        )) {
           el.scrollTop = 0;
         }
       });
     };
 
     // Immediate scroll
-    scrollToTop();
+    forceScrollTop();
     
-    // Multiple delayed scrolls to ensure it works
-    const timeouts = [0, 50, 100, 200, 300, 500].map(delay => 
-      setTimeout(scrollToTop, delay)
-    );
+    // Create a more aggressive scroll prevention
+    let scrollBlocked = true;
+    
+    const preventAnyScroll = (e: Event) => {
+      if (scrollBlocked) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        forceScrollTop();
+        return false;
+      }
+    };
 
-    // Also listen for any layout changes and force scroll
+    // Block all scroll-related events
+    const scrollEvents = ['scroll', 'wheel', 'touchmove', 'keydown'];
+    scrollEvents.forEach(eventType => {
+      window.addEventListener(eventType, preventAnyScroll, { 
+        passive: false, 
+        capture: true 
+      });
+      document.addEventListener(eventType, preventAnyScroll, { 
+        passive: false, 
+        capture: true 
+      });
+    });
+
+    // Override any programmatic scroll attempts
+    const originalScrollTo = window.scrollTo;
+    const originalScrollBy = window.scrollBy;
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    
+    window.scrollTo = function(...args: any[]) {
+      if (scrollBlocked) return;
+      return originalScrollTo.apply(this, args);
+    };
+    
+    window.scrollBy = function(...args: any[]) {
+      if (scrollBlocked) return;
+      return originalScrollBy.apply(this, args);
+    };
+    
+    Element.prototype.scrollIntoView = function(...args: any[]) {
+      if (scrollBlocked) return;
+      return originalScrollIntoView.apply(this, args);
+    };
+
+    // Monitor DOM changes and prevent scroll
     const observer = new MutationObserver(() => {
-      scrollToTop();
+      if (scrollBlocked) {
+        forceScrollTop();
+      }
     });
     
     observer.observe(document.body, { 
       childList: true, 
       subtree: true, 
-      attributes: true 
+      attributes: true,
+      attributeFilter: ['style', 'class']
     });
 
+    // Use RAF to continuously monitor and prevent scroll
+    let rafId: number;
+    const monitorScroll = () => {
+      if (scrollBlocked && (window.pageYOffset > 0 || document.documentElement.scrollTop > 0)) {
+        forceScrollTop();
+      }
+      rafId = requestAnimationFrame(monitorScroll);
+    };
+    rafId = requestAnimationFrame(monitorScroll);
+
+    // Allow user scrolling after a delay
+    const unblockTimeout = setTimeout(() => {
+      scrollBlocked = false;
+      
+      // Restore original functions
+      window.scrollTo = originalScrollTo;
+      window.scrollBy = originalScrollBy;
+      Element.prototype.scrollIntoView = originalScrollIntoView;
+      
+      // Remove event listeners
+      scrollEvents.forEach(eventType => {
+        window.removeEventListener(eventType, preventAnyScroll, { capture: true } as any);
+        document.removeEventListener(eventType, preventAnyScroll, { capture: true } as any);
+      });
+      
+      cancelAnimationFrame(rafId);
+    }, 2000); // Block for 2 seconds
+
     return () => {
-      timeouts.forEach(clearTimeout);
+      scrollBlocked = false;
+      clearTimeout(unblockTimeout);
+      cancelAnimationFrame(rafId);
       observer.disconnect();
-    };
-  }, []);
-
-  // Additional effect to prevent any auto-scrolling from other components
-  useEffect(() => {
-    const preventScroll = (e: Event) => {
-      // Don't prevent user-initiated scrolling
-      if (e.isTrusted) return;
       
-      // Prevent programmatic scrolling
-      e.preventDefault();
-      e.stopPropagation();
+      // Restore original functions
+      window.scrollTo = originalScrollTo;
+      window.scrollBy = originalScrollBy;
+      Element.prototype.scrollIntoView = originalScrollIntoView;
       
-      // Force back to top
-      setTimeout(() => {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      }, 0);
-    };
-
-    // Listen for scroll events that might be programmatic
-    window.addEventListener('scroll', preventScroll, { passive: false });
-    
-    return () => {
-      window.removeEventListener('scroll', preventScroll);
+      // Remove event listeners
+      scrollEvents.forEach(eventType => {
+        window.removeEventListener(eventType, preventAnyScroll, { capture: true } as any);
+        document.removeEventListener(eventType, preventAnyScroll, { capture: true } as any);
+      });
     };
   }, []);
 
