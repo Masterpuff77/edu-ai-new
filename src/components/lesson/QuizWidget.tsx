@@ -53,13 +53,11 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
       setIsCorrect(correct);
       setQuestionSubmitted(true);
       
-      // Award XP for correct answer
+      // Award XP for correct answer without blocking UI
       if (correct) {
-        try {
-          await addExperience(50);
-        } catch (error) {
+        addExperience(50).catch(error => {
           console.error('Error awarding XP:', error);
-        }
+        });
       }
       
       // Show feedback with a small delay to ensure state is updated
