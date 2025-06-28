@@ -20,7 +20,7 @@ const LessonPage: React.FC = () => {
   const [isLessonCompleted, setIsLessonCompleted] = useState(false);
 
   useEffect(() => {
-    if (lessonId && user) {
+    if (lessonId && user?.id) {
       fetchLesson(lessonId);
       checkLessonCompletion();
     }
@@ -46,11 +46,7 @@ const LessonPage: React.FC = () => {
   const handleQuizComplete = async (score: number) => {
     if (!user) return;
     
-    // Consistent XP calculation: 20 XP per correct answer
-    const expPerQuestion = 20;
-    const totalExp = score * expPerQuestion;
-    
-    await addExperience(totalExp);
+    // Quiz-ul acordă deja XP prin LessonQuizModal
     setShowCompletedMessage(true);
     
     setTimeout(() => {
@@ -107,7 +103,7 @@ const LessonPage: React.FC = () => {
     return (
       <>
         <Navbar />
-        <main className="bg-gray-100 min-h-screen py-8 pt-16"> {/* Added pt-16 to account for fixed navbar */}
+        <main className="bg-gray-100 min-h-screen py-8 pt-16">
           <div className="max-w-4xl mx-auto px-4">
             <div className="animate-pulse">
               <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
@@ -124,7 +120,7 @@ const LessonPage: React.FC = () => {
     return (
       <>
         <Navbar />
-        <main className="bg-gray-100 min-h-screen py-8 pt-16"> {/* Added pt-16 to account for fixed navbar */}
+        <main className="bg-gray-100 min-h-screen py-8 pt-16">
           <div className="max-w-4xl mx-auto px-4">
             <div className="mb-6 flex items-center">
               <button
@@ -157,7 +153,7 @@ const LessonPage: React.FC = () => {
   return (
     <>
       <Navbar />
-      <main className="bg-gray-100 min-h-screen pb-8 pt-16"> {/* Added pt-16 to account for fixed navbar */}
+      <main className="bg-gray-100 min-h-screen pb-8 pt-16">
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center">
@@ -197,7 +193,7 @@ const LessonPage: React.FC = () => {
             <div className="mb-6 p-4 bg-green-100 rounded-lg flex items-center">
               <Trophy className="h-6 w-6 text-green-600 mr-2" />
               <span className="text-green-800 font-medium">
-                Felicitări! Ai completat lecția și ai câștigat experiență!
+                Felicitări! Ai completat activitatea și ai câștigat experiență!
               </span>
             </div>
           )}
@@ -227,6 +223,7 @@ const LessonPage: React.FC = () => {
                 correctAnswer: 1
               }
             ]}
+            lessonTitle={currentLesson.title}
             onComplete={handleQuizComplete}
           />
 
