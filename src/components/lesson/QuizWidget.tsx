@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { LessonQuiz } from '../../types';
 import { CheckCircle, XCircle, Trophy } from 'lucide-react';
 import MathRenderer from '../common/MathRenderer';
@@ -52,14 +52,6 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
       
       setIsCorrect(correct);
       setQuestionSubmitted(true);
-      
-      // Award XP for correct answer without blocking UI
-      if (correct) {
-        addExperience(50).catch(error => {
-          console.error('Error awarding XP:', error);
-        });
-      }
-      
       // Show feedback with a small delay to ensure state is updated
       setTimeout(() => {
         setShowFeedback(true);
@@ -70,7 +62,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [questionSubmitted, showFeedback, isSubmitting, selectedAnswers, currentQuestion, quizData, addExperience]);
+  }, [questionSubmitted, showFeedback, isSubmitting, selectedAnswers, currentQuestion, quizData]);
 
   const handleNext = useCallback((e?: React.MouseEvent) => {
     // Prevent default behavior and stop propagation
@@ -116,6 +108,15 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
     setQuestionSubmitted(false);
     setIsSubmitting(false);
   }, [quizData.length]);
+
+  // Award XP after submitting a correct answer
+  useEffect(() => {
+    if (questionSubmitted && isCorrect) {
+      addExperience(50).catch(error => {
+        console.error('Error awarding XP:', error);
+      });
+    }
+  }, [questionSubmitted, isCorrect, addExperience]);
 
   // Function to render text with math expressions
   const renderTextWithMath = (text: string) => {
