@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, Loader2, Trash2 } from 'lucide-react';
 import supabase from '../../config/supabase';
 import useAuthStore from '../../store/authStore';
+import MathRenderer from '../common/MathRenderer';
 
 interface Message {
   id: string;
@@ -53,6 +54,26 @@ const AiChatWidget: React.FC<AiChatWidgetProps> = ({ lessonTitle, subject }) => 
     };
     setMessages([welcomeMessage]);
     setError(null);
+  };
+
+  // Function to render text with math expressions
+  const renderTextWithMath = (text: string) => {
+    // Split text by math expressions (both inline and display)
+    const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\[\[\(][\s\S]*?\\[\]\)])/);
+    
+    return parts.map((part, index) => {
+      // Check if this part is a math expression
+      if (part.match(/^\$\$[\s\S]*\$\$$/) || part.match(/^\\[\[\(][\s\S]*\\[\]\)]$/)) {
+        // Display math
+        return <MathRenderer key={index} inline={false}>{part}</MathRenderer>;
+      } else if (part.match(/^\$[\s\S]*\$$/)) {
+        // Inline math
+        return <MathRenderer key={index} inline={true}>{part}</MathRenderer>;
+      } else {
+        // Regular text - preserve line breaks
+        return <span key={index} style={{ whiteSpace: 'pre-wrap' }}>{part}</span>;
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -184,7 +205,9 @@ const AiChatWidget: React.FC<AiChatWidgetProps> = ({ lessonTitle, subject }) => 
                     : 'bg-white shadow-sm text-gray-800 border border-gray-200'
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <div className="text-sm">
+                  {renderTextWithMath(message.content)}
+                </div>
                 <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-1 block`}>
                   {message.timestamp.toLocaleTimeString('ro-RO', { 
                     hour: '2-digit', 
@@ -222,7 +245,7 @@ const AiChatWidget: React.FC<AiChatWidgetProps> = ({ lessonTitle, subject }) => 
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Scrie o întrebare..."
+            placeholder="Scrie o întrebare... (poți folosi $x^2$ pentru formule)"
             className="w-full pr-20 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             disabled={loading}
           />
@@ -249,9 +272,10 @@ const AiChatWidget: React.FC<AiChatWidgetProps> = ({ lessonTitle, subject }) => 
           </div>
         </form>
         
-        <p className="mt-4 text-xs text-gray-500">
-          Poți pune întrebări consecutive și AI-ul va ține cont de contextul conversației anterioare.
-        </p>
+        <div className="mt-4 text-xs text-gray-500 space-y-1">
+          <p>Poți pune întrebări consecutive și AI-ul va ține cont de contextul conversației anterioare.</p>
+          <p>Pentru formule matematice folosește: $x^2$ pentru inline sau $$x^2 + y^2 = z^2$$ pentru display.</p>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LessonQuiz } from '../../types';
 import { CheckCircle, XCircle } from 'lucide-react';
+import MathRenderer from '../common/MathRenderer';
 
 interface QuizWidgetProps {
   quizData: LessonQuiz[];
@@ -36,6 +37,26 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
     onComplete(newScore);
   };
 
+  // Function to render text with math expressions
+  const renderTextWithMath = (text: string) => {
+    // Split text by math expressions (both inline and display)
+    const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\[\[\(][\s\S]*?\\[\]\)])/);
+    
+    return parts.map((part, index) => {
+      // Check if this part is a math expression
+      if (part.match(/^\$\$[\s\S]*\$\$$/) || part.match(/^\\[\[\(][\s\S]*\\[\]\)]$/)) {
+        // Display math
+        return <MathRenderer key={index} inline={false}>{part}</MathRenderer>;
+      } else if (part.match(/^\$[\s\S]*\$$/)) {
+        // Inline math
+        return <MathRenderer key={index} inline={true}>{part}</MathRenderer>;
+      } else {
+        // Regular text
+        return <span key={index}>{part}</span>;
+      }
+    });
+  };
+
   const currentQuiz = quizData[currentQuestion];
   const isCorrect = selectedAnswers[currentQuestion] === currentQuiz.correctAnswer;
   const hasSelected = selectedAnswers[currentQuestion] !== -1;
@@ -59,7 +80,9 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
       )}
       
       <div className="mb-6">
-        <h4 className="text-base font-medium text-gray-800 mb-4">{currentQuiz.question}</h4>
+        <h4 className="text-base font-medium text-gray-800 mb-4">
+          {renderTextWithMath(currentQuiz.question)}
+        </h4>
         
         <div className="space-y-3">
           {currentQuiz.options.map((option, index) => (
@@ -102,7 +125,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
                     : 'text-indigo-700 font-medium'
                   : 'text-gray-700'
               }`}>
-                {option}
+                {renderTextWithMath(option)}
               </span>
               {submitted && index === currentQuiz.correctAnswer && selectedAnswers[currentQuestion] !== index && (
                 <CheckCircle className="ml-auto h-4 w-4 text-green-500" />

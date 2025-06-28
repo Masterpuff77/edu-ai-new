@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* MathJax styling */
+.math-renderer {
+  font-family: 'Times New Roman', serif;
+}
+
+.inline-math {
+  display: inline;
+  margin: 0 2px;
+}
+
+.display-math {
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+}
+
+/* Ensure MathJax renders properly in different contexts */
+.MathJax {
+  outline: none;
+}
+
+.MathJax_Display {
+  text-align: center !important;
+  margin: 1em 0 !important;
+}
+
+/* Custom styling for math in chat messages */
+.bg-indigo-600 .MathJax {
+  color: white !important;
+}
+
+.bg-white .MathJax {
+  color: #374151 !important;
+}

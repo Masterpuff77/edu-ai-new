@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Play, Pause, SkipBack, Volume2, User } from 'lucide-react';
+import MathRenderer from '../common/MathRenderer';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -13,6 +14,26 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, instructorName, tra
 
   // For MVP we'll use a placeholder
   const videoPlaceholder = !videoUrl || videoUrl === 'placeholder';
+
+  // Function to render text with math expressions
+  const renderTextWithMath = (text: string) => {
+    // Split text by math expressions (both inline and display)
+    const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\[\[\(][\s\S]*?\\[\]\)])/);
+    
+    return parts.map((part, index) => {
+      // Check if this part is a math expression
+      if (part.match(/^\$\$[\s\S]*\$\$$/) || part.match(/^\\[\[\(][\s\S]*\\[\]\)]$/)) {
+        // Display math
+        return <MathRenderer key={index} inline={false}>{part}</MathRenderer>;
+      } else if (part.match(/^\$[\s\S]*\$$/)) {
+        // Inline math
+        return <MathRenderer key={index} inline={true}>{part}</MathRenderer>;
+      } else {
+        // Regular text
+        return <span key={index}>{part}</span>;
+      }
+    });
+  };
 
   return (
     <div className="mb-8 bg-white rounded-lg shadow-md overflow-hidden">
@@ -97,9 +118,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, instructorName, tra
         
         {showTranscript && (
           <div className="mt-4 p-3 bg-gray-50 rounded-md max-h-40 overflow-y-auto">
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {transcript || "Transcriptul lecției nu este disponibil momentan."}
-            </p>
+            <div className="text-sm text-gray-600 leading-relaxed">
+              {transcript ? renderTextWithMath(transcript) : "Transcriptul lecției nu este disponibil momentan."}
+            </div>
           </div>
         )}
       </div>
