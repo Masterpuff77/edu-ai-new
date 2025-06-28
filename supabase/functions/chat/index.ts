@@ -22,10 +22,16 @@ interface UserProfile {
   grade?: number;
 }
 
+interface LessonContext {
+  title?: string;
+  subject?: string;
+}
+
 interface ChatRequest {
   question: string;
   context?: ChatMessage[];
   userProfile?: UserProfile;
+  lessonContext?: LessonContext;
 }
 
 Deno.serve(async (req) => {
@@ -52,7 +58,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { question, context = [], userProfile } = await req.json() as ChatRequest;
+    const { question, context = [], userProfile, lessonContext } = await req.json() as ChatRequest;
 
     if (!question || question.trim().length === 0) {
       return new Response(
@@ -67,7 +73,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build system prompt with user context
+    // Build system prompt with user context and lesson context
     let systemPrompt = `You are an expert AI tutor for Romanian students. 
     Your responses should be:
     - Clear and concise
@@ -75,7 +81,29 @@ Deno.serve(async (req) => {
     - In Romanian language
     - Include examples when helpful
     - Encourage critical thinking
-    - Be supportive and encouraging`;
+    - Be supportive and encouraging
+    - Maintain context from the ongoing conversation`;
+
+    // Add lesson-specific context
+    if (lessonContext) {
+      if (lessonContext.title) {
+        systemPrompt += `\n\nThe student is currently studying the lesson: "${lessonContext.title}".`;
+      }
+      if (lessonContext.subject) {
+        const subjectNames: { [key: string]: string } = {
+          matematica: 'Matematică',
+          romana: 'Limba Română',
+          fizica: 'Fizică',
+          chimie: 'Chimie',
+          biologie: 'Biologie',
+          istorie: 'Istorie',
+          geografie: 'Geografie',
+          informatica: 'Informatică'
+        };
+        const subjectName = subjectNames[lessonContext.subject] || lessonContext.subject;
+        systemPrompt += `\nThe current subject is: ${subjectName}.`;
+      }
+    }
 
     // Add user-specific context to system prompt
     if (userProfile) {
@@ -112,27 +140,22 @@ Deno.serve(async (req) => {
       }
     }
 
-    systemPrompt += `\n\nMaintain context from previous messages in the conversation and provide helpful, educational responses that build upon the ongoing discussion.`;
+    systemPrompt += `\n\nMaintain context from previous messages in the conversation and provide helpful, educational responses that build upon the ongoing discussion. Reference previous parts of the conversation when relevant.`;
 
     // Prepare messages for OpenAI
     const messages: any[] = [
       { role: "system", content: systemPrompt }
     ];
 
-    // Add conversation context (limit to last 10 messages to avoid token limits)
-    const recentContext = context.slice(-10);
+    // Add conversation context (limit to last 15 messages to avoid token limits)
+    const recentContext = context.slice(-15);
     messages.push(...recentContext);
-
-    // If no context provided, add the current question
-    if (context.length === 0) {
-      messages.push({ role: "user", content: question });
-    }
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4-1106-preview",
       messages: messages,
       temperature: 0.7,
-      max_tokens: 800,
+      max_tokens: 1000,
       response_format: { type: "text" }
     });
 
