@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { LessonQuiz } from '../../types';
 import { CheckCircle, XCircle, Trophy } from 'lucide-react';
 import MathRenderer from '../common/MathRenderer';
@@ -18,38 +18,53 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [questionSubmitted, setQuestionSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [processingAnswer, setProcessingAnswer] = useState(false);
   const { addExperience } = useGamificationStore();
 
-  const handleAnswerSelect = (answerIndex: number) => {
+  const handleAnswerSelect = useCallback((answerIndex: number, event?: React.MouseEvent) => {
+    // Stop all event propagation immediately
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+    }
+    
     // Prevent selection if already submitted or showing feedback
-    if (questionSubmitted || showFeedback || isSubmitting) return;
+    if (questionSubmitted || showFeedback || isSubmitting || processingAnswer) {
+      return false;
+    }
     
     const newAnswers = [...selectedAnswers];
     newAnswers[currentQuestion] = answerIndex;
     setSelectedAnswers(newAnswers);
-  };
+    
+    return false;
+  }, [questionSubmitted, showFeedback, isSubmitting, processingAnswer, selectedAnswers, currentQuestion]);
 
-  const handleSubmit = async (e?: React.FormEvent) => {
-    // Prevent default form submission if event exists
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
+  const handleSubmit = useCallback(async (event?: React.FormEvent | React.MouseEvent) => {
+    // Prevent all default behaviors and propagation
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
     }
     
-    // Prevent multiple submissions
-    if (questionSubmitted || showFeedback || isSubmitting || selectedAnswers[currentQuestion] === -1) {
-      return;
+    // Prevent multiple submissions with multiple checks
+    if (questionSubmitted || showFeedback || isSubmitting || processingAnswer || selectedAnswers[currentQuestion] === -1) {
+      return false;
     }
     
+    // Set processing flags immediately
     setIsSubmitting(true);
+    setProcessingAnswer(true);
     
     try {
       const currentQuiz = quizData[currentQuestion];
       const selectedAnswer = selectedAnswers[currentQuestion];
       const correct = selectedAnswer === currentQuiz.correctAnswer;
       
+      // Update state in sequence to prevent race conditions
       setIsCorrect(correct);
-      setShowFeedback(true);
       setQuestionSubmitted(true);
       
       // Award XP for correct answer
@@ -60,20 +75,31 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
           console.error('Error awarding XP:', error);
         }
       }
+      
+      // Show feedback after a small delay to ensure state is updated
+      setTimeout(() => {
+        setShowFeedback(true);
+        setIsSubmitting(false);
+        setProcessingAnswer(false);
+      }, 100);
+      
     } catch (error) {
       console.error('Error in handleSubmit:', error);
-    } finally {
       setIsSubmitting(false);
+      setProcessingAnswer(false);
     }
-  };
+    
+    return false;
+  }, [questionSubmitted, showFeedback, isSubmitting, processingAnswer, selectedAnswers, currentQuestion, quizData, addExperience]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentQuestion < quizData.length - 1) {
       // Move to next question
       setCurrentQuestion(currentQuestion + 1);
       setShowFeedback(false);
       setQuestionSubmitted(false);
       setIsSubmitting(false);
+      setProcessingAnswer(false);
     } else {
       // Quiz completed - calculate final score
       let finalScore = 0;
@@ -87,9 +113,9 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
       setSubmitted(true);
       onComplete(finalScore);
     }
-  };
+  }, [currentQuestion, quizData, selectedAnswers, onComplete]);
 
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setCurrentQuestion(0);
     setSelectedAnswers(Array(quizData.length).fill(-1));
     setSubmitted(false);
@@ -98,7 +124,8 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
     setIsCorrect(false);
     setQuestionSubmitted(false);
     setIsSubmitting(false);
-  };
+    setProcessingAnswer(false);
+  }, [quizData.length]);
 
   // Function to render text with math expressions
   const renderTextWithMath = (text: string) => {
@@ -198,10 +225,10 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
             const isSelected = selectedAnswers[currentQuestion] === index;
             const isCorrectAnswer = index === currentQuiz.correctAnswer;
             
-            let buttonClass = 'flex items-center p-3 rounded-md border transition-all duration-200';
+            let buttonClass = 'flex items-center p-3 rounded-md border transition-all duration-200 select-none';
             
             // Add cursor pointer only if not submitted and not showing feedback
-            if (!showFeedback && !questionSubmitted && !isSubmitting) {
+            if (!showFeedback && !questionSubmitted && !isSubmitting && !processingAnswer) {
               buttonClass += ' cursor-pointer hover:bg-gray-50';
             } else {
               buttonClass += ' cursor-default';
@@ -228,8 +255,11 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
             return (
               <div 
                 key={index}
-                onClick={() => handleAnswerSelect(index)}
+                onClick={(e) => handleAnswerSelect(index, e)}
+                onMouseDown={(e) => e.preventDefault()}
                 className={buttonClass}
+                role="button"
+                tabIndex={0}
               >
                 <div className={`w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center ${
                   showFeedback
@@ -326,15 +356,18 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
           {!showFeedback ? (
             <button
               onClick={handleSubmit}
-              disabled={!hasSelected || isSubmitting}
-              className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              onMouseDown={(e) => e.preventDefault()}
+              disabled={!hasSelected || isSubmitting || processingAnswer}
+              className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors select-none"
+              type="button"
             >
-              {isSubmitting ? 'Se procesează...' : 'Trimite răspuns'}
+              {isSubmitting || processingAnswer ? 'Se procesează...' : 'Trimite răspuns'}
             </button>
           ) : (
             <button
               onClick={handleNext}
               className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+              type="button"
             >
               {currentQuestion < quizData.length - 1 ? 'Următoarea întrebare' : 'Vezi rezultatele'}
             </button>
