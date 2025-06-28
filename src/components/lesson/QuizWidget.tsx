@@ -16,10 +16,11 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
   const [score, setScore] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [questionSubmitted, setQuestionSubmitted] = useState(false);
   const { addExperience } = useGamificationStore();
 
   const handleAnswerSelect = (answerIndex: number) => {
-    if (submitted || showFeedback) return;
+    if (questionSubmitted || showFeedback) return;
     
     const newAnswers = [...selectedAnswers];
     newAnswers[currentQuestion] = answerIndex;
@@ -27,7 +28,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
   };
 
   const handleSubmit = async () => {
-    if (submitted || showFeedback || selectedAnswers[currentQuestion] === -1) return;
+    if (questionSubmitted || showFeedback || selectedAnswers[currentQuestion] === -1) return;
     
     const currentQuiz = quizData[currentQuestion];
     const selectedAnswer = selectedAnswers[currentQuestion];
@@ -35,6 +36,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
     
     setIsCorrect(correct);
     setShowFeedback(true);
+    setQuestionSubmitted(true);
     
     // Award XP for correct answer
     if (correct) {
@@ -44,32 +46,27 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
         console.error('Error awarding XP:', error);
       }
     }
-    
-    // Auto-advance after showing feedback
-    setTimeout(() => {
-      if (currentQuestion < quizData.length - 1) {
-        // Move to next question
-        setCurrentQuestion(currentQuestion + 1);
-        setShowFeedback(false);
-      } else {
-        // Quiz completed - calculate final score
-        let finalScore = 0;
-        for (let i = 0; i < quizData.length; i++) {
-          if (selectedAnswers[i] === quizData[i].correctAnswer) {
-            finalScore++;
-          }
+  };
+
+  const handleNext = () => {
+    if (currentQuestion < quizData.length - 1) {
+      // Move to next question
+      setCurrentQuestion(currentQuestion + 1);
+      setShowFeedback(false);
+      setQuestionSubmitted(false);
+    } else {
+      // Quiz completed - calculate final score
+      let finalScore = 0;
+      for (let i = 0; i < quizData.length; i++) {
+        if (selectedAnswers[i] === quizData[i].correctAnswer) {
+          finalScore++;
         }
-        // Add current answer to final score if correct
-        if (correct) {
-          finalScore = Math.max(finalScore, score + 1);
-        }
-        
-        setScore(finalScore);
-        setSubmitted(true);
-        setShowFeedback(false);
-        onComplete(finalScore);
       }
-    }, 2000); // Show feedback for 2 seconds
+      
+      setScore(finalScore);
+      setSubmitted(true);
+      onComplete(finalScore);
+    }
   };
 
   const handleRetry = () => {
@@ -79,6 +76,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
     setScore(0);
     setShowFeedback(false);
     setIsCorrect(false);
+    setQuestionSubmitted(false);
   };
 
   // Function to render text with math expressions
@@ -251,41 +249,70 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
 
       {/* Feedback Message */}
       {showFeedback && (
-        <div className={`mb-4 p-3 rounded-md ${
+        <div className={`mb-4 p-4 rounded-lg border-2 ${
           isCorrect 
-            ? 'bg-green-50 border border-green-200' 
-            : 'bg-red-50 border border-red-200'
+            ? 'bg-green-50 border-green-200' 
+            : 'bg-red-50 border-red-200'
         }`}>
-          <div className="flex items-center">
+          <div className="flex items-center mb-2">
             {isCorrect ? (
-              <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+              <CheckCircle className="h-6 w-6 text-green-600 mr-3" />
             ) : (
-              <XCircle className="h-5 w-5 text-red-600 mr-2" />
+              <XCircle className="h-6 w-6 text-red-600 mr-3" />
             )}
-            <span className={`text-sm font-medium ${
+            <span className={`text-base font-semibold ${
               isCorrect ? 'text-green-800' : 'text-red-800'
             }`}>
-              {isCorrect 
-                ? '🎉 Corect! +50 XP' 
-                : `Greșit. Răspunsul corect era: ${currentQuiz.options[currentQuiz.correctAnswer]}`
-              }
+              {isCorrect ? '🎉 Corect!' : 'Greșit!'}
             </span>
           </div>
+          
+          {isCorrect ? (
+            <div className="text-sm text-green-700">
+              <p className="font-medium">+50 XP câștigați!</p>
+              <p>Felicitări pentru răspunsul corect!</p>
+            </div>
+          ) : (
+            <div className="text-sm text-red-700">
+              <p className="font-medium">Răspunsul corect era:</p>
+              <p className="mt-1 p-2 bg-green-100 text-green-800 rounded border border-green-300">
+                {renderTextWithMath(currentQuiz.options[currentQuiz.correctAnswer])}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Submit Button */}
-      {!showFeedback && (
-        <div className="flex justify-end">
+      {/* Action Buttons */}
+      <div className="flex justify-between">
+        {quizData.length > 1 && currentQuestion > 0 && !showFeedback && (
           <button
-            onClick={handleSubmit}
-            disabled={!hasSelected}
-            className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
+            className="px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
           >
-            Trimite răspuns
+            Înapoi
           </button>
+        )}
+
+        <div className="ml-auto">
+          {!showFeedback ? (
+            <button
+              onClick={handleSubmit}
+              disabled={!hasSelected}
+              className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Trimite răspuns
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+            >
+              {currentQuestion < quizData.length - 1 ? 'Următoarea întrebare' : 'Vezi rezultatele'}
+            </button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
