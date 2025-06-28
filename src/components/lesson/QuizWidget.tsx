@@ -17,34 +17,53 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [questionSubmitted, setQuestionSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { addExperience } = useGamificationStore();
 
   const handleAnswerSelect = (answerIndex: number) => {
-    if (questionSubmitted || showFeedback) return;
+    // Prevent selection if already submitted or showing feedback
+    if (questionSubmitted || showFeedback || isSubmitting) return;
     
     const newAnswers = [...selectedAnswers];
     newAnswers[currentQuestion] = answerIndex;
     setSelectedAnswers(newAnswers);
   };
 
-  const handleSubmit = async () => {
-    if (questionSubmitted || showFeedback || selectedAnswers[currentQuestion] === -1) return;
+  const handleSubmit = async (e?: React.FormEvent) => {
+    // Prevent default form submission if event exists
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     
-    const currentQuiz = quizData[currentQuestion];
-    const selectedAnswer = selectedAnswers[currentQuestion];
-    const correct = selectedAnswer === currentQuiz.correctAnswer;
+    // Prevent multiple submissions
+    if (questionSubmitted || showFeedback || isSubmitting || selectedAnswers[currentQuestion] === -1) {
+      return;
+    }
     
-    setIsCorrect(correct);
-    setShowFeedback(true);
-    setQuestionSubmitted(true);
+    setIsSubmitting(true);
     
-    // Award XP for correct answer
-    if (correct) {
-      try {
-        await addExperience(50);
-      } catch (error) {
-        console.error('Error awarding XP:', error);
+    try {
+      const currentQuiz = quizData[currentQuestion];
+      const selectedAnswer = selectedAnswers[currentQuestion];
+      const correct = selectedAnswer === currentQuiz.correctAnswer;
+      
+      setIsCorrect(correct);
+      setShowFeedback(true);
+      setQuestionSubmitted(true);
+      
+      // Award XP for correct answer
+      if (correct) {
+        try {
+          await addExperience(50);
+        } catch (error) {
+          console.error('Error awarding XP:', error);
+        }
       }
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -54,6 +73,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
       setCurrentQuestion(currentQuestion + 1);
       setShowFeedback(false);
       setQuestionSubmitted(false);
+      setIsSubmitting(false);
     } else {
       // Quiz completed - calculate final score
       let finalScore = 0;
@@ -77,6 +97,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
     setShowFeedback(false);
     setIsCorrect(false);
     setQuestionSubmitted(false);
+    setIsSubmitting(false);
   };
 
   // Function to render text with math expressions
@@ -177,7 +198,14 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
             const isSelected = selectedAnswers[currentQuestion] === index;
             const isCorrectAnswer = index === currentQuiz.correctAnswer;
             
-            let buttonClass = 'flex items-center p-3 rounded-md border cursor-pointer transition-all duration-200';
+            let buttonClass = 'flex items-center p-3 rounded-md border transition-all duration-200';
+            
+            // Add cursor pointer only if not submitted and not showing feedback
+            if (!showFeedback && !questionSubmitted && !isSubmitting) {
+              buttonClass += ' cursor-pointer hover:bg-gray-50';
+            } else {
+              buttonClass += ' cursor-default';
+            }
             
             if (showFeedback) {
               if (isSelected && isCorrectAnswer) {
@@ -193,7 +221,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
               if (isSelected) {
                 buttonClass += ' bg-indigo-50 border-indigo-500';
               } else {
-                buttonClass += ' border-gray-300 hover:bg-gray-50';
+                buttonClass += ' border-gray-300';
               }
             }
             
@@ -298,10 +326,10 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
           {!showFeedback ? (
             <button
               onClick={handleSubmit}
-              disabled={!hasSelected}
+              disabled={!hasSelected || isSubmitting}
               className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Trimite răspuns
+              {isSubmitting ? 'Se procesează...' : 'Trimite răspuns'}
             </button>
           ) : (
             <button
