@@ -26,6 +26,11 @@ const LessonPage: React.FC = () => {
     }
   }, [lessonId, user?.id, fetchLesson]);
 
+  // Scroll to top when component mounts or lesson changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [lessonId]);
+
   const checkLessonCompletion = async () => {
     if (!user || !lessonId) return;
 
