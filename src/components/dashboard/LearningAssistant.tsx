@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, Sparkles, Trash2 } from 'lucide-react';
 import supabase from '../../config/supabase';
 import useAuthStore from '../../store/authStore';
+import MathRenderer from '../common/MathRenderer';
 
 interface Message {
   id: string;
@@ -54,7 +55,7 @@ const LearningAssistant: React.FC = () => {
           // Add welcome message if no previous messages
           const welcomeMessage: Message = {
             id: '0',
-            content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi? Pot să te ajut cu orice întrebare legată de materiile tale.',
+            content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi? Pot să te ajut cu orice întrebare legată de materiile tale.\n\nPoți folosi formule matematice precum $x^2 + 3x - 4 = 0$ sau $$\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$',
             isUser: false,
             timestamp: new Date()
           };
@@ -65,7 +66,7 @@ const LearningAssistant: React.FC = () => {
         // Fallback to welcome message
         const welcomeMessage: Message = {
           id: '0',
-          content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi?',
+          content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi?\n\nPoți folosi formule matematice precum $x^2$ pentru inline sau $$x^2 + y^2 = z^2$$ pentru display.',
           isUser: false,
           timestamp: new Date()
         };
@@ -115,7 +116,7 @@ const LearningAssistant: React.FC = () => {
       // Reset to welcome message
       const welcomeMessage: Message = {
         id: '0',
-        content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi?',
+        content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi?\n\nPoți folosi formule matematice precum $x^2$ pentru inline sau $$x^2 + y^2 = z^2$$ pentru display.',
         isUser: false,
         timestamp: new Date()
       };
@@ -125,6 +126,26 @@ const LearningAssistant: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to render text with math expressions
+  const renderTextWithMath = (text: string) => {
+    // Split text by math expressions (both inline and display)
+    const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\[\[\(][\s\S]*?\\[\]\)])/);
+    
+    return parts.map((part, index) => {
+      // Check if this part is a math expression
+      if (part.match(/^\$\$[\s\S]*\$\$$/) || part.match(/^\\[\[\(][\s\S]*\\[\]\)]$/)) {
+        // Display math
+        return <MathRenderer key={index} inline={false}>{part}</MathRenderer>;
+      } else if (part.match(/^\$[\s\S]*\$$/)) {
+        // Inline math
+        return <MathRenderer key={index} inline={true}>{part}</MathRenderer>;
+      } else {
+        // Regular text - preserve line breaks
+        return <span key={index} style={{ whiteSpace: 'pre-wrap' }}>{part}</span>;
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -149,8 +170,8 @@ const LearningAssistant: React.FC = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session found');
 
-      // Prepare conversation context (last 10 messages for context)
-      const recentMessages = messages.slice(-10);
+      // Prepare conversation context (last 15 messages for context)
+      const recentMessages = messages.slice(-15);
       const conversationContext = recentMessages.map(msg => ({
         role: msg.isUser ? 'user' : 'assistant',
         content: msg.content
@@ -286,16 +307,33 @@ const LearningAssistant: React.FC = () => {
                 className={`max-w-[80%] rounded-lg p-3 ${
                   message.isUser
                     ? 'bg-indigo-600 text-white'
-                    : 'bg-white shadow-sm text-gray-800'
+                    : 'bg-white shadow-sm text-gray-800 border border-gray-200'
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <div className="text-sm">
+                  {renderTextWithMath(message.content)}
+                </div>
                 <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-1 block`}>
-                  {message.timestamp.toLocaleTimeString()}
+                  {message.timestamp.toLocaleTimeString('ro-RO', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
                 </span>
               </div>
             </div>
           ))}
+          
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-white shadow-sm text-gray-800 border border-gray-200 rounded-lg p-3 max-w-[80%]">
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+                  <span className="text-sm text-gray-600">AI-ul scrie...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div ref={messagesEndRef} />
         </div>
 
@@ -304,7 +342,7 @@ const LearningAssistant: React.FC = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Scrie un mesaj..."
+            placeholder="Scrie un mesaj... (folosește $x^2$ pentru formule)"
             className="w-full pr-12 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             disabled={loading}
           />
@@ -320,6 +358,11 @@ const LearningAssistant: React.FC = () => {
             )}
           </button>
         </form>
+
+        <div className="mt-4 text-xs text-gray-500 space-y-1">
+          <p>Poți pune întrebări consecutive și AI-ul va ține cont de contextul conversației anterioare.</p>
+          <p>Pentru formule matematice folosește: $x^2$ pentru inline sau $$x^2 + y^2 = z^2$$ pentru display.</p>
+        </div>
       </div>
     </div>
   );
