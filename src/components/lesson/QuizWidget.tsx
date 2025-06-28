@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { LessonQuiz } from '../../types';
-import { CheckCircle, XCircle, Trophy } from 'lucide-react';
+import { CheckCircle, XCircle, Trophy, RotateCcw } from 'lucide-react';
 import MathRenderer from '../common/MathRenderer';
 import useGamificationStore from '../../store/gamificationStore';
 
@@ -9,117 +9,36 @@ interface QuizWidgetProps {
   onComplete: (score: number) => void;
 }
 
+// Enum pentru stările quiz-ului
+enum QuizState {
+  ANSWERING = 'answering',
+  SHOWING_FEEDBACK = 'showing_feedback',
+  COMPLETED = 'completed'
+}
+
 const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>(Array(quizData.length).fill(-1));
-  const [submitted, setSubmitted] = useState(false);
-  const [score, setScore] = useState(0);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [questionSubmitted, setQuestionSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // State management complet refăcut
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<(number | null)[]>(Array(quizData.length).fill(null));
+  const [quizState, setQuizState] = useState<QuizState>(QuizState.ANSWERING);
+  const [finalScore, setFinalScore] = useState(0);
+  const [currentQuestionCorrect, setCurrentQuestionCorrect] = useState<boolean | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
   const { addExperience } = useGamificationStore();
 
-  const handleAnswerSelect = useCallback((answerIndex: number) => {
-    // Prevent any action if feedback is showing or question is submitted
-    if (showFeedback || questionSubmitted || isSubmitting) {
-      return;
-    }
-    
-    const newAnswers = [...selectedAnswers];
-    newAnswers[currentQuestion] = answerIndex;
-    setSelectedAnswers(newAnswers);
-  }, [showFeedback, questionSubmitted, isSubmitting, selectedAnswers, currentQuestion]);
-
-  const handleSubmit = useCallback(async (e?: React.MouseEvent) => {
-    // Prevent default behavior and stop propagation
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    // Prevent submission if already submitted or no answer selected
-    if (questionSubmitted || showFeedback || isSubmitting || selectedAnswers[currentQuestion] === -1) {
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    try {
-      const currentQuiz = quizData[currentQuestion];
-      const selectedAnswer = selectedAnswers[currentQuestion];
-      const correct = selectedAnswer === currentQuiz.correctAnswer;
-      
-      setIsCorrect(correct);
-      setQuestionSubmitted(true);
-      // Show feedback with a small delay to ensure state is updated
-      setTimeout(() => {
-        setShowFeedback(true);
-      }, 100);
-      
-    } catch (error) {
-      console.error('Error in handleSubmit:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [questionSubmitted, showFeedback, isSubmitting, selectedAnswers, currentQuestion, quizData]);
-
-  const handleNext = useCallback((e?: React.MouseEvent) => {
-    // Prevent default behavior and stop propagation
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    if (currentQuestion < quizData.length - 1) {
-      // Move to next question
-      setCurrentQuestion(currentQuestion + 1);
-      setShowFeedback(false);
-      setQuestionSubmitted(false);
-      setIsSubmitting(false);
-    } else {
-      // Quiz completed - calculate final score
-      let finalScore = 0;
-      for (let i = 0; i < quizData.length; i++) {
-        if (selectedAnswers[i] === quizData[i].correctAnswer) {
-          finalScore++;
-        }
-      }
-      
-      setScore(finalScore);
-      setSubmitted(true);
-      onComplete(finalScore);
-    }
-  }, [currentQuestion, quizData, selectedAnswers, onComplete]);
-
-  const handleRetry = useCallback((e?: React.MouseEvent) => {
-    // Prevent default behavior and stop propagation
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    setCurrentQuestion(0);
-    setSelectedAnswers(Array(quizData.length).fill(-1));
-    setSubmitted(false);
-    setScore(0);
-    setShowFeedback(false);
-    setIsCorrect(false);
-    setQuestionSubmitted(false);
-    setIsSubmitting(false);
-  }, [quizData.length]);
-
-  // Award XP after submitting a correct answer
+  // Reset quiz când se schimbă datele
   useEffect(() => {
-    if (questionSubmitted && isCorrect) {
-      addExperience(50).catch(error => {
-        console.error('Error awarding XP:', error);
-      });
-    }
-  }, [questionSubmitted, isCorrect, addExperience]);
+    setCurrentQuestionIndex(0);
+    setUserAnswers(Array(quizData.length).fill(null));
+    setQuizState(QuizState.ANSWERING);
+    setFinalScore(0);
+    setCurrentQuestionCorrect(null);
+    setIsProcessing(false);
+  }, [quizData]);
 
-  // Function to render text with math expressions
-  const renderTextWithMath = (text: string) => {
+  // Funcție pentru renderizarea textului cu matematică
+  const renderTextWithMath = useCallback((text: string) => {
     const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\[\[\(][\s\S]*?\\[\]\)])/);
     
     return parts.map((part, index) => {
@@ -131,21 +50,104 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
         return <span key={index}>{part}</span>;
       }
     });
-  };
+  }, []);
 
-  const currentQuiz = quizData[currentQuestion];
-  const hasSelected = selectedAnswers[currentQuestion] !== -1;
+  // Selectarea unui răspuns
+  const selectAnswer = useCallback((answerIndex: number) => {
+    if (quizState !== QuizState.ANSWERING || isProcessing) {
+      return;
+    }
 
-  if (submitted) {
+    const newAnswers = [...userAnswers];
+    newAnswers[currentQuestionIndex] = answerIndex;
+    setUserAnswers(newAnswers);
+  }, [quizState, isProcessing, userAnswers, currentQuestionIndex]);
+
+  // Verificarea răspunsului
+  const checkAnswer = useCallback(async () => {
+    if (quizState !== QuizState.ANSWERING || isProcessing || userAnswers[currentQuestionIndex] === null) {
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const currentQuestion = quizData[currentQuestionIndex];
+      const selectedAnswer = userAnswers[currentQuestionIndex];
+      const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+      
+      setCurrentQuestionCorrect(isCorrect);
+      setQuizState(QuizState.SHOWING_FEEDBACK);
+
+      // Acordă XP pentru răspuns corect
+      if (isCorrect) {
+        await addExperience(50);
+      }
+    } catch (error) {
+      console.error('Eroare la verificarea răspunsului:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [quizState, isProcessing, userAnswers, currentQuestionIndex, quizData, addExperience]);
+
+  // Trecerea la următoarea întrebare sau finalizarea quiz-ului
+  const proceedToNext = useCallback(() => {
+    if (quizState !== QuizState.SHOWING_FEEDBACK) {
+      return;
+    }
+
+    if (currentQuestionIndex < quizData.length - 1) {
+      // Următoarea întrebare
+      setCurrentQuestionIndex(prev => prev + 1);
+      setQuizState(QuizState.ANSWERING);
+      setCurrentQuestionCorrect(null);
+    } else {
+      // Finalizează quiz-ul
+      const score = userAnswers.reduce((total, answer, index) => {
+        return total + (answer === quizData[index].correctAnswer ? 1 : 0);
+      }, 0);
+      
+      setFinalScore(score);
+      setQuizState(QuizState.COMPLETED);
+      onComplete(score);
+    }
+  }, [quizState, currentQuestionIndex, quizData, userAnswers, onComplete]);
+
+  // Reînceperea quiz-ului
+  const restartQuiz = useCallback(() => {
+    setCurrentQuestionIndex(0);
+    setUserAnswers(Array(quizData.length).fill(null));
+    setQuizState(QuizState.ANSWERING);
+    setFinalScore(0);
+    setCurrentQuestionCorrect(null);
+    setIsProcessing(false);
+  }, [quizData.length]);
+
+  // Navigarea înapoi (doar în modul de răspuns)
+  const goToPreviousQuestion = useCallback(() => {
+    if (quizState === QuizState.ANSWERING && currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  }, [quizState, currentQuestionIndex]);
+
+  const currentQuestion = quizData[currentQuestionIndex];
+  const hasSelectedAnswer = userAnswers[currentQuestionIndex] !== null;
+
+  // Render pentru starea completată
+  if (quizState === QuizState.COMPLETED) {
+    const percentage = Math.round((finalScore / quizData.length) * 100);
+    
     return (
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="text-center py-8">
           <div className={`w-20 h-20 mx-auto flex items-center justify-center rounded-full mb-6 ${
-            score === quizData.length ? 'bg-green-100' : score >= Math.ceil(quizData.length / 2) ? 'bg-yellow-100' : 'bg-red-100'
+            percentage >= 80 ? 'bg-green-100' : 
+            percentage >= 60 ? 'bg-yellow-100' : 
+            percentage >= 40 ? 'bg-orange-100' : 'bg-red-100'
           }`}>
-            {score === quizData.length ? (
+            {percentage >= 80 ? (
               <Trophy className="h-10 w-10 text-yellow-600" />
-            ) : score >= Math.ceil(quizData.length / 2) ? (
+            ) : percentage >= 60 ? (
               <CheckCircle className="h-10 w-10 text-yellow-600" />
             ) : (
               <XCircle className="h-10 w-10 text-red-600" />
@@ -157,98 +159,118 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
           </h3>
           
           <p className="text-lg text-gray-600 mb-4">
-            Ai răspuns corect la {score} din {quizData.length} întrebări
+            Ai răspuns corect la {finalScore} din {quizData.length} întrebări ({percentage}%)
           </p>
 
           <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-6 ${
-            score === quizData.length 
-              ? 'bg-green-100 text-green-800' 
-              : score >= Math.ceil(quizData.length / 2) 
-                ? 'bg-yellow-100 text-yellow-800' 
-                : 'bg-red-100 text-red-800'
+            percentage >= 80 ? 'bg-green-100 text-green-800' : 
+            percentage >= 60 ? 'bg-yellow-100 text-yellow-800' : 
+            percentage >= 40 ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800'
           }`}>
-            {score === quizData.length ? 'Excelent!' : score >= Math.ceil(quizData.length / 2) ? 'Bine!' : 'Mai încearcă!'}
+            {percentage >= 80 ? 'Excelent!' : 
+             percentage >= 60 ? 'Foarte bine!' : 
+             percentage >= 40 ? 'Bine!' : 'Mai încearcă!'}
           </div>
 
-          <div className="flex justify-center space-x-4">
-            <button
-              type="button"
-              onClick={handleRetry}
-              className="px-6 py-2 text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 transition-colors"
-            >
-              Încearcă din nou
-            </button>
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <h4 className="font-medium text-gray-900 mb-3">Rezultate detaliate:</h4>
+            <div className="space-y-2">
+              {quizData.map((question, index) => (
+                <div key={index} className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Întrebarea {index + 1}</span>
+                  <div className="flex items-center">
+                    {userAnswers[index] === question.correctAnswer ? (
+                      <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-500 mr-1" />
+                    )}
+                    <span className={userAnswers[index] === question.correctAnswer ? 'text-green-600' : 'text-red-600'}>
+                      {userAnswers[index] === question.correctAnswer ? 'Corect' : 'Greșit'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+
+          <button
+            onClick={restartQuiz}
+            className="inline-flex items-center px-6 py-3 text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 transition-colors"
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Încearcă din nou
+          </button>
         </div>
       </div>
     );
   }
 
+  // Render principal pentru întrebări
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-8">
       <h3 className="text-lg font-medium text-gray-900 mb-2">Quiz rapid</h3>
 
+      {/* Progress bar */}
       {quizData.length > 1 && (
         <div className="mb-4">
           <div className="flex justify-between text-sm text-gray-500 mb-2">
-            <span>Întrebarea {currentQuestion + 1} din {quizData.length}</span>
+            <span>Întrebarea {currentQuestionIndex + 1} din {quizData.length}</span>
+            <span>{userAnswers.filter(a => a !== null).length}/{quizData.length} răspunsuri</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div 
-              className="bg-indigo-600 h-1.5 rounded-full transition-all"
-              style={{ width: `${((currentQuestion + 1) / quizData.length) * 100}%` }}
-            ></div>
+              className="bg-indigo-600 h-1.5 rounded-full transition-all duration-300"
+              style={{ width: `${((currentQuestionIndex + 1) / quizData.length) * 100}%` }}
+            />
           </div>
         </div>
       )}
       
+      {/* Întrebarea curentă */}
       <div className="mb-6">
         <h4 className="text-base font-medium text-gray-800 mb-4">
-          {renderTextWithMath(currentQuiz.question)}
+          {renderTextWithMath(currentQuestion.question)}
         </h4>
         
+        {/* Opțiunile de răspuns */}
         <div className="space-y-3">
-          {currentQuiz.options.map((option, index) => {
-            const isSelected = selectedAnswers[currentQuestion] === index;
-            const isCorrectAnswer = index === currentQuiz.correctAnswer;
-            const canSelect = !showFeedback && !questionSubmitted && !isSubmitting;
+          {currentQuestion.options.map((option, index) => {
+            const isSelected = userAnswers[currentQuestionIndex] === index;
+            const isCorrectAnswer = index === currentQuestion.correctAnswer;
+            const showResults = quizState === QuizState.SHOWING_FEEDBACK;
             
-            let buttonClass = 'flex items-center p-3 rounded-md border transition-all duration-200 select-none';
+            let buttonClass = 'flex items-center p-3 rounded-md border-2 transition-all duration-200 select-none';
             
-            // Add cursor and hover effects only if selection is allowed
-            if (canSelect) {
+            if (quizState === QuizState.ANSWERING) {
               buttonClass += ' cursor-pointer hover:bg-gray-50';
-            } else {
-              buttonClass += ' cursor-default';
-            }
-            
-            // Apply colors based on state
-            if (showFeedback) {
-              if (isSelected && isCorrectAnswer) {
-                buttonClass += ' bg-green-50 border-green-500';
-              } else if (isSelected && !isCorrectAnswer) {
-                buttonClass += ' bg-red-50 border-red-500';
-              } else if (isCorrectAnswer) {
-                buttonClass += ' bg-green-50 border-green-300';
-              } else {
-                buttonClass += ' border-gray-300 opacity-60';
-              }
-            } else {
               if (isSelected) {
                 buttonClass += ' bg-indigo-50 border-indigo-500';
               } else {
                 buttonClass += ' border-gray-300';
+              }
+            } else {
+              buttonClass += ' cursor-default';
+              if (showResults) {
+                if (isSelected && isCorrectAnswer) {
+                  buttonClass += ' bg-green-50 border-green-500';
+                } else if (isSelected && !isCorrectAnswer) {
+                  buttonClass += ' bg-red-50 border-red-500';
+                } else if (isCorrectAnswer) {
+                  buttonClass += ' bg-green-50 border-green-300';
+                } else {
+                  buttonClass += ' border-gray-300 opacity-60';
+                }
               }
             }
             
             return (
               <div 
                 key={index}
-                onClick={() => handleAnswerSelect(index)}
+                onClick={() => selectAnswer(index)}
                 className={buttonClass}
               >
-                <div className={`w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center ${
-                  showFeedback
+                <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center mr-3 ${
+                  showResults
                     ? isSelected && isCorrectAnswer
                       ? 'border-green-500 bg-green-500'
                       : isSelected && !isCorrectAnswer
@@ -260,18 +282,18 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
                       ? 'border-indigo-600 bg-indigo-600'
                       : 'border-gray-400'
                 }`}>
-                  {showFeedback && (isCorrectAnswer || (isSelected && isCorrectAnswer)) && (
+                  {showResults && (isCorrectAnswer || (isSelected && isCorrectAnswer)) && (
                     <CheckCircle className="h-3 w-3 text-white" />
                   )}
-                  {showFeedback && isSelected && !isCorrectAnswer && (
+                  {showResults && isSelected && !isCorrectAnswer && (
                     <XCircle className="h-3 w-3 text-white" />
                   )}
-                  {!showFeedback && isSelected && (
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  {!showResults && isSelected && (
+                    <div className="w-2 h-2 bg-white rounded-full" />
                   )}
                 </div>
-                <span className={`ml-3 text-sm ${
-                  showFeedback
+                <span className={`text-sm ${
+                  showResults
                     ? isSelected && isCorrectAnswer
                       ? 'text-green-700 font-medium'
                       : isSelected && !isCorrectAnswer
@@ -291,27 +313,27 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
         </div>
       </div>
 
-      {/* Feedback Message */}
-      {showFeedback && (
+      {/* Feedback pentru răspuns */}
+      {quizState === QuizState.SHOWING_FEEDBACK && (
         <div className={`mb-4 p-4 rounded-lg border-2 ${
-          isCorrect 
+          currentQuestionCorrect 
             ? 'bg-green-50 border-green-200' 
             : 'bg-red-50 border-red-200'
         }`}>
           <div className="flex items-center mb-2">
-            {isCorrect ? (
+            {currentQuestionCorrect ? (
               <CheckCircle className="h-6 w-6 text-green-600 mr-3" />
             ) : (
               <XCircle className="h-6 w-6 text-red-600 mr-3" />
             )}
             <span className={`text-base font-semibold ${
-              isCorrect ? 'text-green-800' : 'text-red-800'
+              currentQuestionCorrect ? 'text-green-800' : 'text-red-800'
             }`}>
-              {isCorrect ? '🎉 Corect!' : 'Greșit!'}
+              {currentQuestionCorrect ? '🎉 Corect!' : 'Greșit!'}
             </span>
           </div>
           
-          {isCorrect ? (
+          {currentQuestionCorrect ? (
             <div className="text-sm text-green-700">
               <p className="font-medium">+50 XP câștigați!</p>
               <p>Felicitări pentru răspunsul corect!</p>
@@ -320,46 +342,41 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
             <div className="text-sm text-red-700">
               <p className="font-medium">Răspunsul corect era:</p>
               <p className="mt-1 p-2 bg-green-100 text-green-800 rounded border border-green-300">
-                {renderTextWithMath(currentQuiz.options[currentQuiz.correctAnswer])}
+                {renderTextWithMath(currentQuestion.options[currentQuestion.correctAnswer])}
               </p>
             </div>
           )}
         </div>
       )}
 
-      {/* Action Buttons - Completely isolated from any form behavior */}
+      {/* Butoanele de navigare */}
       <div className="flex justify-between items-center">
-        {quizData.length > 1 && currentQuestion > 0 && !showFeedback && (
+        {/* Buton înapoi */}
+        {quizData.length > 1 && currentQuestionIndex > 0 && quizState === QuizState.ANSWERING && (
           <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setCurrentQuestion(prev => Math.max(0, prev - 1));
-            }}
+            onClick={goToPreviousQuestion}
             className="px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
           >
             Înapoi
           </button>
         )}
 
+        {/* Buton principal */}
         <div className="ml-auto">
-          {!showFeedback ? (
+          {quizState === QuizState.ANSWERING ? (
             <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={!hasSelected || isSubmitting}
+              onClick={checkAnswer}
+              disabled={!hasSelectedAnswer || isProcessing}
               className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isSubmitting ? 'Se procesează...' : 'Trimite răspuns'}
+              {isProcessing ? 'Se verifică...' : 'Verifică răspunsul'}
             </button>
           ) : (
             <button
-              type="button"
-              onClick={handleNext}
+              onClick={proceedToNext}
               className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
             >
-              {currentQuestion < quizData.length - 1 ? 'Următoarea întrebare' : 'Vezi rezultatele'}
+              {currentQuestionIndex < quizData.length - 1 ? 'Următoarea întrebare' : 'Vezi rezultatele'}
             </button>
           )}
         </div>
