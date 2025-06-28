@@ -24,7 +24,7 @@ const LessonPage: React.FC = () => {
       fetchLesson(lessonId);
       checkLessonCompletion();
     }
-  }, [lessonId, user, fetchLesson]);
+  }, [lessonId, user?.id, fetchLesson]);
 
   const checkLessonCompletion = async () => {
     if (!user || !lessonId) return;
