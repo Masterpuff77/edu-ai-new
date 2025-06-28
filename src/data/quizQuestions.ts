@@ -10,7 +10,7 @@ export interface LessonQuestions {
 }
 
 export const quizQuestions: LessonQuestions = {
-  // Mathematics lessons with completely different questions
+  // Mathematics lessons - Complete with 3 diverse questions each
   'mate-1': [
     {
       question: "Care dintre următoarele este un număr irațional?",
@@ -96,8 +96,93 @@ export const quizQuestions: LessonQuestions = {
       correctAnswer: 3
     }
   ],
+  'mate-6': [
+    {
+      question: "Într-un triunghi isoscel:",
+      options: ["Toate laturile sunt egale", "Două laturi sunt egale", "Toate unghiurile sunt egale", "Un unghi este de 90°"],
+      correctAnswer: 1
+    },
+    {
+      question: "Bisectoarea unui unghi:",
+      options: ["Îl împarte în două părți egale", "Este perpendiculară pe latură", "Unește două vârfuri", "Trece prin centrul cercului"],
+      correctAnswer: 0
+    },
+    {
+      question: "Teorema lui Pitagora se aplică în triunghiul:",
+      options: ["Echilateral", "Isoscel", "Dreptunghic", "Obtuzunghic"],
+      correctAnswer: 2
+    }
+  ],
+  'mate-7': [
+    {
+      question: "Aria unui paralelogram se calculează:",
+      options: ["baza × înălțimea", "latura × latura", "(baza × înălțimea) / 2", "2 × (lungimea + lățimea)"],
+      correctAnswer: 0
+    },
+    {
+      question: "Un romb are:",
+      options: ["Toate unghiurile drepte", "Toate laturile egale", "Diagonalele egale", "Toate variantele"],
+      correctAnswer: 1
+    },
+    {
+      question: "Perimetrul unui pătrat cu aria 25 cm² este:",
+      options: ["20 cm", "25 cm", "10 cm", "15 cm"],
+      correctAnswer: 0
+    }
+  ],
+  'mate-8': [
+    {
+      question: "Aria unui cerc cu raza 2 cm este (π ≈ 3,14):",
+      options: ["6,28 cm²", "12,56 cm²", "25,12 cm²", "4 cm²"],
+      correctAnswer: 1
+    },
+    {
+      question: "O coardă a cercului este:",
+      options: ["O linie din centru la circumferință", "O linie care trece prin centru", "O linie care unește două puncte de pe circumferință", "O linie tangentă"],
+      correctAnswer: 2
+    },
+    {
+      question: "Sectorul circular reprezintă:",
+      options: ["Întregul cerc", "O porțiune din cerc", "Circumferința", "Centrul cercului"],
+      correctAnswer: 1
+    }
+  ],
+  'mate-9': [
+    {
+      question: "Expresia (2x + 1)² se dezvoltă:",
+      options: ["4x² + 1", "4x² + 4x + 1", "4x² + 2x + 1", "2x² + 4x + 1"],
+      correctAnswer: 1
+    },
+    {
+      question: "Factorizarea lui x² - 25 este:",
+      options: ["(x - 5)²", "(x + 5)²", "(x - 5)(x + 5)", "x(x - 25)"],
+      correctAnswer: 2
+    },
+    {
+      question: "Pentru a calcula (a + b)³ folosim:",
+      options: ["a³ + b³", "a³ + 3a²b + 3ab² + b³", "(a + b)(a² + b²)", "a³ + 3ab + b³"],
+      correctAnswer: 1
+    }
+  ],
+  'mate-10': [
+    {
+      question: "Înainte de a rezolva o problemă trebuie să:",
+      options: ["Calculezi imediat", "Înțelegi ce se cere", "Scrii răspunsul", "Verifici rezultatul"],
+      correctAnswer: 1
+    },
+    {
+      question: "Datele unei probleme sunt:",
+      options: ["Informațiile cunoscute", "Rezultatul final", "Calculele efectuate", "Verificarea"],
+      correctAnswer: 0
+    },
+    {
+      question: "Un răspuns complet conține:",
+      options: ["Doar cifre", "Cifre și unitatea de măsură", "Doar unitatea", "Doar calculele"],
+      correctAnswer: 1
+    }
+  ],
 
-  // Romanian lessons with diverse questions
+  // Romanian lessons - Complete with 3 diverse questions each
   'romana-1': [
     {
       question: "Genul epic se caracterizează prin:",
@@ -146,6 +231,125 @@ export const quizQuestions: LessonQuestions = {
     {
       question: "Conflictul într-un text narativ este:",
       options: ["Lupta dintre personaje", "Opoziția dintre forțe", "Dialogul", "Descrierea"],
+      correctAnswer: 1
+    }
+  ],
+  'romana-4': [
+    {
+      question: "Caracterizarea psihologică se referă la:",
+      options: ["Aspectul fizic", "Trăsăturile morale și psihice", "Vârsta personajului", "Numele personajului"],
+      correctAnswer: 1
+    },
+    {
+      question: "Monologul interior dezvăluie:",
+      options: ["Aspectul fizic", "Gândurile și sentimentele", "Acțiunile", "Dialogul cu alții"],
+      correctAnswer: 1
+    },
+    {
+      question: "Un personaj plat este:",
+      options: ["Simplu, cu puține trăsături", "Complex și evoluat", "Absent din acțiune", "Naratorul"],
+      correctAnswer: 0
+    }
+  ],
+  'romana-5': [
+    {
+      question: "Descrierea subiectivă conține:",
+      options: ["Doar fapte obiective", "Impresii și sentimente personale", "Date științifice", "Cifre exacte"],
+      correctAnswer: 1
+    },
+    {
+      question: "Timpul în descriere poate fi:",
+      options: ["Doar prezent", "Prezent, trecut sau viitor", "Doar trecut", "Absent"],
+      correctAnswer: 1
+    },
+    {
+      question: "Descrierea dinamică prezintă:",
+      options: ["Elemente statice", "Elemente în mișcare", "Doar culori", "Doar sunete"],
+      correctAnswer: 1
+    }
+  ],
+  'romana-6': [
+    {
+      question: "Antiteza în argumentare:",
+      options: ["Susține teza", "Prezintă punctul de vedere opus", "Repetă teza", "Ignoră teza"],
+      correctAnswer: 1
+    },
+    {
+      question: "Un argument prin exemplu folosește:",
+      options: ["Cazuri concrete", "Teorii abstracte", "Opinii personale", "Întrebări"],
+      correctAnswer: 0
+    },
+    {
+      question: "\"Prin urmare\" este un conector de:",
+      options: ["Cauză", "Opoziție", "Concluzie", "Timp"],
+      correctAnswer: 2
+    }
+  ],
+  'romana-7': [
+    {
+      question: "Articolul hotărât pentru \"casă\" este:",
+      options: ["casa", "unei case", "case", "casei"],
+      correctAnswer: 0
+    },
+    {
+      question: "Verbul la modul conjunctiv exprimă:",
+      options: ["O acțiune reală", "O acțiune posibilă/dorită", "Un ordin", "O întrebare"],
+      correctAnswer: 1
+    },
+    {
+      question: "Numeralul \"primul\" este:",
+      options: ["Cardinal", "Ordinal", "Fracționar", "Multiplicativ"],
+      correctAnswer: 1
+    }
+  ],
+  'romana-8': [
+    {
+      question: "Atributul se acordă cu:",
+      options: ["Verbul", "Substantivul determinat", "Subiectul", "Predicatul"],
+      correctAnswer: 1
+    },
+    {
+      question: "Complementul circumstanțial de timp răspunde la:",
+      options: ["Cine? Ce?", "Unde?", "Când?", "Cum?"],
+      correctAnswer: 2
+    },
+    {
+      question: "Propoziția principală poate exista:",
+      options: ["Doar cu subordonate", "Și fără subordonate", "Doar în frază", "Doar cu coordonate"],
+      correctAnswer: 1
+    }
+  ],
+  'romana-9': [
+    {
+      question: "Cuvintele \"mâine\" și \"pâine\" se scriu cu:",
+      options: ["î", "â", "ai", "âi"],
+      correctAnswer: 1
+    },
+    {
+      question: "Ghilimelele se folosesc pentru:",
+      options: ["Întrebări", "Citate și cuvinte străine", "Exclamații", "Enumerări"],
+      correctAnswer: 1
+    },
+    {
+      question: "Punctul și virgula se pune:",
+      options: ["La sfârșitul frazei", "Între propoziții independente", "Înaintea conjuncțiilor", "În enumerări"],
+      correctAnswer: 1
+    }
+  ],
+  'romana-10': [
+    {
+      question: "Textul argumentativ la Subiectul III trebuie să aibă:",
+      options: ["Doar introducere", "Introducere, cuprins, încheiere", "Doar cuprins", "Doar încheiere"],
+      correctAnswer: 1
+    },
+    {
+      question: "Pentru nota maximă la redactare este important:",
+      options: ["Lungimea textului", "Coerența și corectitudinea", "Cuvintele complicate", "Viteza de scriere"],
+      correctAnswer: 1
+    },
+    {
+      question: "Planul de idei ajută la:",
+      options: ["Scrierea mai rapidă", "Organizarea logică a textului", "Folosirea mai multor cuvinte", "Evitarea greșelilor"],
       correctAnswer: 1
     }
   ],
@@ -202,6 +406,125 @@ export const quizQuestions: LessonQuestions = {
       correctAnswer: 1
     }
   ],
+  'informatica-4': [
+    {
+      question: "Supraîncărcarea funcțiilor permite:",
+      options: ["Același nume cu parametri diferiți", "Același nume cu același tip", "Funcții fără parametri", "Funcții fără nume"],
+      correctAnswer: 0
+    },
+    {
+      question: "Variabilele locale într-o funcție:",
+      options: ["Sunt vizibile în tot programul", "Sunt vizibile doar în funcție", "Nu există", "Sunt întotdeauna globale"],
+      correctAnswer: 1
+    },
+    {
+      question: "Cazul de bază în recursivitate:",
+      options: ["Oprește recursivitatea", "Continuă recursivitatea", "Generează eroare", "Nu este necesar"],
+      correctAnswer: 0
+    }
+  ],
+  'informatica-5': [
+    {
+      question: "Metoda append() pentru șiruri:",
+      options: ["Șterge caractere", "Adaugă la sfârșitul șirului", "Caută în șir", "Compară șiruri"],
+      correctAnswer: 1
+    },
+    {
+      question: "Pentru a converti un șir la număr folosim:",
+      options: ["toString()", "stoi()", "convert()", "parse()"],
+      correctAnswer: 1
+    },
+    {
+      question: "Caracterul de escape \"\\n\" reprezintă:",
+      options: ["Spațiu", "Tab", "Linie nouă", "Backslash"],
+      correctAnswer: 2
+    }
+  ],
+  'informatica-6': [
+    {
+      question: "Quick Sort folosește strategia:",
+      options: ["Divide et impera", "Forță brută", "Programare dinamică", "Greedy"],
+      correctAnswer: 0
+    },
+    {
+      question: "Stabilitatea unui algoritm de sortare înseamnă:",
+      options: ["Nu generează erori", "Păstrează ordinea elementelor egale", "Rulează rapid", "Folosește puțină memorie"],
+      correctAnswer: 1
+    },
+    {
+      question: "Căutarea ternară împarte intervalul în:",
+      options: ["2 părți", "3 părți", "4 părți", "5 părți"],
+      correctAnswer: 1
+    }
+  ],
+  'informatica-7': [
+    {
+      question: "Destructorul unei clase:",
+      options: ["Creează obiecte", "Distruge obiecte", "Modifică obiecte", "Copiază obiecte"],
+      correctAnswer: 1
+    },
+    {
+      question: "Clasa derivată poate accesa membrii \"protected\" ai clasei de bază:",
+      options: ["Da, întotdeauna", "Nu, niciodată", "Doar prin moștenire publică", "Doar prin funcții friend"],
+      correctAnswer: 0
+    },
+    {
+      question: "Funcțiile virtuale permit:",
+      options: ["Moștenire multiplă", "Polimorfism dinamic", "Încapsulare", "Abstractizare"],
+      correctAnswer: 1
+    }
+  ],
+  'informatica-8': [
+    {
+      question: "Funcția seekg() în C++:",
+      options: ["Caută text în fișier", "Poziționează cursorul de citire", "Deschide fișierul", "Închide fișierul"],
+      correctAnswer: 1
+    },
+    {
+      question: "Diferența între \">>\" și \"getline()\" este:",
+      options: ["Nu există diferență", ">> citește până la spațiu, getline() citește linia", "getline() este mai lent", ">> este pentru numere"],
+      correctAnswer: 1
+    },
+    {
+      question: "Fișierele binare sunt utile pentru:",
+      options: ["Stocare eficientă", "Citire ușoară", "Editare în notepad", "Debugging"],
+      correctAnswer: 0
+    }
+  ],
+  'informatica-9': [
+    {
+      question: "Avantajul listelor înlănțuite față de tablouri:",
+      options: ["Acces mai rapid", "Dimensiune dinamică", "Mai puțină memorie", "Implementare mai simplă"],
+      correctAnswer: 1
+    },
+    {
+      question: "Într-un heap binar, părintele unui nod la poziția i este la:",
+      options: ["i/2", "(i-1)/2", "i*2", "i+1"],
+      correctAnswer: 1
+    },
+    {
+      question: "Parcurgerea BFS (Breadth-First Search) folosește:",
+      options: ["Stivă", "Coadă", "Lista", "Tablou"],
+      correctAnswer: 1
+    }
+  ],
+  'informatica-10': [
+    {
+      question: "Clauza GROUP BY în SQL:",
+      options: ["Sortează rezultatele", "Grupează rândurile", "Filtrează datele", "Unește tabele"],
+      correctAnswer: 1
+    },
+    {
+      question: "Funcția COUNT() returnează:",
+      options: ["Suma valorilor", "Numărul de rânduri", "Valoarea maximă", "Media valorilor"],
+      correctAnswer: 1
+    },
+    {
+      question: "INNER JOIN returnează:",
+      options: ["Toate rândurile din prima tabelă", "Toate rândurile din a doua tabelă", "Doar rândurile care au corespondent în ambele tabele", "Toate rândurile din ambele tabele"],
+      correctAnswer: 2
+    }
+  ],
 
   // Physics lessons
   'fizica-1': [
@@ -219,6 +542,40 @@ export const quizQuestions: LessonQuestions = {
       question: "În mișcarea rectilinie uniformă:",
       options: ["Viteza variază", "Accelerația este constantă", "Viteza este constantă", "Nu există viteză"],
       correctAnswer: 2
+    }
+  ],
+  'fizica-2': [
+    {
+      question: "Prima lege a lui Newton afirmă că:",
+      options: ["F = ma", "Un corp în repaus rămâne în repaus", "La orice acțiune există o reacțiune", "Energia se conservă"],
+      correctAnswer: 1
+    },
+    {
+      question: "Forța de frecare este:",
+      options: ["Întotdeauna utilă", "Întotdeauna dăunătoare", "Poate fi utilă sau dăunătoare", "Nu există"],
+      correctAnswer: 2
+    },
+    {
+      question: "Unitatea de măsură pentru forță în SI este:",
+      options: ["kg", "m/s²", "Newton", "Joule"],
+      correctAnswer: 2
+    }
+  ],
+  'fizica-3': [
+    {
+      question: "Temperatura se măsoară în:",
+      options: ["Joule", "Kelvin", "Newton", "Watt"],
+      correctAnswer: 1
+    },
+    {
+      question: "Dilatarea termică a solidelor depinde de:",
+      options: ["Doar temperatura", "Temperatura și materialul", "Doar materialul", "Presiune"],
+      correctAnswer: 1
+    },
+    {
+      question: "Căldura este:",
+      options: ["O formă de energie", "Temperatura", "Masa", "Volumul"],
+      correctAnswer: 0
     }
   ],
 
@@ -240,6 +597,40 @@ export const quizQuestions: LessonQuestions = {
       correctAnswer: 1
     }
   ],
+  'chimie-2': [
+    {
+      question: "Legătura ionică se formează între:",
+      options: ["Doi nemetale", "Două metale", "Un metal și un nemetal", "Atomi identici"],
+      correctAnswer: 2
+    },
+    {
+      question: "Legătura covalentă implică:",
+      options: ["Transfer de electroni", "Punerea în comun de electroni", "Electroni liberi", "Protoni"],
+      correctAnswer: 1
+    },
+    {
+      question: "Molecula de apă (H₂O) conține:",
+      options: ["Legături ionice", "Legături covalente", "Legături metalice", "Nu are legături"],
+      correctAnswer: 1
+    }
+  ],
+  'chimie-3': [
+    {
+      question: "Concentrația molară se exprimă în:",
+      options: ["g/L", "mol/L", "mg/mL", "%"],
+      correctAnswer: 1
+    },
+    {
+      question: "Solubilitatea depinde de:",
+      options: ["Doar temperatura", "Temperatura și natura substanțelor", "Doar presiune", "Doar timpul"],
+      correctAnswer: 1
+    },
+    {
+      question: "O soluție saturată conține:",
+      options: ["Puțin solut", "Mult solut", "Cantitatea maximă de solut", "Doar solvent"],
+      correctAnswer: 2
+    }
+  ],
 
   // Biology lessons
   'biologie-1': [
@@ -257,6 +648,40 @@ export const quizQuestions: LessonQuestions = {
       question: "Nucleul celular conține:",
       options: ["Proteine", "Materialul genetic", "Lipide", "Glucide"],
       correctAnswer: 1
+    }
+  ],
+  'biologie-2': [
+    {
+      question: "ADN-ul conține informația pentru:",
+      options: ["Sinteza lipidelor", "Sinteza proteinelor", "Respirația", "Digestia"],
+      correctAnswer: 1
+    },
+    {
+      question: "Cromozomii sunt formați din:",
+      options: ["Proteine", "ADN și proteine", "Doar ADN", "Lipide"],
+      correctAnswer: 1
+    },
+    {
+      question: "Mutațiile sunt:",
+      options: ["Întotdeauna dăunătoare", "Întotdeauna benefice", "Pot fi benefice, neutre sau dăunătoare", "Nu există"],
+      correctAnswer: 2
+    }
+  ],
+  'biologie-3': [
+    {
+      question: "Sistemul nervos central include:",
+      options: ["Doar creierul", "Creierul și măduva spinării", "Doar nervii", "Toate nervii"],
+      correctAnswer: 1
+    },
+    {
+      question: "Inima are:",
+      options: ["2 camere", "3 camere", "4 camere", "5 camere"],
+      correctAnswer: 2
+    },
+    {
+      question: "Plămânii sunt organele pentru:",
+      options: ["Digestie", "Circulație", "Respirație", "Excreție"],
+      correctAnswer: 2
     }
   ]
 };
