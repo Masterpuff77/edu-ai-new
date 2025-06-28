@@ -20,13 +20,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addExperience } = useGamificationStore();
 
-  const handleAnswerSelect = useCallback((answerIndex: number, event?: React.MouseEvent) => {
-    // Stop event propagation
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
+  const handleAnswerSelect = useCallback((answerIndex: number) => {
     // Only prevent selection if feedback is showing or question is already submitted
     if (showFeedback || questionSubmitted) {
       return;
@@ -37,12 +31,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
     setSelectedAnswers(newAnswers);
   }, [showFeedback, questionSubmitted, selectedAnswers, currentQuestion]);
 
-  const handleSubmit = useCallback(async (event?: React.FormEvent | React.MouseEvent) => {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
+  const handleSubmit = useCallback(async () => {
     // Prevent submission if already submitted or no answer selected
     if (questionSubmitted || showFeedback || isSubmitting || selectedAnswers[currentQuestion] === -1) {
       return;
@@ -235,7 +224,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
             return (
               <div 
                 key={index}
-                onClick={(e) => handleAnswerSelect(index, e)}
+                onClick={() => handleAnswerSelect(index)}
                 className={buttonClass}
               >
                 <div className={`w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center ${
@@ -318,7 +307,7 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* Action Buttons - NO FORM WRAPPER */}
       <div className="flex justify-between">
         {quizData.length > 1 && currentQuestion > 0 && !showFeedback && (
           <button
@@ -335,7 +324,6 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
               onClick={handleSubmit}
               disabled={!hasSelected || isSubmitting}
               className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              type="button"
             >
               {isSubmitting ? 'Se procesează...' : 'Trimite răspuns'}
             </button>
@@ -343,7 +331,6 @@ const QuizWidget: React.FC<QuizWidgetProps> = ({ quizData, onComplete }) => {
             <button
               onClick={handleNext}
               className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-              type="button"
             >
               {currentQuestion < quizData.length - 1 ? 'Următoarea întrebare' : 'Vezi rezultatele'}
             </button>
