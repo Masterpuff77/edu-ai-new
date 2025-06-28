@@ -177,7 +177,7 @@ const AiChatWidget: React.FC<AiChatWidgetProps> = ({ lessonTitle, subject }) => 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-md overflow-hidden">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-900">Întreabă AI-ul</h3>

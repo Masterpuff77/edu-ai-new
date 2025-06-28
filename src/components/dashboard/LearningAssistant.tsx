@@ -255,7 +255,7 @@ const LearningAssistant: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-md overflow-hidden">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <div className="p-2 bg-indigo-200 rounded-lg">
@@ -276,7 +276,7 @@ const LearningAssistant: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-md overflow-hidden">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
