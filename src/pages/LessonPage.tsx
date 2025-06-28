@@ -26,10 +26,27 @@ const LessonPage: React.FC = () => {
     }
   }, [lessonId, user?.id, fetchLesson]);
 
-  // Scroll to top when component mounts or lesson changes
+  // Force scroll to top when lesson changes - more aggressive approach
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Immediate scroll to top
+    window.scrollTo(0, 0);
+    
+    // Also try with a small delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [lessonId]);
+
+  // Additional scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
 
   const checkLessonCompletion = async () => {
     if (!user || !lessonId) return;
