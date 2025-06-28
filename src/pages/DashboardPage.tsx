@@ -16,26 +16,76 @@ const DashboardPage: React.FC = () => {
   const [nextLesson, setNextLesson] = useState<{ id: string; title: string } | null>(null);
   const [recommendation, setRecommendation] = useState<string>('');
 
-  // Force scroll to top when dashboard loads - aggressive approach
+  // MOST AGGRESSIVE scroll to top approach
   useEffect(() => {
-    // Immediate scroll to top
-    window.scrollTo(0, 0);
-    
-    // Also try with a small delay to ensure DOM is ready
-    const timeoutId = setTimeout(() => {
-      window.scrollTo(0, 0);
+    // Multiple immediate scroll attempts
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
-    }, 100);
+      
+      // Also try setting scroll on the main element if it exists
+      const main = document.querySelector('main');
+      if (main) {
+        main.scrollTop = 0;
+      }
+      
+      // Try setting on any scrollable containers
+      const scrollableElements = document.querySelectorAll('[style*="overflow"]');
+      scrollableElements.forEach(el => {
+        if (el instanceof HTMLElement) {
+          el.scrollTop = 0;
+        }
+      });
+    };
 
-    return () => clearTimeout(timeoutId);
+    // Immediate scroll
+    scrollToTop();
+    
+    // Multiple delayed scrolls to ensure it works
+    const timeouts = [0, 50, 100, 200, 300, 500].map(delay => 
+      setTimeout(scrollToTop, delay)
+    );
+
+    // Also listen for any layout changes and force scroll
+    const observer = new MutationObserver(() => {
+      scrollToTop();
+    });
+    
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true, 
+      attributes: true 
+    });
+
+    return () => {
+      timeouts.forEach(clearTimeout);
+      observer.disconnect();
+    };
   }, []);
 
-  // Additional scroll to top when component mounts
+  // Additional effect to prevent any auto-scrolling from other components
   useEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    const preventScroll = (e: Event) => {
+      // Don't prevent user-initiated scrolling
+      if (e.isTrusted) return;
+      
+      // Prevent programmatic scrolling
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Force back to top
+      setTimeout(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }, 0);
+    };
+
+    // Listen for scroll events that might be programmatic
+    window.addEventListener('scroll', preventScroll, { passive: false });
+    
+    return () => {
+      window.removeEventListener('scroll', preventScroll);
+    };
   }, []);
 
   useEffect(() => {
