@@ -55,7 +55,7 @@ const LearningAssistant: React.FC = () => {
           // Add welcome message if no previous messages
           const welcomeMessage: Message = {
             id: '0',
-            content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi? Pot să te ajut cu orice întrebare legată de materiile tale.\n\nPoți folosi formule matematice precum $x^2 + 3x - 4 = 0$ sau $$\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$',
+            content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi? Pot să te ajut cu orice întrebare legată de materiile tale.',
             isUser: false,
             timestamp: new Date()
           };
@@ -66,7 +66,7 @@ const LearningAssistant: React.FC = () => {
         // Fallback to welcome message
         const welcomeMessage: Message = {
           id: '0',
-          content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi?\n\nPoți folosi formule matematice precum $x^2$ pentru inline sau $$x^2 + y^2 = z^2$$ pentru display.',
+          content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi?',
           isUser: false,
           timestamp: new Date()
         };
@@ -116,7 +116,7 @@ const LearningAssistant: React.FC = () => {
       // Reset to welcome message
       const welcomeMessage: Message = {
         id: '0',
-        content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi?\n\nPoți folosi formule matematice precum $x^2$ pentru inline sau $$x^2 + y^2 = z^2$$ pentru display.',
+        content: 'Salut! Sunt asistentul tău AI pentru învățare. Ce cunoștințe vrei să-ți îmbunătățești azi?',
         isUser: false,
         timestamp: new Date()
       };
@@ -342,7 +342,7 @@ const LearningAssistant: React.FC = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Scrie un mesaj... (folosește $x^2$ pentru formule)"
+            placeholder="Scrie un mesaj..."
             className="w-full pr-12 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             disabled={loading}
           />
@@ -358,11 +358,6 @@ const LearningAssistant: React.FC = () => {
             )}
           </button>
         </form>
-
-        <div className="mt-4 text-xs text-gray-500 space-y-1">
-          <p>Poți pune întrebări consecutive și AI-ul va ține cont de contextul conversației anterioare.</p>
-          <p>Pentru formule matematice folosește: $x^2$ pentru inline sau $$x^2 + y^2 = z^2$$ pentru display.</p>
-        </div>
       </div>
     </div>
   );

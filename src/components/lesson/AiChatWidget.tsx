@@ -245,7 +245,7 @@ const AiChatWidget: React.FC<AiChatWidgetProps> = ({ lessonTitle, subject }) => 
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Scrie o întrebare... (poți folosi $x^2$ pentru formule)"
+            placeholder="Scrie o întrebare..."
             className="w-full pr-20 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             disabled={loading}
           />
@@ -271,11 +271,6 @@ const AiChatWidget: React.FC<AiChatWidgetProps> = ({ lessonTitle, subject }) => 
             </button>
           </div>
         </form>
-        
-        <div className="mt-4 text-xs text-gray-500 space-y-1">
-          <p>Poți pune întrebări consecutive și AI-ul va ține cont de contextul conversației anterioare.</p>
-          <p>Pentru formule matematice folosește: $x^2$ pentru inline sau $$x^2 + y^2 = z^2$$ pentru display.</p>
-        </div>
       </div>
     </div>
   );
