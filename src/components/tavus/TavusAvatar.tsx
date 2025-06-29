@@ -227,7 +227,6 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!message.trim() || loading) return;
     
     const userMessage = message.trim();
