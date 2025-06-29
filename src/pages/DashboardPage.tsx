@@ -7,6 +7,7 @@ import NotificationsList from '../components/dashboard/NotificationsList';
 import LearningAssistant from '../components/dashboard/LearningAssistant';
 import WeeklyLeaderboard from '../components/dashboard/WeeklyLeaderboard';
 import KnowledgeTestingBox from '../components/dashboard/KnowledgeTestingBox';
+import TavusAvatarCard from '../components/dashboard/TavusAvatarCard';
 import useAuthStore from '../store/authStore';
 import useStudyPlanStore from '../store/studyPlanStore';
 
@@ -218,6 +219,7 @@ const DashboardPage: React.FC = () => {
             
             <div className="lg:col-span-4 space-y-6">
               <LearningAssistant />
+              <TavusAvatarCard />
               <WeeklyLeaderboard />
               <NotificationsList />
             </div>
