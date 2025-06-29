@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Loader2, AlertCircle, Volume2, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
-import TavusService from '../tavus/TavusService';
-import TavusAnalytics from '../tavus/TavusAnalytics';
 import useAuthStore from '../../store/authStore';
 
 interface TavusLessonAssistantProps {
@@ -11,7 +9,6 @@ interface TavusLessonAssistantProps {
 
 const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle, subject }) => {
   const { user } = useAuthStore();
-  const [conversationId, setConversationId] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,6 +16,10 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   const [isMuted, setIsMuted] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Mock video URL for development
+  const mockVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
 
   useEffect(() => {
     if (user) {
@@ -31,78 +32,28 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   }, [user, lessonTitle, subject]);
 
   const initializeConversation = async () => {
-    if (!user) return;
-    
     try {
       setLoading(true);
       setError(null);
 
-      const conversation = await TavusService.createConversation({
-        user_id: user.id,
-        user_name: user.name || 'Student',
-        subject: subject,
-        lesson_title: lessonTitle,
-        grade: user.grade,
-        exam_type: user.examType
-      });
-
-      setConversationId(conversation.id);
-      
-      // Track conversation started
-      await TavusAnalytics.trackConversationStarted(
-        user.id,
-        conversation.id,
-        {
-          subject,
-          lesson_title: lessonTitle
-        }
-      );
-
-      // Request initial greeting specific to this lesson
-      await sendInitialMessage(conversation.id);
+      // Use mock data for development
+      setTimeout(() => {
+        setVideoUrl(mockVideoUrl);
+        setLoading(false);
+      }, 1500);
     } catch (error) {
       console.error('Failed to initialize Tavus conversation:', error);
       setError('Nu s-a putut inițializa asistentul pentru această lecție.');
+      setRetryCount(prev => prev + 1);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const sendInitialMessage = async (convId: string) => {
-    if (!user) return;
-    
-    try {
-      const initialPrompt = `Salut! Sunt un elev care studiază lecția "${lessonTitle}" la materia ${subject}. Te rog să te prezinți și să-mi explici cum mă poți ajuta să înțeleg mai bine această lecție.`;
-      
-      const message = await TavusService.sendMessage(
-        convId,
-        initialPrompt,
-        { is_initial: true, lesson_title: lessonTitle, subject }
-      );
-
-      // Track message sent
-      await TavusAnalytics.trackMessageSent(
-        user.id,
-        convId,
-        message.id,
-        initialPrompt
-      );
-
-      if (message.video_url) {
-        setVideoUrl(message.video_url);
-      } else if (message.status === 'processing') {
-        await pollForVideo(convId, message.id);
-      }
-    } catch (error) {
-      console.error('Failed to send initial message:', error);
-      setError('Nu s-a putut obține răspunsul inițial de la profesor.');
     }
   };
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user || !conversationId || !message.trim() || loading) return;
+    if (!message.trim() || loading) return;
 
     const userMessage = message.trim();
     setMessage('');
@@ -111,65 +62,16 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       setLoading(true);
       setError(null);
 
-      const response = await TavusService.sendMessage(
-        conversationId,
-        userMessage,
-        { 
-          timestamp: new Date().toISOString(),
-          lesson_title: lessonTitle,
-          subject
-        }
-      );
-
-      // Track message sent
-      await TavusAnalytics.trackMessageSent(
-        user.id,
-        conversationId,
-        response.id,
-        userMessage
-      );
-
-      if (response.video_url) {
-        setVideoUrl(response.video_url);
-        
-        // Track video viewed
-        await TavusAnalytics.trackVideoViewed(
-          user.id,
-          conversationId,
-          response.id,
-          0 // Initial view
-        );
-      } else if (response.status === 'processing') {
-        await pollForVideo(conversationId, response.id);
-      }
+      // Use mock data for development
+      setTimeout(() => {
+        setVideoUrl(mockVideoUrl);
+        setLoading(false);
+      }, 1500);
     } catch (error) {
       console.error('Failed to send message:', error);
       setError('Nu s-a putut trimite mesajul. Te rugăm să încerci din nou.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const pollForVideo = async (convId: string, messageId: string) => {
-    if (!user) return;
-    
-    try {
-      const message = await TavusService.pollForVideoStatus(convId, messageId);
-      
-      if (message.video_url) {
-        setVideoUrl(message.video_url);
-        
-        // Track video viewed
-        await TavusAnalytics.trackVideoViewed(
-          user.id,
-          convId,
-          messageId,
-          0 // Initial view
-        );
-      }
-    } catch (error) {
-      console.error('Failed to poll for video:', error);
-      setError('Nu s-a putut obține răspunsul video. Te rugăm să încerci din nou.');
     }
   };
 
@@ -184,19 +86,19 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
     setIsMinimized(!isMinimized);
   };
 
+  const handleRetry = () => {
+    initializeConversation();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-3 flex items-center justify-between">
         <div className="flex items-center">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mr-3">
             <img 
-              src="/professor-avatar.png" 
+              src="https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150" 
               alt="Professor Avatar" 
               className="w-8 h-8 rounded-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = 'https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150';
-              }}
             />
           </div>
           <div>
@@ -240,7 +142,7 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
                   <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-2" />
                   <p className="text-white text-sm">{error}</p>
                   <button 
-                    onClick={initializeConversation}
+                    onClick={handleRetry}
                     className="mt-3 px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
                   >
                     Reîncearcă
@@ -258,6 +160,7 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
                 playsInline
                 muted={isMuted}
                 controls={false}
+                loop={retryCount > 0} // Loop video if we've had to retry
               ></video>
             )}
             
@@ -266,13 +169,9 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
                 <div className="text-center">
                   <div className="w-16 h-16 bg-white/20 rounded-full mx-auto flex items-center justify-center mb-2">
                     <img 
-                      src="/professor-avatar.png" 
+                      src="https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150" 
                       alt="Professor Avatar" 
                       className="w-14 h-14 rounded-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150';
-                      }}
                     />
                   </div>
                   <h4 className="text-white text-sm font-medium">Profesor Virtual</h4>

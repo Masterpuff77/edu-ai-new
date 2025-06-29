@@ -13,7 +13,7 @@ const TavusAvatarButton: React.FC = () => {
     <>
       <button
         onClick={toggleAvatar}
-        className="fixed bottom-4 right-4 z-40 p-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-white"
+        className="fixed bottom-20 right-4 z-40 p-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-2 border-white"
         aria-label="Open professor avatar"
       >
         <User className="h-6 w-6" />

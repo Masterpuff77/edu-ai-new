@@ -18,12 +18,11 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMinimized, setIsMinimized] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<Array<{role: string, content: string}>>([]);
+  const [retryCount, setRetryCount] = useState(0);
 
-  // API configuration
-  const API_KEY = '7c3787ab7bf24c2d8247ad651412987f';
-  const PERSONA_ID = 'p7636ec0d04c';
-  const REPLICA_ID = 'r95fd27b5a37';
-  const API_URL = 'https://api.tavus.io/v1';
+  // Mock response for development
+  const useMockResponse = true;
+  const mockVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
 
   useEffect(() => {
     // Initialize conversation when component mounts
@@ -40,11 +39,22 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       setLoading(true);
       setError(null);
 
+      if (useMockResponse) {
+        // Use mock data for development
+        setTimeout(() => {
+          setConversationId('mock-conversation-id');
+          setVideoUrl(mockVideoUrl);
+          setLoading(false);
+        }, 1500);
+        return;
+      }
+
+      // Real API implementation
       const response = await axios.post(
-        `${API_URL}/conversations`, 
+        'https://api.tavus.io/v1/conversations', 
         {
-          persona_id: PERSONA_ID,
-          replica_id: REPLICA_ID,
+          persona_id: 'p7636ec0d04c',
+          replica_id: 'r95fd27b5a37',
           metadata: {
             user_id: user?.id || 'anonymous',
             user_name: user?.name || 'Student',
@@ -53,7 +63,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${API_KEY}`,
+            'Authorization': 'Bearer 7c3787ab7bf24c2d8247ad651412987f',
             'Content-Type': 'application/json'
           }
         }
@@ -87,13 +97,16 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
     } catch (err) {
       console.error('Error initializing conversation:', err);
       setError('Nu s-a putut inițializa conversația cu profesorul virtual. Te rugăm să încerci din nou.');
+      
+      // Increment retry count
+      setRetryCount(prev => prev + 1);
     } finally {
       setLoading(false);
     }
   };
 
   const sendMessage = async (content: string, isInitial = false) => {
-    if (!conversationId && !isInitial) {
+    if (!conversationId && !isInitial && !useMockResponse) {
       setError('Conversația nu a fost inițializată. Te rugăm să reîmprospătezi pagina.');
       return;
     }
@@ -107,14 +120,31 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
         setConversationHistory(prev => [...prev, { role: 'user', content }]);
       }
 
+      if (useMockResponse) {
+        // Use mock data for development
+        setTimeout(() => {
+          setVideoUrl(mockVideoUrl);
+          setConversationHistory(prev => [
+            ...prev, 
+            { 
+              role: 'assistant', 
+              content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Pot să-ți explic concepte, să răspund la întrebări și să te ghidez prin materialele de studiu. Cu ce te pot ajuta astăzi?' 
+            }
+          ]);
+          setLoading(false);
+        }, 1500);
+        return;
+      }
+
+      // Real API implementation
       const endpoint = isInitial 
-        ? `${API_URL}/conversations` 
-        : `${API_URL}/conversations/${conversationId}/messages`;
+        ? 'https://api.tavus.io/v1/conversations' 
+        : `https://api.tavus.io/v1/conversations/${conversationId}/messages`;
 
       const payload = isInitial 
         ? {
-            persona_id: PERSONA_ID,
-            replica_id: REPLICA_ID,
+            persona_id: 'p7636ec0d04c',
+            replica_id: 'r95fd27b5a37',
             message: content,
             metadata: {
               user_id: user?.id || 'anonymous',
@@ -134,7 +164,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
         payload,
         {
           headers: {
-            'Authorization': `Bearer ${API_KEY}`,
+            'Authorization': 'Bearer 7c3787ab7bf24c2d8247ad651412987f',
             'Content-Type': 'application/json'
           }
         }
@@ -170,15 +200,30 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   };
 
   const pollForVideoStatus = async (messageId: string) => {
-    if (!conversationId) return;
+    if (!conversationId && !useMockResponse) return;
+
+    if (useMockResponse) {
+      // Use mock data for development
+      setTimeout(() => {
+        setVideoUrl(mockVideoUrl);
+        setConversationHistory(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Pot să-ți explic concepte, să răspund la întrebări și să te ghidez prin materialele de studiu. Cu ce te pot ajuta astăzi?' 
+          }
+        ]);
+      }, 1500);
+      return;
+    }
 
     const checkStatus = async () => {
       try {
         const response = await axios.get(
-          `${API_URL}/conversations/${conversationId}/messages/${messageId}`,
+          `https://api.tavus.io/v1/conversations/${conversationId}/messages/${messageId}`,
           {
             headers: {
-              'Authorization': `Bearer ${API_KEY}`
+              'Authorization': 'Bearer 7c3787ab7bf24c2d8247ad651412987f'
             }
           }
         );
@@ -251,6 +296,10 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
     setIsMinimized(!isMinimized);
   };
 
+  const handleRetry = () => {
+    initializeConversation();
+  };
+
   return (
     <div className={`fixed bottom-4 right-4 z-50 transition-all duration-300 ease-in-out ${isMinimized ? 'w-16 h-16' : 'w-80 sm:w-96'}`}>
       {isMinimized ? (
@@ -259,13 +308,9 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
           className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-white"
         >
           <img 
-            src="/professor-avatar.png" 
+            src="https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150" 
             alt="Professor Avatar" 
             className="w-14 h-14 rounded-full object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = 'https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150';
-            }}
           />
         </button>
       ) : (
@@ -275,13 +320,9 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mr-3">
                 <img 
-                  src="/professor-avatar.png" 
+                  src="https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150" 
                   alt="Professor Avatar" 
                   className="w-8 h-8 rounded-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150';
-                  }}
                 />
               </div>
               <div>
@@ -336,7 +377,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
                   <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-2" />
                   <p className="text-white text-sm">{error}</p>
                   <button 
-                    onClick={initializeConversation}
+                    onClick={handleRetry}
                     className="mt-3 px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors"
                   >
                     Reîncearcă
@@ -354,6 +395,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
                 playsInline
                 muted={isMuted}
                 controls={false}
+                loop={retryCount > 0} // Loop video if we've had to retry
               ></video>
             )}
             
@@ -362,13 +404,9 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
                 <div className="text-center">
                   <div className="w-16 h-16 bg-white/20 rounded-full mx-auto flex items-center justify-center mb-2">
                     <img 
-                      src="/professor-avatar.png" 
+                      src="https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150" 
                       alt="Professor Avatar" 
                       className="w-14 h-14 rounded-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = 'https://images.pexels.com/photos/5212324/pexels-photo-5212324.jpeg?auto=compress&cs=tinysrgb&w=150';
-                      }}
                     />
                   </div>
                   <h4 className="text-white text-sm font-medium">Profesor Virtual</h4>
