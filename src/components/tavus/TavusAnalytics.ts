@@ -11,9 +11,6 @@ export interface AnalyticsEvent {
 // Analytics service
 export class TavusAnalytics {
   private static instance: TavusAnalytics;
-  private isEnabled: boolean = true;
-  private lastError: Error | null = null;
-  private tableExists: boolean = false;
 
   // Singleton pattern
   public static getInstance(): TavusAnalytics {
@@ -23,65 +20,11 @@ export class TavusAnalytics {
     return TavusAnalytics.instance;
   }
 
-  constructor() {
-    // Check if analytics table exists
-    this.checkTableExists();
-  }
-
-  // Check if analytics table exists
-  private async checkTableExists(): Promise<void> {
-    try {
-      if (!supabase) {
-        this.isEnabled = false;
-        return;
-      }
-
-      const { error } = await supabase
-        .from('tavus_analytics')
-        .select('id')
-        .limit(1)
-        .maybeSingle();
-
-      if (error && error.code === 'PGRST116') {
-        console.warn('[Tavus Analytics] tavus_analytics table does not exist, analytics disabled');
-        this.isEnabled = false;
-        this.tableExists = false;
-      } else {
-        this.tableExists = true;
-      }
-    } catch (error) {
-      console.warn('[Tavus Analytics] Error checking table existence:', error);
-      this.isEnabled = false;
-      this.tableExists = false;
-    }
-  }
-
   // Track event
   async trackEvent(event: AnalyticsEvent): Promise<void> {
-    if (!this.isEnabled) {
-      console.log(`[Tavus Analytics] Analytics disabled, skipping event: ${event.eventType}`);
-      return;
-    }
-    
     try {
       console.log(`[Tavus Analytics] Tracking event: ${event.eventType}`, event);
       
-      // Check if Supabase is available
-      if (!supabase) {
-        console.warn('[Tavus Analytics] Supabase not available, skipping event tracking');
-        this.isEnabled = false;
-        return;
-      }
-      
-      // First check if the table exists to avoid 404 errors
-      if (!this.tableExists) {
-        await this.checkTableExists();
-        if (!this.tableExists) {
-          return;
-        }
-      }
-      
-      // Try to insert the event
       const { error } = await supabase
         .from('tavus_analytics')
         .insert([{
@@ -93,19 +36,9 @@ export class TavusAnalytics {
       
       if (error) {
         console.error('[Tavus Analytics] Error tracking event:', error);
-        this.lastError = error;
-        
-        // If we get a 404 error, the table doesn't exist
-        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
-          this.isEnabled = false;
-          this.tableExists = false;
-        }
       }
     } catch (error) {
       console.error('[Tavus Analytics] Failed to track event:', error);
-      this.lastError = error instanceof Error ? error : new Error(String(error));
-      
-      // Don't disable analytics on unexpected errors, might be temporary
     }
   }
 
@@ -163,26 +96,7 @@ export class TavusAnalytics {
 
   // Get user engagement metrics
   async getUserEngagementMetrics(userId: string): Promise<any> {
-    if (!this.isEnabled) {
-      console.log('[Tavus Analytics] Analytics disabled, skipping metrics retrieval');
-      return null;
-    }
-    
     try {
-      // Check if Supabase is available
-      if (!supabase) {
-        console.warn('[Tavus Analytics] Supabase not available, cannot fetch metrics');
-        return null;
-      }
-      
-      // Check if table exists
-      if (!this.tableExists) {
-        await this.checkTableExists();
-        if (!this.tableExists) {
-          return null;
-        }
-      }
-      
       const { data, error } = await supabase
         .from('tavus_analytics')
         .select('*')
@@ -191,7 +105,6 @@ export class TavusAnalytics {
       
       if (error) {
         console.error('[Tavus Analytics] Error fetching metrics:', error);
-        this.lastError = error;
         return null;
       }
       
@@ -207,7 +120,6 @@ export class TavusAnalytics {
       return metrics;
     } catch (error) {
       console.error('[Tavus Analytics] Failed to get user metrics:', error);
-      this.lastError = error instanceof Error ? error : new Error(String(error));
       return null;
     }
   }
@@ -241,23 +153,6 @@ export class TavusAnalytics {
     
     const sum = messagePairs.reduce((acc, time) => acc + time, 0);
     return sum / messagePairs.length;
-  }
-
-  // Reset analytics
-  resetAnalytics(): void {
-    this.isEnabled = true;
-    this.lastError = null;
-    this.checkTableExists();
-  }
-
-  // Get analytics status
-  isAnalyticsEnabled(): boolean {
-    return this.isEnabled;
-  }
-
-  // Get last error
-  getLastError(): Error | null {
-    return this.lastError;
   }
 }
 
