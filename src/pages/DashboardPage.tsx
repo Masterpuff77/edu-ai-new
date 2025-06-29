@@ -7,6 +7,8 @@ import NotificationsList from '../components/dashboard/NotificationsList';
 import LearningAssistant from '../components/dashboard/LearningAssistant';
 import WeeklyLeaderboard from '../components/dashboard/WeeklyLeaderboard';
 import KnowledgeTestingBox from '../components/dashboard/KnowledgeTestingBox';
+import TavusTeacherCard from '../components/dashboard/TavusTeacherCard';
+import FloatingChatButton from '../components/chat/FloatingChatButton';
 import useAuthStore from '../store/authStore';
 import useStudyPlanStore from '../store/studyPlanStore';
 
@@ -218,12 +220,18 @@ const DashboardPage: React.FC = () => {
             
             <div className="lg:col-span-4 space-y-6">
               <LearningAssistant />
+              <TavusTeacherCard />
               <WeeklyLeaderboard />
               <NotificationsList />
             </div>
           </div>
         </div>
       </main>
+      
+      {/* Floating chat button for mobile devices */}
+      <div className="md:hidden">
+        <FloatingChatButton />
+      </div>
     </>
   );
 };

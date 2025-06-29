@@ -102,6 +102,7 @@ const App: React.FC = () => {
     <Router>
       {/* Only show ElevenLabs widget for authenticated users who completed onboarding */}
       {isAuthenticated && isOnboardingComplete() && <ElevenLabsWidget />}
+      
       <Routes>
         <Route 
           path="/" 
