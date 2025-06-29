@@ -10,7 +10,6 @@ import ProfilePage from './pages/ProfilePage';
 import useAuthStore from './store/authStore';
 import supabase, { isSupabaseAvailable } from './config/supabase';
 import ElevenLabsWidget from './components/chat/ElevenLabsWidget';
-import TavusAvatarButton from './components/tavus/TavusAvatarButton';
 
 const App: React.FC = () => {
   const { user, isAuthenticated, loading, loadUserProfile, clearAuth } = useAuthStore();
@@ -103,10 +102,6 @@ const App: React.FC = () => {
     <Router>
       {/* Only show ElevenLabs widget for authenticated users who completed onboarding */}
       {isAuthenticated && isOnboardingComplete() && <ElevenLabsWidget />}
-      
-      {/* Show Tavus Avatar button for authenticated users who completed onboarding */}
-      {isAuthenticated && isOnboardingComplete() && <TavusAvatarButton />}
-      
       <Routes>
         <Route 
           path="/" 
