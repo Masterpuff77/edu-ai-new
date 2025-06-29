@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, Trash2, Bot, Zap } from 'lucide-react';
+import { Send, Loader2, Sparkles, Trash2 } from 'lucide-react';
 import supabase from '../../config/supabase';
 import useAuthStore from '../../store/authStore';
 import MathRenderer from '../common/MathRenderer';
@@ -255,31 +255,19 @@ const LearningAssistant: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="relative">
-        {/* Animated border wave effect */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 rounded-xl opacity-75 blur-sm animate-pulse"></div>
-        <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-400 rounded-xl opacity-50 animate-spin" style={{ animationDuration: '3s' }}></div>
-        
-        <div className="relative bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="relative">
-                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                  <Bot className="h-6 w-6 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">Asistentul tău AI</h3>
-                <p className="text-white/80 text-sm">Întotdeauna disponibil pentru tine</p>
-              </div>
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-md overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 bg-indigo-200 rounded-lg">
+              <Sparkles className="h-5 w-5 text-indigo-600" />
             </div>
-            
-            <div className="h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-white mx-auto mb-2" />
-                <p className="text-sm text-white/90">Se încarcă conversația...</p>
-              </div>
+            <h3 className="text-lg font-medium text-gray-900">Asistentul tău de învățare</h3>
+          </div>
+          
+          <div className="h-[400px] flex items-center justify-center">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">Se încarcă conversația...</p>
             </div>
           </div>
         </div>
@@ -288,139 +276,88 @@ const LearningAssistant: React.FC = () => {
   }
 
   return (
-    <div className="relative group">
-      {/* Animated border wave effect - multiple layers for depth */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 via-blue-500 via-purple-600 via-pink-500 to-cyan-400 rounded-xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-300"></div>
-      <div 
-        className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 via-cyan-400 via-blue-500 to-purple-600 rounded-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"
-        style={{ 
-          animation: 'borderWave 4s linear infinite',
-        }}
-      ></div>
-      <div 
-        className="absolute -inset-1 bg-gradient-to-r from-pink-500 via-cyan-400 via-purple-600 via-blue-500 to-pink-500 rounded-xl opacity-30 group-hover:opacity-50 transition-opacity duration-300"
-        style={{ 
-          animation: 'borderWave 6s linear infinite reverse',
-        }}
-      ></div>
-
-      {/* Custom CSS for the wave animation */}
-      <style jsx>{`
-        @keyframes borderWave {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-      `}</style>
-      
-      <div className="relative bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300">
-        {/* Animated background effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-pulse"></div>
-        
-        <div className="relative p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                  <Bot className="h-6 w-6 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  Asistentul tău AI
-                  <Zap className="h-5 w-5 text-yellow-300 animate-pulse" />
-                </h3>
-                <p className="text-white/80 text-sm">Întotdeauna disponibil pentru tine</p>
-              </div>
+    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-md overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-indigo-200 rounded-lg">
+              <Sparkles className="h-5 w-5 text-indigo-600" />
             </div>
-            
-            <button
-              onClick={clearChat}
-              disabled={loading || messages.length <= 1}
-              className="p-2 text-white/70 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
-              title="Șterge conversația"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <h3 className="text-lg font-medium text-gray-900">Asistentul tău de învățare</h3>
           </div>
           
-          {/* Enhanced chat container */}
-          <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border border-white/20 shadow-inner">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-xl p-3 backdrop-blur-sm ${
-                    message.isUser
-                      ? 'bg-white text-gray-800 shadow-lg border border-white/30'
-                      : 'bg-white/20 text-white shadow-lg border border-white/20'
-                  }`}
-                >
-                  <div className="text-sm">
-                    {renderTextWithMath(message.content)}
-                  </div>
-                  <span className={`text-xs ${message.isUser ? 'text-gray-500' : 'text-white/70'} mt-1 block`}>
-                    {message.timestamp.toLocaleTimeString('ro-RO', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </span>
-                </div>
-              </div>
-            ))}
-            
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-white/20 backdrop-blur-sm text-white border border-white/20 rounded-xl p-3 max-w-[80%] shadow-lg">
-                  <div className="flex items-center space-x-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-white" />
-                    <span className="text-sm text-white">AI-ul scrie...</span>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Enhanced input form */}
-          <form onSubmit={handleSubmit} className="relative">
-            <div className="relative bg-white/15 backdrop-blur-md rounded-xl border border-white/20 shadow-lg">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Întreabă-mă orice despre lecțiile tale..."
-                className="w-full pr-14 pl-4 py-3 bg-transparent text-white placeholder-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40"
-                disabled={loading}
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || loading}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-white/20 rounded-lg hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm border border-white/20 hover:scale-105"
-              >
-                {loading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </form>
-
-          {/* AI capabilities indicator */}
-          <div className="mt-3 flex items-center justify-center gap-2 text-white/60 text-xs">
-            <Sparkles className="h-3 w-3" />
-            <span>Pot rezolva probleme de matematică, explica concepte și răspunde la întrebări</span>
-            <Sparkles className="h-3 w-3" />
-          </div>
+          <button
+            onClick={clearChat}
+            disabled={loading || messages.length <= 1}
+            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Șterge conversația"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
+        
+        {/* Chat container with light purple background and purple border */}
+        <div className="bg-purple-50 rounded-lg p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border-2 border-purple-200">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[80%] rounded-lg p-3 ${
+                  message.isUser
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white shadow-sm text-gray-800 border border-gray-200'
+                }`}
+              >
+                <div className="text-sm">
+                  {renderTextWithMath(message.content)}
+                </div>
+                <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-1 block`}>
+                  {message.timestamp.toLocaleTimeString('ro-RO', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </span>
+              </div>
+            </div>
+          ))}
+          
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-white shadow-sm text-gray-800 border border-gray-200 rounded-lg p-3 max-w-[80%]">
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+                  <span className="text-sm text-gray-600">AI-ul scrie...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+
+        <form onSubmit={handleSubmit} className="relative">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Scrie un mesaj..."
+            className="w-full pr-12 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={!input.trim() || loading}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-indigo-600 rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Send className="h-5 w-5" />
+            )}
+          </button>
+        </form>
       </div>
     </div>
   );
