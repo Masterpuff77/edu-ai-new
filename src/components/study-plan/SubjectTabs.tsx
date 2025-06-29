@@ -187,6 +187,27 @@ const SubjectTabs: React.FC<SubjectTabsProps> = ({ subjects, activeSubject, onSu
     }
   }, []);
 
+  // Scroll to active subject on mount and when active subject changes
+  useEffect(() => {
+    if (scrollContainerRef.current && activeSubject) {
+      const activeElement = scrollContainerRef.current.querySelector(`[data-subject="${activeSubject}"]`);
+      if (activeElement) {
+        const containerRect = scrollContainerRef.current.getBoundingClientRect();
+        const elementRect = activeElement.getBoundingClientRect();
+        
+        // Calculate the scroll position to center the element
+        const scrollLeft = elementRect.left - containerRect.left - (containerRect.width / 2) + (elementRect.width / 2);
+        
+        scrollContainerRef.current.scrollTo({
+          left: scrollContainerRef.current.scrollLeft + scrollLeft,
+          behavior: 'smooth'
+        });
+        
+        setTimeout(checkScrollPosition, 300);
+      }
+    }
+  }, [activeSubject]);
+
   return (
     <div className="mb-6">
       <div className="border-b border-gray-200 relative">
@@ -225,7 +246,7 @@ const SubjectTabs: React.FC<SubjectTabsProps> = ({ subjects, activeSubject, onSu
         {/* Scrollable container with padding for arrows */}
         <div 
           ref={scrollContainerRef}
-          className="flex overflow-x-auto scrollbar-hide pb-4 -mb-px px-8" 
+          className="flex overflow-x-auto scrollbar-hide pb-4 -mb-px px-0" 
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <style jsx>{`
@@ -233,7 +254,7 @@ const SubjectTabs: React.FC<SubjectTabsProps> = ({ subjects, activeSubject, onSu
               display: none;
             }
           `}</style>
-          <nav className="flex space-x-2 min-w-max" aria-label="Materii">
+          <nav className="flex space-x-2 min-w-max pl-0" aria-label="Materii">
             {subjects.map((subject) => {
               const config = getSubjectConfig(subject);
               const IconComponent = config.icon;
@@ -242,6 +263,7 @@ const SubjectTabs: React.FC<SubjectTabsProps> = ({ subjects, activeSubject, onSu
               return (
                 <button
                   key={subject}
+                  data-subject={subject}
                   onClick={() => onSubjectChange(subject)}
                   className={`flex items-center whitespace-nowrap px-4 py-3 border-b-2 font-medium text-sm transition-all duration-200 transform hover:scale-105 ${
                     isActive
