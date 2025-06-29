@@ -192,3 +192,48 @@
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
+
+/* ElevenLabs Widget Mobile Responsiveness */
+/* Ascunde widget-ul ElevenLabs pe dispozitive mobile */
+@media (max-width: 767px) {
+  /* Selectează widget-ul ElevenLabs și îl ascunde complet */
+  elevenlabs-convai {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+  
+  /* Asigură că spațiul ocupat de widget este eliberat */
+  body elevenlabs-convai {
+    position: absolute !important;
+    z-index: -9999 !important;
+  }
+  
+  /* Previne orice interacțiune cu widget-ul pe mobile */
+  body.has-elevenlabs-widget {
+    overflow: auto !important;
+  }
+}
+
+/* Asigură tranziția fluidă între stările vizibile și ascunse */
+elevenlabs-convai {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Stiluri pentru desktop (widget vizibil) */
+@media (min-width: 768px) {
+  elevenlabs-convai {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+  }
+}

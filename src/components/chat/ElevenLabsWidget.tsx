@@ -3,8 +3,18 @@ import React, { useEffect, useRef } from 'react';
 const ElevenLabsWidget: React.FC = () => {
   const scriptLoaded = useRef(false);
   const widgetMounted = useRef(false);
+  const isMobileDevice = useRef(false);
 
   useEffect(() => {
+    // Verifică dacă este un dispozitiv mobil (lățime < 768px)
+    const checkMobileDevice = () => {
+      isMobileDevice.current = window.innerWidth < 768;
+    };
+
+    // Verifică inițial și adaugă listener pentru redimensionare
+    checkMobileDevice();
+    window.addEventListener('resize', checkMobileDevice);
+
     // Use the specific agent ID provided
     const agentId = 'agent_01jwtq4zsef3cvgrpw0kzxk7ad';
     
@@ -15,6 +25,12 @@ const ElevenLabsWidget: React.FC = () => {
 
     const initializeWidget = () => {
       try {
+        // Skip initialization on mobile devices
+        if (isMobileDevice.current) {
+          console.log('ElevenLabs widget disabled on mobile devices');
+          return;
+        }
+
         // Check if script is already loaded
         if (!scriptLoaded.current) {
           const script = document.createElement('script');
@@ -43,6 +59,11 @@ const ElevenLabsWidget: React.FC = () => {
 
     const mountWidget = () => {
       try {
+        // Skip mounting on mobile devices
+        if (isMobileDevice.current) {
+          return;
+        }
+
         // Remove existing widget if present
         const existingWidget = document.querySelector('elevenlabs-convai');
         if (existingWidget) {
@@ -82,6 +103,7 @@ const ElevenLabsWidget: React.FC = () => {
     // Cleanup function
     return () => {
       clearTimeout(timeoutId);
+      window.removeEventListener('resize', checkMobileDevice);
       
       try {
         // Remove widget on unmount
