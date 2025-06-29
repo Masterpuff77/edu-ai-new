@@ -47,7 +47,7 @@ export class TavusService {
       'Authorization': `Bearer ${API_KEY}`,
       'Content-Type': 'application/json'
     },
-    timeout: 10000 // 10 second timeout
+    timeout: 30000 // Increased timeout to 30 seconds
   });
 
   // Singleton pattern
