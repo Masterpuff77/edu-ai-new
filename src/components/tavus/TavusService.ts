@@ -27,6 +27,27 @@ export interface TavusMessage {
   metadata?: Record<string, any>;
 }
 
+export interface TavusLiveInteraction {
+  id: string;
+  conversation_id: string;
+  status: 'active' | 'completed' | 'failed';
+  created_at: string;
+  ended_at?: string;
+  mode: 'interactive' | 'streaming';
+}
+
+export interface TavusLiveMessage {
+  id: string;
+  live_id: string;
+  conversation_id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  status: 'created' | 'processing' | 'completed' | 'failed';
+  video_url?: string;
+  transcript?: string;
+  created_at: string;
+}
+
 // Error handling
 class TavusError extends Error {
   status: number;
@@ -47,7 +68,7 @@ export class TavusService {
       'Authorization': `Bearer ${API_KEY}`,
       'Content-Type': 'application/json'
     },
-    timeout: 5000 // Reduced timeout to 5 seconds for faster fallback
+    timeout: 10000 // 10 seconds timeout
   });
   
   private mockMode = true; // Start in mock mode by default for reliability
@@ -135,15 +156,9 @@ export class TavusService {
   // Health check to verify API connectivity
   async checkApiHealth(): Promise<boolean> {
     try {
-      // If we've already determined the API is unhealthy, return that status
-      if (!this.apiHealthStatus) {
-        return false;
-      }
-      
       // Simple GET request to check if API is accessible
-      // Since Tavus doesn't have a dedicated health endpoint, we'll use a simple request
       const response = await this.axiosInstance.get('/personas', { 
-        timeout: 3000 // Even shorter timeout for health check
+        timeout: 3000 // Short timeout for health check
       });
       
       this.apiHealthStatus = response.status === 200;
@@ -342,7 +357,7 @@ export class TavusService {
   }
 
   // Poll for message status until video is ready
-  async pollForVideoStatus(conversationId: string, messageId: string, maxAttempts = 5): Promise<TavusMessage> {
+  async pollForVideoStatus(conversationId: string, messageId: string, maxAttempts = 10): Promise<TavusMessage> {
     // If we're in mock mode, return a mock message
     if (this.mockMode) {
       console.log('[Tavus API] Using mock mode for pollForVideoStatus');
@@ -472,14 +487,15 @@ export class TavusService {
   }
 
   // Live interaction methods based on Tavus documentation
-  async startLiveInteraction(conversationId: string): Promise<any> {
+  async startLiveInteraction(conversationId: string): Promise<TavusLiveInteraction> {
     if (this.mockMode) {
       console.log('[Tavus API] Using mock mode for startLiveInteraction');
       return {
         id: `mock-live-${Date.now()}`,
         conversation_id: conversationId,
         status: 'active',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        mode: 'interactive'
       };
     }
     
@@ -503,12 +519,13 @@ export class TavusService {
         id: `mock-live-${Date.now()}`,
         conversation_id: conversationId,
         status: 'active',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        mode: 'interactive'
       };
     }
   }
 
-  async endLiveInteraction(conversationId: string, liveId: string): Promise<any> {
+  async endLiveInteraction(conversationId: string, liveId: string): Promise<TavusLiveInteraction> {
     if (this.mockMode) {
       console.log('[Tavus API] Using mock mode for endLiveInteraction');
       return {
@@ -516,7 +533,8 @@ export class TavusService {
         conversation_id: conversationId,
         status: 'completed',
         created_at: new Date(Date.now() - 60000).toISOString(),
-        ended_at: new Date().toISOString()
+        ended_at: new Date().toISOString(),
+        mode: 'interactive'
       };
     }
     
@@ -539,12 +557,13 @@ export class TavusService {
         conversation_id: conversationId,
         status: 'completed',
         created_at: new Date(Date.now() - 60000).toISOString(),
-        ended_at: new Date().toISOString()
+        ended_at: new Date().toISOString(),
+        mode: 'interactive'
       };
     }
   }
 
-  async sendLiveMessage(conversationId: string, liveId: string, content: string): Promise<any> {
+  async sendLiveMessage(conversationId: string, liveId: string, content: string): Promise<TavusLiveMessage> {
     if (this.mockMode) {
       console.log('[Tavus API] Using mock mode for sendLiveMessage');
       return {
@@ -555,6 +574,7 @@ export class TavusService {
         role: 'assistant',
         status: 'completed',
         video_url: this.getMockVideo(),
+        transcript: 'Aceasta este o simulare a răspunsului profesorului virtual în modul live. Sistemul funcționează în modul offline din cauza problemelor de conectivitate cu API-ul Tavus.',
         created_at: new Date().toISOString()
       };
     }
@@ -583,19 +603,21 @@ export class TavusService {
         role: 'assistant',
         status: 'completed',
         video_url: this.getMockVideo(),
+        transcript: 'Aceasta este o simulare a răspunsului profesorului virtual în modul live. Sistemul funcționează în modul offline din cauza problemelor de conectivitate cu API-ul Tavus.',
         created_at: new Date().toISOString()
       };
     }
   }
 
-  async getLiveStatus(conversationId: string, liveId: string): Promise<any> {
+  async getLiveStatus(conversationId: string, liveId: string): Promise<TavusLiveInteraction> {
     if (this.mockMode) {
       console.log('[Tavus API] Using mock mode for getLiveStatus');
       return {
         id: liveId,
         conversation_id: conversationId,
         status: 'active',
-        created_at: new Date(Date.now() - 60000).toISOString()
+        created_at: new Date(Date.now() - 60000).toISOString(),
+        mode: 'interactive'
       };
     }
     
@@ -617,12 +639,13 @@ export class TavusService {
         id: liveId,
         conversation_id: conversationId,
         status: 'active',
-        created_at: new Date(Date.now() - 60000).toISOString()
+        created_at: new Date(Date.now() - 60000).toISOString(),
+        mode: 'interactive'
       };
     }
   }
 
-  async getLiveMessages(conversationId: string, liveId: string): Promise<any[]> {
+  async getLiveMessages(conversationId: string, liveId: string): Promise<TavusLiveMessage[]> {
     if (this.mockMode) {
       console.log('[Tavus API] Using mock mode for getLiveMessages');
       return [
@@ -634,6 +657,7 @@ export class TavusService {
           role: 'assistant',
           status: 'completed',
           video_url: this.getMockVideo(),
+          transcript: 'Bună ziua! Sunt profesorul virtual. Cu ce te pot ajuta astăzi?',
           created_at: new Date(Date.now() - 60000).toISOString()
         }
       ];
@@ -662,6 +686,7 @@ export class TavusService {
           role: 'assistant',
           status: 'completed',
           video_url: this.getMockVideo(),
+          transcript: 'Bună ziua! Sunt profesorul virtual. Cu ce te pot ajuta astăzi?',
           created_at: new Date(Date.now() - 60000).toISOString()
         }
       ];
