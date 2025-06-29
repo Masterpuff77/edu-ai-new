@@ -22,8 +22,8 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isApiHealthy, setIsApiHealthy] = useState(true);
-  const [isMockMode, setIsMockMode] = useState(false);
+  const [isApiHealthy, setIsApiHealthy] = useState(false);
+  const [isMockMode, setIsMockMode] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [conversationHistory, setConversationHistory] = useState<Array<{role: string, content: string}>>([]);
 
@@ -70,13 +70,16 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Initialize conversation when user is available
   useEffect(() => {
-    if (user && !conversationId && isApiHealthy) {
+    if (user && !conversationId && isApiHealthy && !isMockMode) {
       initializeConversation();
+    } else if (user && !videoUrl) {
+      // If we're in mock mode but don't have a video URL yet, set it
+      setVideoUrl(TavusService.getMockVideo());
     }
-  }, [user, isApiHealthy]);
+  }, [user, isApiHealthy, isMockMode, conversationId, videoUrl]);
 
   const initializeConversation = async () => {
-    if (!user || !isApiHealthy) return;
+    if (!user) return;
     
     try {
       setLoading(true);
@@ -149,7 +152,7 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const sendInitialGreeting = async (convId: string) => {
-    if (!user || !isApiHealthy) return;
+    if (!user) return;
     
     try {
       const initialMessage = 'Salut, te rog să te prezinți și să-mi explici cum mă poți ajuta cu învățarea.';

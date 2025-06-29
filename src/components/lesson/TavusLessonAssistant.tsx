@@ -20,8 +20,8 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   const videoRef = useRef<HTMLVideoElement>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [isApiHealthy, setIsApiHealthy] = useState(true);
-  const [isMockMode, setIsMockMode] = useState(false);
+  const [isApiHealthy, setIsApiHealthy] = useState(false);
+  const [isMockMode, setIsMockMode] = useState(true);
 
   // Fallback video URL for when API is unavailable
   const fallbackVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';

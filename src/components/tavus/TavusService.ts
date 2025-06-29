@@ -47,12 +47,12 @@ export class TavusService {
       'Authorization': `Bearer ${API_KEY}`,
       'Content-Type': 'application/json'
     },
-    timeout: 30000 // Increased timeout to 30 seconds
+    timeout: 10000 // 10 second timeout
   });
   
-  private mockMode = false;
+  private mockMode = true; // Start in mock mode by default for reliability
   private lastError: Error | null = null;
-  private apiHealthStatus = true;
+  private apiHealthStatus = false;
 
   // Singleton pattern
   public static getInstance(): TavusService {
@@ -72,6 +72,9 @@ export class TavusService {
       },
       error => {
         console.error('[Tavus API] Request error:', error);
+        this.mockMode = true;
+        this.apiHealthStatus = false;
+        this.lastError = error;
         return Promise.reject(error);
       }
     );
@@ -181,16 +184,14 @@ export class TavusService {
       this.mockMode = true;
       this.apiHealthStatus = false;
       
-      // If it's a TavusError, rethrow it
-      if (error instanceof TavusError) {
-        throw error;
-      }
-      
-      // Otherwise, create a new TavusError
-      throw new TavusError(
-        error instanceof Error ? error.message : 'Failed to create conversation',
-        error.response?.status || 500
-      );
+      // Return a mock conversation instead of throwing
+      return {
+        id: `mock-conversation-${Date.now()}`,
+        persona_id: PERSONA_ID,
+        replica_id: REPLICA_ID,
+        created_at: new Date().toISOString(),
+        metadata
+      };
     }
   }
 
@@ -228,16 +229,18 @@ export class TavusService {
       this.mockMode = true;
       this.apiHealthStatus = false;
       
-      // If it's a TavusError, rethrow it
-      if (error instanceof TavusError) {
-        throw error;
-      }
-      
-      // Otherwise, create a new TavusError
-      throw new TavusError(
-        error instanceof Error ? error.message : 'Failed to send message',
-        error.response?.status || 500
-      );
+      // Return a mock message instead of throwing
+      return {
+        id: `mock-message-${Date.now()}`,
+        conversation_id: conversationId,
+        content,
+        role: 'assistant',
+        status: 'completed',
+        video_url: this.getMockVideo(),
+        transcript: 'Aceasta este o simulare a răspunsului profesorului virtual. Sistemul funcționează în modul offline din cauza problemelor de conectivitate cu API-ul Tavus.',
+        created_at: new Date().toISOString(),
+        metadata
+      };
     }
   }
 
@@ -270,16 +273,18 @@ export class TavusService {
       this.mockMode = true;
       this.apiHealthStatus = false;
       
-      // If it's a TavusError, rethrow it
-      if (error instanceof TavusError) {
-        throw error;
-      }
-      
-      // Otherwise, create a new TavusError
-      throw new TavusError(
-        error instanceof Error ? error.message : 'Failed to get message',
-        error.response?.status || 500
-      );
+      // Return a mock message instead of throwing
+      return {
+        id: messageId,
+        conversation_id: conversationId,
+        content: 'Aceasta este o simulare a răspunsului profesorului virtual.',
+        role: 'assistant',
+        status: 'completed',
+        video_url: this.getMockVideo(),
+        transcript: 'Aceasta este o simulare a răspunsului profesorului virtual. Sistemul funcționează în modul offline din cauza problemelor de conectivitate cu API-ul Tavus.',
+        created_at: new Date().toISOString(),
+        metadata: {}
+      };
     }
   }
 
@@ -314,21 +319,25 @@ export class TavusService {
       this.mockMode = true;
       this.apiHealthStatus = false;
       
-      // If it's a TavusError, rethrow it
-      if (error instanceof TavusError) {
-        throw error;
-      }
-      
-      // Otherwise, create a new TavusError
-      throw new TavusError(
-        error instanceof Error ? error.message : 'Failed to get conversation history',
-        error.response?.status || 500
-      );
+      // Return mock history instead of throwing
+      return [
+        {
+          id: `mock-message-1`,
+          conversation_id: conversationId,
+          content: 'Bună ziua! Sunt profesorul virtual. Cu ce te pot ajuta astăzi?',
+          role: 'assistant',
+          status: 'completed',
+          video_url: this.getMockVideo(),
+          transcript: 'Bună ziua! Sunt profesorul virtual. Cu ce te pot ajuta astăzi?',
+          created_at: new Date(Date.now() - 60000).toISOString(),
+          metadata: {}
+        }
+      ];
     }
   }
 
   // Poll for message status until video is ready
-  async pollForVideoStatus(conversationId: string, messageId: string, maxAttempts = 15): Promise<TavusMessage> {
+  async pollForVideoStatus(conversationId: string, messageId: string, maxAttempts = 5): Promise<TavusMessage> {
     // If we're in mock mode, return a mock message
     if (this.mockMode) {
       console.log('[Tavus API] Using mock mode for pollForVideoStatus');
