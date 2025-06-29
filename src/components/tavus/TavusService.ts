@@ -47,7 +47,7 @@ export class TavusService {
       'Authorization': `Bearer ${API_KEY}`,
       'Content-Type': 'application/json'
     },
-    timeout: 10000 // 10 second timeout
+    timeout: 5000 // Reduced timeout to 5 seconds for faster fallback
   });
   
   private mockMode = true; // Start in mock mode by default for reliability
@@ -138,7 +138,7 @@ export class TavusService {
       // Simple GET request to check if API is accessible
       // Since Tavus doesn't have a dedicated health endpoint, we'll use a simple request
       const response = await this.axiosInstance.get('/personas', { 
-        timeout: 5000 // Short timeout for health check
+        timeout: 3000 // Even shorter timeout for health check
       });
       
       this.apiHealthStatus = response.status === 200;
