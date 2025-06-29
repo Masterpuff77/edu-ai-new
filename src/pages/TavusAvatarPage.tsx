@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DailyProvider, DailyIframe } from '@daily-co/daily-react';
+import DailyIframe, { DailyProvider } from '@daily-co/daily-react';
 import { ArrowLeft, Video, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
