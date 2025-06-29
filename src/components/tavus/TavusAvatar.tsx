@@ -20,10 +20,6 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   const [conversationHistory, setConversationHistory] = useState<Array<{role: string, content: string}>>([]);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Mock response for development
-  const useMockResponse = true;
-  const mockVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
-
   useEffect(() => {
     // Initialize conversation when component mounts
     initializeConversation();
@@ -38,16 +34,6 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
     try {
       setLoading(true);
       setError(null);
-
-      if (useMockResponse) {
-        // Use mock data for development
-        setTimeout(() => {
-          setConversationId('mock-conversation-id');
-          setVideoUrl(mockVideoUrl);
-          setLoading(false);
-        }, 1500);
-        return;
-      }
 
       // Real API implementation
       const response = await axios.post(
@@ -71,6 +57,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
 
       if (response.data && response.data.id) {
         setConversationId(response.data.id);
+        console.log("Conversation initialized with ID:", response.data.id);
         
         // Set initial welcome video if available
         if (response.data.video_url) {
@@ -106,7 +93,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   };
 
   const sendMessage = async (content: string, isInitial = false) => {
-    if (!conversationId && !isInitial && !useMockResponse) {
+    if (!conversationId && !isInitial) {
       setError('Conversația nu a fost inițializată. Te rugăm să reîmprospătezi pagina.');
       return;
     }
@@ -118,22 +105,6 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       // Add user message to history
       if (!isInitial) {
         setConversationHistory(prev => [...prev, { role: 'user', content }]);
-      }
-
-      if (useMockResponse) {
-        // Use mock data for development
-        setTimeout(() => {
-          setVideoUrl(mockVideoUrl);
-          setConversationHistory(prev => [
-            ...prev, 
-            { 
-              role: 'assistant', 
-              content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Pot să-ți explic concepte, să răspund la întrebări și să te ghidez prin materialele de studiu. Cu ce te pot ajuta astăzi?' 
-            }
-          ]);
-          setLoading(false);
-        }, 1500);
-        return;
       }
 
       // Real API implementation
@@ -172,10 +143,12 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
 
       if (isInitial && response.data && response.data.id) {
         setConversationId(response.data.id);
+        console.log("Initial message sent, conversation ID:", response.data.id);
       }
 
       if (response.data && response.data.video_url) {
         setVideoUrl(response.data.video_url);
+        console.log("Video URL received:", response.data.video_url);
         
         // Add assistant response to history
         setConversationHistory(prev => [
@@ -187,6 +160,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
         ]);
       } else if (response.data && response.data.status === 'processing') {
         // If video is processing, poll for status
+        console.log("Video is processing, polling for status...");
         pollForVideoStatus(response.data.id);
       } else {
         throw new Error('Nu s-a primit un răspuns valid');
@@ -200,22 +174,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   };
 
   const pollForVideoStatus = async (messageId: string) => {
-    if (!conversationId && !useMockResponse) return;
-
-    if (useMockResponse) {
-      // Use mock data for development
-      setTimeout(() => {
-        setVideoUrl(mockVideoUrl);
-        setConversationHistory(prev => [
-          ...prev, 
-          { 
-            role: 'assistant', 
-            content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Pot să-ți explic concepte, să răspund la întrebări și să te ghidez prin materialele de studiu. Cu ce te pot ajuta astăzi?' 
-          }
-        ]);
-      }, 1500);
-      return;
-    }
+    if (!conversationId) return;
 
     const checkStatus = async () => {
       try {
@@ -230,6 +189,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
 
         if (response.data && response.data.video_url) {
           setVideoUrl(response.data.video_url);
+          console.log("Video URL received from polling:", response.data.video_url);
           
           // Add assistant response to history
           setConversationHistory(prev => [

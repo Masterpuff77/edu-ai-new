@@ -10,6 +10,7 @@ interface TavusContextType {
   error: string | null;
   sendMessage: (content: string) => Promise<void>;
   clearConversation: () => void;
+  isApiHealthy: boolean;
 }
 
 const TavusContext = createContext<TavusContextType | undefined>(undefined);
@@ -20,16 +21,36 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isApiHealthy, setIsApiHealthy] = useState(true);
+
+  // Check API health on component mount
+  useEffect(() => {
+    const checkApiHealth = async () => {
+      try {
+        const isHealthy = await TavusService.checkApiHealth();
+        setIsApiHealthy(isHealthy);
+        
+        if (!isHealthy) {
+          console.warn('Tavus API is not healthy. Some features may not work correctly.');
+        }
+      } catch (error) {
+        console.error('Error checking Tavus API health:', error);
+        setIsApiHealthy(false);
+      }
+    };
+    
+    checkApiHealth();
+  }, []);
 
   // Initialize conversation when user is available
   useEffect(() => {
-    if (user && !conversationId) {
+    if (user && !conversationId && isApiHealthy) {
       initializeConversation();
     }
-  }, [user]);
+  }, [user, isApiHealthy]);
 
   const initializeConversation = async () => {
-    if (!user) return;
+    if (!user || !isApiHealthy) return;
     
     try {
       setLoading(true);
@@ -44,6 +65,7 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       });
 
       setConversationId(conversation.id);
+      console.log("Conversation initialized with ID:", conversation.id);
       
       // Track conversation started
       await TavusAnalytics.trackConversationStarted(
@@ -76,7 +98,7 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const sendInitialGreeting = async (convId: string) => {
-    if (!user) return;
+    if (!user || !isApiHealthy) return;
     
     try {
       const message = await TavusService.sendMessage(
@@ -95,6 +117,7 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       if (message.video_url) {
         setVideoUrl(message.video_url);
+        console.log("Initial video URL received:", message.video_url);
       } else if (message.status === 'processing') {
         await pollForVideo(convId, message.id);
       }
@@ -114,7 +137,7 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const sendMessage = async (content: string) => {
-    if (!user || !conversationId) {
+    if (!user || !conversationId || !isApiHealthy) {
       setError('Conversația nu a fost inițializată corect.');
       return;
     }
@@ -139,6 +162,7 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       if (message.video_url) {
         setVideoUrl(message.video_url);
+        console.log("Video URL received:", message.video_url);
         
         // Track video viewed
         await TavusAnalytics.trackVideoViewed(
@@ -168,13 +192,14 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const pollForVideo = async (convId: string, messageId: string) => {
-    if (!user) return;
+    if (!user || !isApiHealthy) return;
     
     try {
       const message = await TavusService.pollForVideoStatus(convId, messageId);
       
       if (message.video_url) {
         setVideoUrl(message.video_url);
+        console.log("Video URL received from polling:", message.video_url);
         
         // Track video viewed
         await TavusAnalytics.trackVideoViewed(
@@ -205,7 +230,7 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setError(null);
     
     // Re-initialize conversation
-    if (user) {
+    if (user && isApiHealthy) {
       initializeConversation();
     }
   };
@@ -218,7 +243,8 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         loading,
         error,
         sendMessage,
-        clearConversation
+        clearConversation,
+        isApiHealthy
       }}
     >
       {children}

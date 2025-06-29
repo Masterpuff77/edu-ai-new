@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Loader2, AlertCircle, Volume2, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
+import TavusService from '../tavus/TavusService';
+import TavusAnalytics from '../tavus/TavusAnalytics';
 
 interface TavusLessonAssistantProps {
   lessonTitle: string;
@@ -17,9 +19,7 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   const [isMinimized, setIsMinimized] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [retryCount, setRetryCount] = useState(0);
-
-  // Mock video URL for development
-  const mockVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -36,11 +36,60 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       setLoading(true);
       setError(null);
 
-      // Use mock data for development
-      setTimeout(() => {
-        setVideoUrl(mockVideoUrl);
-        setLoading(false);
-      }, 1500);
+      // Check if Tavus API is healthy
+      const isApiHealthy = await TavusService.checkApiHealth();
+      
+      if (!isApiHealthy) {
+        throw new Error('Serviciul Tavus nu este disponibil momentan.');
+      }
+
+      // Create a new conversation
+      const conversation = await TavusService.createConversation({
+        user_id: user?.id || 'anonymous',
+        user_name: user?.name || 'Student',
+        subject: subject,
+        lesson_title: lessonTitle
+      });
+
+      setConversationId(conversation.id);
+      console.log("Conversation initialized with ID:", conversation.id);
+
+      // Track conversation started
+      if (user) {
+        await TavusAnalytics.trackConversationStarted(
+          user.id,
+          conversation.id,
+          {
+            subject,
+            lesson_title: lessonTitle
+          }
+        );
+      }
+
+      // Send initial message
+      const initialMessage = `Salut! Sunt aici pentru a te ajuta cu lecția "${lessonTitle}" la materia ${subject}. Cu ce te pot ajuta?`;
+      const message = await TavusService.sendMessage(
+        conversation.id,
+        initialMessage,
+        { is_initial: true }
+      );
+
+      // Track message sent
+      if (user) {
+        await TavusAnalytics.trackMessageSent(
+          user.id,
+          conversation.id,
+          message.id,
+          initialMessage
+        );
+      }
+
+      if (message.video_url) {
+        setVideoUrl(message.video_url);
+        console.log("Initial video URL received:", message.video_url);
+      } else if (message.status === 'processing') {
+        await pollForVideoStatus(conversation.id, message.id);
+      }
     } catch (error) {
       console.error('Failed to initialize Tavus conversation:', error);
       setError('Nu s-a putut inițializa asistentul pentru această lecție.');
@@ -53,7 +102,7 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!message.trim() || loading) return;
+    if (!message.trim() || loading || !conversationId) return;
 
     const userMessage = message.trim();
     setMessage('');
@@ -62,16 +111,81 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       setLoading(true);
       setError(null);
 
-      // Use mock data for development
-      setTimeout(() => {
-        setVideoUrl(mockVideoUrl);
-        setLoading(false);
-      }, 1500);
+      const response = await TavusService.sendMessage(
+        conversationId,
+        userMessage,
+        {
+          lesson_title: lessonTitle,
+          subject: subject,
+          timestamp: new Date().toISOString()
+        }
+      );
+
+      // Track message sent
+      if (user) {
+        await TavusAnalytics.trackMessageSent(
+          user.id,
+          conversationId,
+          response.id,
+          userMessage
+        );
+      }
+
+      if (response.video_url) {
+        setVideoUrl(response.video_url);
+        console.log("Video URL received:", response.video_url);
+      } else if (response.status === 'processing') {
+        await pollForVideoStatus(conversationId, response.id);
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
       setError('Nu s-a putut trimite mesajul. Te rugăm să încerci din nou.');
+      
+      // Track error
+      if (user && conversationId) {
+        TavusAnalytics.trackError(
+          user.id,
+          conversationId,
+          'message_send_failed',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const pollForVideoStatus = async (convId: string, messageId: string) => {
+    try {
+      const message = await TavusService.pollForVideoStatus(convId, messageId);
+      
+      if (message.video_url) {
+        setVideoUrl(message.video_url);
+        console.log("Video URL received from polling:", message.video_url);
+        
+        // Track video viewed
+        if (user) {
+          await TavusAnalytics.trackVideoViewed(
+            user.id,
+            convId,
+            messageId,
+            0 // Initial view
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Failed to poll for video:', error);
+      setError('Nu s-a putut obține răspunsul video. Te rugăm să încerci din nou.');
+      
+      // Track error
+      if (user) {
+        TavusAnalytics.trackError(
+          user.id,
+          convId,
+          'video_poll_failed',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
     }
   };
 

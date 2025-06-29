@@ -11,6 +11,7 @@ import useAuthStore from './store/authStore';
 import supabase, { isSupabaseAvailable } from './config/supabase';
 import ElevenLabsWidget from './components/chat/ElevenLabsWidget';
 import TavusAvatarButton from './components/tavus/TavusAvatarButton';
+import { TavusProvider } from './components/tavus/TavusContext';
 
 const App: React.FC = () => {
   const { user, isAuthenticated, loading, loadUserProfile, clearAuth } = useAuthStore();
@@ -100,77 +101,79 @@ const App: React.FC = () => {
   }
 
   return (
-    <Router>
-      {/* Only show ElevenLabs widget for authenticated users who completed onboarding */}
-      {isAuthenticated && isOnboardingComplete() && <ElevenLabsWidget />}
-      
-      {/* Show Tavus Avatar button for authenticated users who completed onboarding */}
-      {isAuthenticated && isOnboardingComplete() && <TavusAvatarButton />}
-      
-      <Routes>
-        <Route 
-          path="/" 
-          element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} 
-        />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+    <TavusProvider>
+      <Router>
+        {/* Only show ElevenLabs widget for authenticated users who completed onboarding */}
+        {isAuthenticated && isOnboardingComplete() && <ElevenLabsWidget />}
         
-        <Route 
-          path="/onboarding" 
-          element={
-            isAuthenticated 
-              ? isOnboardingComplete() 
-                ? <Navigate to="/dashboard" /> 
-                : <OnboardingPage />
-              : <Navigate to="/login" />
-          } 
-        />
+        {/* Show Tavus Avatar button for authenticated users who completed onboarding */}
+        {isAuthenticated && isOnboardingComplete() && <TavusAvatarButton />}
         
-        <Route 
-          path="/dashboard" 
-          element={
-            isAuthenticated 
-              ? isOnboardingComplete() 
-                ? <DashboardPage /> 
-                : <Navigate to="/onboarding" />
-              : <Navigate to="/login" />
-          } 
-        />
-        
-        <Route 
-          path="/study-plan" 
-          element={
-            isAuthenticated 
-              ? isOnboardingComplete() 
-                ? <StudyPlanPage /> 
-                : <Navigate to="/onboarding" />
-              : <Navigate to="/login" />
-          } 
-        />
-        
-        <Route 
-          path="/lessons/:lessonId" 
-          element={
-            isAuthenticated 
-              ? isOnboardingComplete() 
-                ? <LessonPage /> 
-                : <Navigate to="/onboarding" />
-              : <Navigate to="/login" />
-          } 
-        />
-        
-        <Route 
-          path="/profile" 
-          element={
-            isAuthenticated 
-              ? <ProfilePage /> 
-              : <Navigate to="/login" />
-          } 
-        />
-        
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </Router>
+        <Routes>
+          <Route 
+            path="/" 
+            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} 
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          
+          <Route 
+            path="/onboarding" 
+            element={
+              isAuthenticated 
+                ? isOnboardingComplete() 
+                  ? <Navigate to="/dashboard" /> 
+                  : <OnboardingPage />
+                : <Navigate to="/login" />
+            } 
+          />
+          
+          <Route 
+            path="/dashboard" 
+            element={
+              isAuthenticated 
+                ? isOnboardingComplete() 
+                  ? <DashboardPage /> 
+                  : <Navigate to="/onboarding" />
+                : <Navigate to="/login" />
+            } 
+          />
+          
+          <Route 
+            path="/study-plan" 
+            element={
+              isAuthenticated 
+                ? isOnboardingComplete() 
+                  ? <StudyPlanPage /> 
+                  : <Navigate to="/onboarding" />
+                : <Navigate to="/login" />
+            } 
+          />
+          
+          <Route 
+            path="/lessons/:lessonId" 
+            element={
+              isAuthenticated 
+                ? isOnboardingComplete() 
+                  ? <LessonPage /> 
+                  : <Navigate to="/onboarding" />
+                : <Navigate to="/login" />
+            } 
+          />
+          
+          <Route 
+            path="/profile" 
+            element={
+              isAuthenticated 
+                ? <ProfilePage /> 
+                : <Navigate to="/login" />
+            } 
+          />
+          
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
+    </TavusProvider>
   );
 };
 

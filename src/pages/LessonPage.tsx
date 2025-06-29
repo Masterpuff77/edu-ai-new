@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import VideoPlayer from '../components/lesson/VideoPlayer';
@@ -9,7 +9,7 @@ import useGamificationStore from '../store/gamificationStore';
 import useAuthStore from '../store/authStore';
 import { ArrowLeft, Trophy, AlertCircle, CheckCircle } from 'lucide-react';
 import supabase from '../config/supabase';
-import TavusAvatar from '../components/tavus/TavusAvatar';
+import TavusLessonAssistant from '../components/lesson/TavusLessonAssistant';
 
 const LessonPage: React.FC = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
@@ -237,7 +237,10 @@ const LessonPage: React.FC = () => {
 
           {showTavusAvatar && (
             <div className="mb-6">
-              <TavusAvatar onClose={() => setShowTavusAvatar(false)} />
+              <TavusLessonAssistant 
+                lessonTitle={currentLesson.title}
+                subject={currentLesson.subject}
+              />
             </div>
           )}
 

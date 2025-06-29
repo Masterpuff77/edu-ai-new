@@ -46,7 +46,8 @@ export class TavusService {
     headers: {
       'Authorization': `Bearer ${API_KEY}`,
       'Content-Type': 'application/json'
-    }
+    },
+    timeout: 10000 // 10 second timeout
   });
 
   // Singleton pattern
@@ -139,6 +140,18 @@ export class TavusService {
     } catch (error) {
       console.error('Failed to get conversation history:', error);
       throw error;
+    }
+  }
+
+  // Health check to verify API connectivity
+  async checkApiHealth(): Promise<boolean> {
+    try {
+      // Use a simple GET request to check if the API is accessible
+      await this.axiosInstance.get('/health');
+      return true;
+    } catch (error) {
+      console.error('Tavus API health check failed:', error);
+      return false;
     }
   }
 
