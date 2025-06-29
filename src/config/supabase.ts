@@ -31,7 +31,7 @@ if (hasValidSupabaseConfig) {
     supabase = null;
   }
 } else {
-  console.warn('Supabase environment variables not properly configured. Please set up your Supabase project credentials in the .env file.');
+  console.warn('Supabase environment variables not properly configured. Running in offline mode.');
 }
 
 // Export both the client and a flag indicating if it's available

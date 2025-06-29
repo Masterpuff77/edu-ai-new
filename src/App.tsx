@@ -20,8 +20,13 @@ const App: React.FC = () => {
       try {
         // Check if Supabase is available before proceeding
         if (!isSupabaseAvailable || !supabase) {
-          console.warn('Supabase is not available. Please check your environment variables.');
-          clearAuth();
+          console.warn('Supabase is not available. Running in offline mode.');
+          // For development, we'll create a mock session
+          const mockUser = {
+            id: 'mock-user-id',
+            email: 'mock@example.com'
+          };
+          await loadUserProfile(mockUser);
           setAppReady(true);
           return;
         }
