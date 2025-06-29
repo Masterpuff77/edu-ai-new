@@ -31,11 +31,15 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         setIsApiHealthy(isHealthy);
         
         if (!isHealthy) {
-          console.warn('Tavus API is not healthy. Some features may not work correctly.');
+          console.warn('Tavus API is not healthy. Using fallback mode.');
+          // If API is not healthy, set a mock video URL
+          setVideoUrl(TavusService.getMockVideo());
         }
       } catch (error) {
         console.error('Error checking Tavus API health:', error);
         setIsApiHealthy(false);
+        // Set mock video URL in case of error
+        setVideoUrl(TavusService.getMockVideo());
       }
     };
     
@@ -82,7 +86,10 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       await sendInitialGreeting(conversation.id);
     } catch (error) {
       console.error('Failed to initialize Tavus conversation:', error);
-      setError('Nu s-a putut inițializa conversația cu profesorul virtual.');
+      setError('Nu s-a putut inițializa conversația cu profesorul virtual. Folosim modul offline.');
+      
+      // Set mock video URL in case of error
+      setVideoUrl(TavusService.getMockVideo());
       
       if (user) {
         TavusAnalytics.trackError(
@@ -123,7 +130,10 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
     } catch (error) {
       console.error('Failed to send initial greeting:', error);
-      setError('Nu s-a putut obține răspunsul inițial de la profesorul virtual.');
+      setError('Nu s-a putut obține răspunsul inițial de la profesorul virtual. Folosim modul offline.');
+      
+      // Set mock video URL in case of error
+      setVideoUrl(TavusService.getMockVideo());
       
       if (user) {
         TavusAnalytics.trackError(
@@ -138,7 +148,9 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const sendMessage = async (content: string) => {
     if (!user || !conversationId || !isApiHealthy) {
-      setError('Conversația nu a fost inițializată corect.');
+      setError('Conversația nu a fost inițializată corect. Folosim modul offline.');
+      // Set mock video URL in case of error
+      setVideoUrl(TavusService.getMockVideo());
       return;
     }
 
@@ -176,7 +188,10 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      setError('Nu s-a putut trimite mesajul. Te rugăm să încerci din nou.');
+      setError('Nu s-a putut trimite mesajul. Folosim modul offline.');
+      
+      // Set mock video URL in case of error
+      setVideoUrl(TavusService.getMockVideo());
       
       if (user) {
         TavusAnalytics.trackError(
@@ -211,7 +226,10 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
     } catch (error) {
       console.error('Failed to poll for video:', error);
-      setError('Nu s-a putut obține răspunsul video. Te rugăm să încerci din nou.');
+      setError('Nu s-a putut obține răspunsul video. Folosim modul offline.');
+      
+      // Set mock video URL in case of error
+      setVideoUrl(TavusService.getMockVideo());
       
       if (user) {
         TavusAnalytics.trackError(
@@ -232,6 +250,9 @@ export const TavusProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // Re-initialize conversation
     if (user && isApiHealthy) {
       initializeConversation();
+    } else {
+      // Set mock video URL in offline mode
+      setVideoUrl(TavusService.getMockVideo());
     }
   };
 

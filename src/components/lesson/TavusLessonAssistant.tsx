@@ -20,10 +20,34 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   const videoRef = useRef<HTMLVideoElement>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isApiHealthy, setIsApiHealthy] = useState(true);
+
+  // Fallback video URL for when API is unavailable
+  const fallbackVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
 
   useEffect(() => {
     if (user) {
-      initializeConversation();
+      // Check API health first
+      const checkApiHealth = async () => {
+        try {
+          const isHealthy = await TavusService.checkApiHealth();
+          setIsApiHealthy(isHealthy);
+          
+          if (!isHealthy) {
+            console.warn('Tavus API is not healthy. Using fallback mode.');
+            setVideoUrl(fallbackVideoUrl);
+          } else {
+            // Initialize conversation when API is healthy
+            initializeConversation();
+          }
+        } catch (error) {
+          console.error('Error checking API health:', error);
+          setIsApiHealthy(false);
+          setVideoUrl(fallbackVideoUrl);
+        }
+      };
+      
+      checkApiHealth();
     }
     
     return () => {
@@ -36,13 +60,6 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       setLoading(true);
       setError(null);
 
-      // Check if Tavus API is healthy
-      const isApiHealthy = await TavusService.checkApiHealth();
-      
-      if (!isApiHealthy) {
-        throw new Error('Serviciul Tavus nu este disponibil momentan.');
-      }
-
       // Create a new conversation
       const conversation = await TavusService.createConversation({
         user_id: user?.id || 'anonymous',
@@ -53,7 +70,7 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
 
       setConversationId(conversation.id);
       console.log("Conversation initialized with ID:", conversation.id);
-
+      
       // Track conversation started
       if (user) {
         await TavusAnalytics.trackConversationStarted(
@@ -66,7 +83,7 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
         );
       }
 
-      // Send initial message
+      // Send initial greeting
       const initialMessage = `Salut! Sunt aici pentru a te ajuta cu lecția "${lessonTitle}" la materia ${subject}. Cu ce te pot ajuta?`;
       const message = await TavusService.sendMessage(
         conversation.id,
@@ -92,8 +109,20 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       }
     } catch (error) {
       console.error('Failed to initialize Tavus conversation:', error);
-      setError('Nu s-a putut inițializa asistentul pentru această lecție.');
+      setError('Nu s-a putut inițializa asistentul pentru această lecție. Folosim modul offline.');
+      setVideoUrl(fallbackVideoUrl);
       setRetryCount(prev => prev + 1);
+      setIsApiHealthy(false);
+      
+      // Track error
+      if (user) {
+        TavusAnalytics.trackError(
+          user.id || 'anonymous',
+          'unknown',
+          'initialization_failed',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -102,10 +131,23 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!message.trim() || loading || !conversationId) return;
+    if (!message.trim() || loading) return;
 
     const userMessage = message.trim();
     setMessage('');
+    
+    // If API is not healthy or no conversation ID, use fallback mode
+    if (!isApiHealthy || !conversationId) {
+      setLoading(true);
+      
+      // Simulate processing time
+      setTimeout(() => {
+        setVideoUrl(fallbackVideoUrl);
+        setLoading(false);
+      }, 1500);
+      
+      return;
+    }
     
     try {
       setLoading(true);
@@ -134,12 +176,23 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       if (response.video_url) {
         setVideoUrl(response.video_url);
         console.log("Video URL received:", response.video_url);
+        
+        // Track video viewed
+        if (user) {
+          await TavusAnalytics.trackVideoViewed(
+            user.id,
+            conversationId,
+            response.id,
+            0 // Initial view
+          );
+        }
       } else if (response.status === 'processing') {
         await pollForVideoStatus(conversationId, response.id);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      setError('Nu s-a putut trimite mesajul. Te rugăm să încerci din nou.');
+      setError('Nu s-a putut trimite mesajul. Folosim modul offline.');
+      setVideoUrl(fallbackVideoUrl);
       
       // Track error
       if (user && conversationId) {
@@ -174,8 +227,9 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
         }
       }
     } catch (error) {
-      console.error('Failed to poll for video:', error);
-      setError('Nu s-a putut obține răspunsul video. Te rugăm să încerci din nou.');
+      console.error('Error polling for video status:', error);
+      setError('Nu s-a putut obține răspunsul video. Folosim modul offline.');
+      setVideoUrl(fallbackVideoUrl);
       
       // Track error
       if (user) {
@@ -201,7 +255,13 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   };
 
   const handleRetry = () => {
-    initializeConversation();
+    if (isApiHealthy) {
+      initializeConversation();
+    } else {
+      // If API is not healthy, just refresh the fallback video
+      setVideoUrl(null);
+      setTimeout(() => setVideoUrl(fallbackVideoUrl), 100);
+    }
   };
 
   return (
@@ -217,7 +277,9 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
           </div>
           <div>
             <h3 className="text-white font-medium text-sm">Profesor Virtual</h3>
-            <p className="text-white/80 text-xs">Asistent pentru {subject}</p>
+            <p className="text-white/80 text-xs">
+              {isApiHealthy ? `Asistent pentru ${subject}` : 'Mod offline'}
+            </p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -274,7 +336,7 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
                 playsInline
                 muted={isMuted}
                 controls={false}
-                loop={retryCount > 0} // Loop video if we've had to retry
+                loop={retryCount > 0 || !isApiHealthy} // Loop video if we've had to retry or in offline mode
               ></video>
             )}
             
@@ -291,6 +353,12 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
                   <h4 className="text-white text-sm font-medium">Profesor Virtual</h4>
                   <p className="text-white/70 text-xs mt-1">Asistent pentru {subject}</p>
                 </div>
+              </div>
+            )}
+            
+            {!isApiHealthy && (
+              <div className="absolute top-2 right-2 bg-yellow-500 text-xs text-white px-2 py-1 rounded-full">
+                Mod offline
               </div>
             )}
           </div>

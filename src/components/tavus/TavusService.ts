@@ -79,6 +79,22 @@ export class TavusService {
         return response;
       },
       error => {
+        // Check if it's a timeout error
+        if (error.code === 'ECONNABORTED') {
+          console.error('[Tavus API] Request timeout:', error.message);
+          return Promise.reject(
+            new TavusError('Request timed out. The server took too long to respond.', 408)
+          );
+        }
+        
+        // Check if it's a network error
+        if (error.message === 'Network Error') {
+          console.error('[Tavus API] Network error:', error.message);
+          return Promise.reject(
+            new TavusError('Network error. Please check your internet connection.', 0)
+          );
+        }
+        
         console.error('[Tavus API] Response error:', error.response?.status, error.response?.data || error.message);
         return Promise.reject(
           new TavusError(
@@ -90,40 +106,80 @@ export class TavusService {
     );
   }
 
+  // Health check to verify API connectivity
+  async checkApiHealth(): Promise<boolean> {
+    try {
+      // Simple GET request to check if API is accessible
+      // Since Tavus doesn't have a dedicated health endpoint, we'll use a simple request
+      const response = await this.axiosInstance.get('/personas', { 
+        timeout: 5000 // Short timeout for health check
+      });
+      return response.status === 200;
+    } catch (error) {
+      console.warn('Tavus API health check failed:', error);
+      return false;
+    }
+  }
+
   // Create a new conversation
   async createConversation(metadata: Record<string, any> = {}): Promise<TavusConversation> {
     try {
+      console.log('[Tavus API] Creating conversation with metadata:', metadata);
       const response = await this.axiosInstance.post('/conversations', {
         persona_id: PERSONA_ID,
         replica_id: REPLICA_ID,
         metadata
       });
       
+      console.log('[Tavus API] Conversation created:', response.data.id);
       return response.data;
     } catch (error) {
       console.error('Failed to create conversation:', error);
-      throw error;
+      
+      // If it's a TavusError, rethrow it
+      if (error instanceof TavusError) {
+        throw error;
+      }
+      
+      // Otherwise, create a new TavusError
+      throw new TavusError(
+        error instanceof Error ? error.message : 'Failed to create conversation',
+        error.response?.status || 500
+      );
     }
   }
 
   // Send a message in an existing conversation
   async sendMessage(conversationId: string, content: string, metadata: Record<string, any> = {}): Promise<TavusMessage> {
     try {
+      console.log(`[Tavus API] Sending message to conversation ${conversationId}:`, content);
       const response = await this.axiosInstance.post(`/conversations/${conversationId}/messages`, {
         content,
         metadata
       });
       
+      console.log(`[Tavus API] Message sent, ID: ${response.data.id}, Status: ${response.data.status}`);
       return response.data;
     } catch (error) {
       console.error('Failed to send message:', error);
-      throw error;
+      
+      // If it's a TavusError, rethrow it
+      if (error instanceof TavusError) {
+        throw error;
+      }
+      
+      // Otherwise, create a new TavusError
+      throw new TavusError(
+        error instanceof Error ? error.message : 'Failed to send message',
+        error.response?.status || 500
+      );
     }
   }
 
   // Get a message by ID
   async getMessage(conversationId: string, messageId: string): Promise<TavusMessage> {
     try {
+      console.log(`[Tavus API] Getting message ${messageId} from conversation ${conversationId}`);
       const response = await this.axiosInstance.get(`/conversations/${conversationId}/messages/${messageId}`);
       return response.data;
     } catch (error) {
@@ -135,6 +191,7 @@ export class TavusService {
   // Get conversation history
   async getConversationHistory(conversationId: string): Promise<TavusMessage[]> {
     try {
+      console.log(`[Tavus API] Getting conversation history for ${conversationId}`);
       const response = await this.axiosInstance.get(`/conversations/${conversationId}/messages`);
       return response.data.data;
     } catch (error) {
@@ -143,38 +200,31 @@ export class TavusService {
     }
   }
 
-  // Health check to verify API connectivity
-  async checkApiHealth(): Promise<boolean> {
-    try {
-      // Use a simple GET request to check if the API is accessible
-      await this.axiosInstance.get('/health');
-      return true;
-    } catch (error) {
-      console.error('Tavus API health check failed:', error);
-      return false;
-    }
-  }
-
   // Poll for message status until video is ready
   async pollForVideoStatus(conversationId: string, messageId: string, maxAttempts = 15): Promise<TavusMessage> {
+    console.log(`[Tavus API] Starting to poll for video status: message ${messageId}, conversation ${conversationId}`);
     return new Promise((resolve, reject) => {
       let attempts = 0;
       
       const checkStatus = async () => {
         try {
+          console.log(`[Tavus API] Polling attempt ${attempts + 1}/${maxAttempts}`);
           const message = await this.getMessage(conversationId, messageId);
           
           if (message.video_url) {
+            console.log(`[Tavus API] Video ready: ${message.video_url}`);
             resolve(message);
             return;
           }
           
           if (message.status === 'failed') {
+            console.error(`[Tavus API] Video generation failed for message ${messageId}`);
             reject(new TavusError('Video generation failed', 500));
             return;
           }
           
           if (attempts >= maxAttempts) {
+            console.error(`[Tavus API] Timeout waiting for video generation after ${maxAttempts} attempts`);
             reject(new TavusError('Timeout waiting for video generation', 408));
             return;
           }
@@ -182,12 +232,18 @@ export class TavusService {
           attempts++;
           setTimeout(checkStatus, 2000);
         } catch (error) {
+          console.error(`[Tavus API] Error during polling:`, error);
           reject(error);
         }
       };
       
       checkStatus();
     });
+  }
+
+  // Fallback method to get a mock video when API is unavailable
+  getMockVideo(): string {
+    return 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
   }
 }
 

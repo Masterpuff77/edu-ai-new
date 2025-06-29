@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { Loader2, AlertCircle, Volume2, VolumeX } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
+import TavusService from './TavusService';
+import TavusAnalytics from './TavusAnalytics';
 
 interface TavusAvatarProps {
   onClose?: () => void;
@@ -19,10 +20,39 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<Array<{role: string, content: string}>>([]);
   const [retryCount, setRetryCount] = useState(0);
+  const [isApiHealthy, setIsApiHealthy] = useState(true);
+
+  // Fallback video URL for when API is unavailable
+  const fallbackVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
 
   useEffect(() => {
-    // Initialize conversation when component mounts
-    initializeConversation();
+    // Check API health first
+    const checkApiHealth = async () => {
+      try {
+        const isHealthy = await TavusService.checkApiHealth();
+        setIsApiHealthy(isHealthy);
+        
+        if (!isHealthy) {
+          console.warn('Tavus API is not healthy. Using fallback mode.');
+          setVideoUrl(fallbackVideoUrl);
+          setConversationHistory([
+            { 
+              role: 'assistant', 
+              content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Momentan funcționez în modul offline, dar pot să-ți răspund la întrebări de bază.' 
+            }
+          ]);
+        } else {
+          // Initialize conversation when API is healthy
+          initializeConversation();
+        }
+      } catch (error) {
+        console.error('Error checking API health:', error);
+        setIsApiHealthy(false);
+        setVideoUrl(fallbackVideoUrl);
+      }
+    };
+    
+    checkApiHealth();
 
     // Cleanup function
     return () => {
@@ -35,55 +65,41 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       setLoading(true);
       setError(null);
 
-      // Real API implementation
-      const response = await axios.post(
-        'https://api.tavus.io/v1/conversations', 
-        {
-          persona_id: 'p7636ec0d04c',
-          replica_id: 'r95fd27b5a37',
-          metadata: {
-            user_id: user?.id || 'anonymous',
-            user_name: user?.name || 'Student',
-            subject: user?.subjects?.[0] || 'general'
-          }
-        },
-        {
-          headers: {
-            'Authorization': 'Bearer 7c3787ab7bf24c2d8247ad651412987f',
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // Create a new conversation
+      const conversation = await TavusService.createConversation({
+        user_id: user?.id || 'anonymous',
+        user_name: user?.name || 'Student',
+        subject: user?.subjects?.[0] || 'general'
+      });
 
-      if (response.data && response.data.id) {
-        setConversationId(response.data.id);
-        console.log("Conversation initialized with ID:", response.data.id);
-        
-        // Set initial welcome video if available
-        if (response.data.video_url) {
-          setVideoUrl(response.data.video_url);
-        } else {
-          // Request initial greeting
-          await sendMessage('Salut, te rog să te prezinți și să-mi explici cum mă poți ajuta cu învățarea.', true);
-        }
-        
-        // Initialize conversation history with system message
-        setConversationHistory([
-          { 
-            role: 'system', 
-            content: `You are a helpful AI professor assistant named Professor Virtual. 
-            You're speaking to ${user?.name || 'a student'} who is studying for 
-            ${user?.examType === 'evaluareNationala' ? 'Evaluarea Națională' : 'Bacalaureat'}.
-            They are interested in ${user?.subjects?.join(', ') || 'various subjects'}.
-            Respond in Romanian language. Be helpful, encouraging, and educational.`
+      setConversationId(conversation.id);
+      console.log("Conversation initialized with ID:", conversation.id);
+      
+      // Track conversation started
+      if (user) {
+        await TavusAnalytics.trackConversationStarted(
+          user.id,
+          conversation.id,
+          {
+            subject: user.subjects?.[0] || 'general'
           }
-        ]);
-      } else {
-        throw new Error('Nu s-a putut inițializa conversația');
+        );
       }
-    } catch (err) {
-      console.error('Error initializing conversation:', err);
-      setError('Nu s-a putut inițializa conversația cu profesorul virtual. Te rugăm să încerci din nou.');
+
+      // Send initial greeting
+      await sendInitialGreeting(conversation.id);
+    } catch (error) {
+      console.error('Error initializing conversation:', error);
+      setError('Nu s-a putut inițializa conversația cu profesorul virtual. Folosim modul offline.');
+      
+      // Fallback to offline mode
+      setVideoUrl(fallbackVideoUrl);
+      setConversationHistory([
+        { 
+          role: 'assistant', 
+          content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Momentan funcționez în modul offline, dar pot să-ți răspund la întrebări de bază.' 
+        }
+      ]);
       
       // Increment retry count
       setRetryCount(prev => prev + 1);
@@ -92,148 +108,58 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
     }
   };
 
-  const sendMessage = async (content: string, isInitial = false) => {
-    if (!conversationId && !isInitial) {
-      setError('Conversația nu a fost inițializată. Te rugăm să reîmprospătezi pagina.');
-      return;
-    }
-
+  const sendInitialGreeting = async (convId: string) => {
     try {
-      setLoading(true);
-      setError(null);
-
+      const initialMessage = 'Salut, te rog să te prezinți și să-mi explici cum mă poți ajuta cu învățarea.';
+      
       // Add user message to history
-      if (!isInitial) {
-        setConversationHistory(prev => [...prev, { role: 'user', content }]);
-      }
-
-      // Real API implementation
-      const endpoint = isInitial 
-        ? 'https://api.tavus.io/v1/conversations' 
-        : `https://api.tavus.io/v1/conversations/${conversationId}/messages`;
-
-      const payload = isInitial 
-        ? {
-            persona_id: 'p7636ec0d04c',
-            replica_id: 'r95fd27b5a37',
-            message: content,
-            metadata: {
-              user_id: user?.id || 'anonymous',
-              user_name: user?.name || 'Student',
-              subject: user?.subjects?.[0] || 'general'
-            }
-          }
-        : {
-            content,
-            metadata: {
-              timestamp: new Date().toISOString()
-            }
-          };
-
-      const response = await axios.post(
-        endpoint,
-        payload,
-        {
-          headers: {
-            'Authorization': 'Bearer 7c3787ab7bf24c2d8247ad651412987f',
-            'Content-Type': 'application/json'
-          }
-        }
+      setConversationHistory(prev => [...prev, { role: 'user', content: initialMessage }]);
+      
+      const message = await TavusService.sendMessage(
+        convId,
+        initialMessage,
+        { is_initial: true }
       );
 
-      if (isInitial && response.data && response.data.id) {
-        setConversationId(response.data.id);
-        console.log("Initial message sent, conversation ID:", response.data.id);
+      // Track message sent
+      if (user) {
+        await TavusAnalytics.trackMessageSent(
+          user.id,
+          convId,
+          message.id,
+          initialMessage
+        );
       }
 
-      if (response.data && response.data.video_url) {
-        setVideoUrl(response.data.video_url);
-        console.log("Video URL received:", response.data.video_url);
+      if (message.video_url) {
+        setVideoUrl(message.video_url);
+        console.log("Initial video URL received:", message.video_url);
         
         // Add assistant response to history
         setConversationHistory(prev => [
           ...prev, 
           { 
             role: 'assistant', 
-            content: response.data.transcript || 'Răspunsul profesorului virtual' 
+            content: message.transcript || 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea.' 
           }
         ]);
-      } else if (response.data && response.data.status === 'processing') {
-        // If video is processing, poll for status
-        console.log("Video is processing, polling for status...");
-        pollForVideoStatus(response.data.id);
-      } else {
-        throw new Error('Nu s-a primit un răspuns valid');
+      } else if (message.status === 'processing') {
+        await pollForVideoStatus(convId, message.id);
       }
-    } catch (err) {
-      console.error('Error sending message:', err);
-      setError('Nu s-a putut trimite mesajul. Te rugăm să încerci din nou.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const pollForVideoStatus = async (messageId: string) => {
-    if (!conversationId) return;
-
-    const checkStatus = async () => {
-      try {
-        const response = await axios.get(
-          `https://api.tavus.io/v1/conversations/${conversationId}/messages/${messageId}`,
-          {
-            headers: {
-              'Authorization': 'Bearer 7c3787ab7bf24c2d8247ad651412987f'
-            }
-          }
-        );
-
-        if (response.data && response.data.video_url) {
-          setVideoUrl(response.data.video_url);
-          console.log("Video URL received from polling:", response.data.video_url);
-          
-          // Add assistant response to history
-          setConversationHistory(prev => [
-            ...prev, 
-            { 
-              role: 'assistant', 
-              content: response.data.transcript || 'Răspunsul profesorului virtual' 
-            }
-          ]);
-          
-          return true;
-        } else if (response.data && response.data.status === 'failed') {
-          throw new Error('Generarea videoclipului a eșuat');
-        }
-        
-        return false;
-      } catch (err) {
-        console.error('Error checking message status:', err);
-        throw err;
-      }
-    };
-
-    // Poll every 2 seconds for up to 30 seconds
-    let attempts = 0;
-    const maxAttempts = 15;
-    
-    const poll = async () => {
-      if (attempts >= maxAttempts) {
-        setError('Generarea răspunsului video durează mai mult decât de obicei. Te rugăm să încerci din nou.');
-        return;
-      }
+    } catch (error) {
+      console.error('Error sending initial greeting:', error);
+      setError('Nu s-a putut obține răspunsul inițial. Folosim modul offline.');
       
-      try {
-        const isDone = await checkStatus();
-        if (!isDone) {
-          attempts++;
-          setTimeout(poll, 2000);
+      // Fallback to offline mode
+      setVideoUrl(fallbackVideoUrl);
+      setConversationHistory(prev => [
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Momentan funcționez în modul offline, dar pot să-ți răspund la întrebări de bază.' 
         }
-      } catch (err) {
-        setError('A apărut o eroare în timpul generării răspunsului video.');
-      }
-    };
-    
-    poll();
+      ]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -242,7 +168,156 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
     
     const userMessage = message.trim();
     setMessage('');
-    await sendMessage(userMessage);
+    
+    // Add user message to history
+    setConversationHistory(prev => [...prev, { role: 'user', content: userMessage }]);
+    
+    // If API is not healthy, use fallback mode
+    if (!isApiHealthy || !conversationId) {
+      setLoading(true);
+      
+      // Simulate processing time
+      setTimeout(() => {
+        setVideoUrl(fallbackVideoUrl);
+        setConversationHistory(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: 'Îmi pare rău, momentan funcționez în modul offline și nu pot procesa această cerere. Te rog să încerci din nou mai târziu.' 
+          }
+        ]);
+        setLoading(false);
+      }, 1500);
+      
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await TavusService.sendMessage(
+        conversationId,
+        userMessage,
+        {
+          timestamp: new Date().toISOString()
+        }
+      );
+
+      // Track message sent
+      if (user) {
+        await TavusAnalytics.trackMessageSent(
+          user.id,
+          conversationId,
+          response.id,
+          userMessage
+        );
+      }
+
+      if (response.video_url) {
+        setVideoUrl(response.video_url);
+        console.log("Video URL received:", response.video_url);
+        
+        // Add assistant response to history
+        setConversationHistory(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: response.transcript || 'Răspunsul profesorului virtual' 
+          }
+        ]);
+        
+        // Track video viewed
+        if (user) {
+          await TavusAnalytics.trackVideoViewed(
+            user.id,
+            conversationId,
+            response.id,
+            0 // Initial view
+          );
+        }
+      } else if (response.status === 'processing') {
+        await pollForVideoStatus(conversationId, response.id);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Nu s-a putut trimite mesajul. Folosim modul offline.');
+      
+      // Fallback to offline mode
+      setVideoUrl(fallbackVideoUrl);
+      setConversationHistory(prev => [
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: 'Îmi pare rău, a apărut o eroare. Te rog să încerci din nou mai târziu.' 
+        }
+      ]);
+      
+      // Track error
+      if (user && conversationId) {
+        TavusAnalytics.trackError(
+          user.id,
+          conversationId,
+          'message_send_failed',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pollForVideoStatus = async (convId: string, messageId: string) => {
+    try {
+      const message = await TavusService.pollForVideoStatus(convId, messageId);
+      
+      if (message.video_url) {
+        setVideoUrl(message.video_url);
+        console.log("Video URL received from polling:", message.video_url);
+        
+        // Add assistant response to history
+        setConversationHistory(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: message.transcript || 'Răspunsul profesorului virtual' 
+          }
+        ]);
+        
+        // Track video viewed
+        if (user) {
+          await TavusAnalytics.trackVideoViewed(
+            user.id,
+            convId,
+            messageId,
+            0 // Initial view
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error polling for video status:', error);
+      setError('Nu s-a putut obține răspunsul video. Folosim modul offline.');
+      
+      // Fallback to offline mode
+      setVideoUrl(fallbackVideoUrl);
+      setConversationHistory(prev => [
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: 'Îmi pare rău, a apărut o eroare. Te rog să încerci din nou mai târziu.' 
+        }
+      ]);
+      
+      // Track error
+      if (user) {
+        TavusAnalytics.trackError(
+          user.id,
+          convId,
+          'video_poll_failed',
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }
   };
 
   const toggleMute = () => {
@@ -257,7 +332,13 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   };
 
   const handleRetry = () => {
-    initializeConversation();
+    if (isApiHealthy) {
+      initializeConversation();
+    } else {
+      // If API is not healthy, just refresh the fallback video
+      setVideoUrl(null);
+      setTimeout(() => setVideoUrl(fallbackVideoUrl), 100);
+    }
   };
 
   return (
@@ -287,7 +368,9 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
               </div>
               <div>
                 <h3 className="text-white font-medium text-sm">Profesor Virtual</h3>
-                <p className="text-white/80 text-xs">Asistent educațional AI</p>
+                <p className="text-white/80 text-xs">
+                  {isApiHealthy ? 'Asistent educațional AI' : 'Mod offline'}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -355,7 +438,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
                 playsInline
                 muted={isMuted}
                 controls={false}
-                loop={retryCount > 0} // Loop video if we've had to retry
+                loop={retryCount > 0 || !isApiHealthy} // Loop video if we've had to retry or in offline mode
               ></video>
             )}
             
@@ -370,8 +453,16 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
                     />
                   </div>
                   <h4 className="text-white text-sm font-medium">Profesor Virtual</h4>
-                  <p className="text-white/70 text-xs mt-1">Asistent educațional AI</p>
+                  <p className="text-white/70 text-xs mt-1">
+                    {isApiHealthy ? 'Asistent educațional AI' : 'Mod offline'}
+                  </p>
                 </div>
+              </div>
+            )}
+            
+            {!isApiHealthy && (
+              <div className="absolute top-2 right-2 bg-yellow-500 text-xs text-white px-2 py-1 rounded-full">
+                Mod offline
               </div>
             )}
           </div>

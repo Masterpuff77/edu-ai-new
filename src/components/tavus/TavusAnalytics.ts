@@ -25,6 +25,25 @@ export class TavusAnalytics {
     try {
       console.log(`[Tavus Analytics] Tracking event: ${event.eventType}`, event);
       
+      // Check if Supabase is available
+      if (!supabase) {
+        console.warn('[Tavus Analytics] Supabase not available, skipping event tracking');
+        return;
+      }
+      
+      // First check if the table exists to avoid 404 errors
+      const { error: tableCheckError } = await supabase
+        .from('tavus_analytics')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+      
+      // If table doesn't exist, log warning and return
+      if (tableCheckError && tableCheckError.code === 'PGRST116') {
+        console.warn('[Tavus Analytics] tavus_analytics table does not exist, skipping event tracking');
+        return;
+      }
+      
       const { error } = await supabase
         .from('tavus_analytics')
         .insert([{
@@ -97,6 +116,24 @@ export class TavusAnalytics {
   // Get user engagement metrics
   async getUserEngagementMetrics(userId: string): Promise<any> {
     try {
+      // Check if Supabase is available
+      if (!supabase) {
+        console.warn('[Tavus Analytics] Supabase not available, cannot fetch metrics');
+        return null;
+      }
+      
+      // Check if table exists
+      const { error: tableCheckError } = await supabase
+        .from('tavus_analytics')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+      
+      if (tableCheckError && tableCheckError.code === 'PGRST116') {
+        console.warn('[Tavus Analytics] tavus_analytics table does not exist, cannot fetch metrics');
+        return null;
+      }
+      
       const { data, error } = await supabase
         .from('tavus_analytics')
         .select('*')
