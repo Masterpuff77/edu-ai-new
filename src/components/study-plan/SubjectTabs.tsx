@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { 
   Calculator, 
   BookOpen, 
@@ -12,7 +12,9 @@ import {
   Lightbulb, 
   TrendingUp, 
   Users, 
-  Heart 
+  Heart,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface SubjectTabsProps {
@@ -22,6 +24,10 @@ interface SubjectTabsProps {
 }
 
 const SubjectTabs: React.FC<SubjectTabsProps> = ({ subjects, activeSubject, onSubjectChange }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+
   const getSubjectConfig = (subject: string) => {
     const configs: { [key: string]: { name: string; icon: React.ComponentType<any>; color: string; bgColor: string; hoverColor: string } } = {
       matematica: { 
@@ -125,10 +131,103 @@ const SubjectTabs: React.FC<SubjectTabsProps> = ({ subjects, activeSubject, onSu
     };
   };
 
+  // Check if scrolling is needed and update arrow visibility
+  const checkScrollPosition = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 5); // 5px buffer
+    }
+  };
+
+  // Initialize and add resize listener
+  useEffect(() => {
+    checkScrollPosition();
+    
+    const handleResize = () => {
+      checkScrollPosition();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [subjects]);
+
+  // Scroll left
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -200,
+        behavior: 'smooth'
+      });
+      
+      // Check scroll position after animation
+      setTimeout(checkScrollPosition, 300);
+    }
+  };
+
+  // Scroll right
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: 200,
+        behavior: 'smooth'
+      });
+      
+      // Check scroll position after animation
+      setTimeout(checkScrollPosition, 300);
+    }
+  };
+
+  // Add scroll event listener
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', checkScrollPosition);
+      return () => scrollContainer.removeEventListener('scroll', checkScrollPosition);
+    }
+  }, []);
+
   return (
     <div className="mb-6">
-      <div className="border-b border-gray-200">
-        <div className="flex overflow-x-auto scrollbar-hide pb-4 -mb-px" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div className="border-b border-gray-200 relative">
+        {/* Left scroll arrow */}
+        {showLeftArrow && (
+          <button 
+            onClick={scrollLeft}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-white rounded-full shadow-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 transform hover:scale-110"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+        )}
+        
+        {/* Right scroll arrow */}
+        {showRightArrow && (
+          <button 
+            onClick={scrollRight}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-white rounded-full shadow-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 transform hover:scale-110"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        )}
+        
+        {/* Gradient fade effect on left side when scrollable */}
+        {showLeftArrow && (
+          <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-[1] pointer-events-none"></div>
+        )}
+        
+        {/* Gradient fade effect on right side when scrollable */}
+        {showRightArrow && (
+          <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-[1] pointer-events-none"></div>
+        )}
+        
+        {/* Scrollable container with padding for arrows */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto scrollbar-hide pb-4 -mb-px px-8" 
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
           <style jsx>{`
             .scrollbar-hide::-webkit-scrollbar {
               display: none;
