@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { DailyIframe, DailyProvider } from '@daily-co/daily-react';
 import { ArrowLeft, Video, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -97,13 +96,14 @@ const TavusAvatarPage: React.FC = () => {
             </div>
           ) : (
             <div className="aspect-video w-full">
-              <DailyProvider>
-                <DailyIframe
-                  url={conversationUrl}
-                  showLeaveButton={true}
-                  showFullscreenButton={true}
-                />
-              </DailyProvider>
+              <iframe
+                src={conversationUrl}
+                width="100%"
+                height="100%"
+                allow="camera; microphone; display-capture; autoplay"
+                className="w-full h-full border-0"
+                title="Tavus Avatar Conversation"
+              />
             </div>
           )}
         </div>
