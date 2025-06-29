@@ -21,6 +21,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   const [conversationHistory, setConversationHistory] = useState<Array<{role: string, content: string}>>([]);
   const [retryCount, setRetryCount] = useState(0);
   const [isApiHealthy, setIsApiHealthy] = useState(true);
+  const [isMockMode, setIsMockMode] = useState(false);
 
   // Fallback video URL for when API is unavailable
   const fallbackVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
@@ -31,6 +32,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       try {
         const isHealthy = await TavusService.checkApiHealth();
         setIsApiHealthy(isHealthy);
+        setIsMockMode(TavusService.isMockMode());
         
         if (!isHealthy) {
           console.warn('Tavus API is not healthy. Using fallback mode.');
@@ -48,7 +50,14 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       } catch (error) {
         console.error('Error checking API health:', error);
         setIsApiHealthy(false);
+        setIsMockMode(true);
         setVideoUrl(fallbackVideoUrl);
+        setConversationHistory([
+          { 
+            role: 'assistant', 
+            content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Momentan funcționez în modul offline, dar pot să-ți răspund la întrebări de bază.' 
+          }
+        ]);
       }
     };
     
@@ -77,13 +86,17 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       
       // Track conversation started
       if (user) {
-        await TavusAnalytics.trackConversationStarted(
-          user.id,
-          conversation.id,
-          {
-            subject: user.subjects?.[0] || 'general'
-          }
-        );
+        try {
+          await TavusAnalytics.trackConversationStarted(
+            user.id,
+            conversation.id,
+            {
+              subject: user.subjects?.[0] || 'general'
+            }
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to track conversation start:', analyticsError);
+        }
       }
 
       // Send initial greeting
@@ -94,6 +107,8 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       
       // Fallback to offline mode
       setVideoUrl(fallbackVideoUrl);
+      setIsMockMode(true);
+      setIsApiHealthy(false);
       setConversationHistory([
         { 
           role: 'assistant', 
@@ -103,6 +118,20 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       
       // Increment retry count
       setRetryCount(prev => prev + 1);
+      
+      // Track error
+      if (user) {
+        try {
+          TavusAnalytics.trackError(
+            user.id,
+            'unknown',
+            'initialization_failed',
+            error instanceof Error ? error.message : String(error)
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to track error:', analyticsError);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -123,12 +152,16 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
 
       // Track message sent
       if (user) {
-        await TavusAnalytics.trackMessageSent(
-          user.id,
-          convId,
-          message.id,
-          initialMessage
-        );
+        try {
+          await TavusAnalytics.trackMessageSent(
+            user.id,
+            convId,
+            message.id,
+            initialMessage
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to track message sent:', analyticsError);
+        }
       }
 
       if (message.video_url) {
@@ -143,6 +176,20 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
             content: message.transcript || 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea.' 
           }
         ]);
+        
+        // Track video viewed
+        if (user) {
+          try {
+            await TavusAnalytics.trackVideoViewed(
+              user.id,
+              convId,
+              message.id,
+              0 // Initial view
+            );
+          } catch (analyticsError) {
+            console.warn('Failed to track video viewed:', analyticsError);
+          }
+        }
       } else if (message.status === 'processing') {
         await pollForVideoStatus(convId, message.id);
       }
@@ -152,6 +199,8 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       
       // Fallback to offline mode
       setVideoUrl(fallbackVideoUrl);
+      setIsMockMode(true);
+      setIsApiHealthy(false);
       setConversationHistory(prev => [
         ...prev, 
         { 
@@ -159,6 +208,20 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
           content: 'Bună ziua! Sunt Profesorul Virtual și sunt aici să te ajut cu învățarea. Momentan funcționez în modul offline, dar pot să-ți răspund la întrebări de bază.' 
         }
       ]);
+      
+      // Track error
+      if (user) {
+        try {
+          TavusAnalytics.trackError(
+            user.id,
+            convId,
+            'initial_greeting_failed',
+            error instanceof Error ? error.message : String(error)
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to track error:', analyticsError);
+        }
+      }
     }
   };
 
@@ -172,8 +235,8 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
     // Add user message to history
     setConversationHistory(prev => [...prev, { role: 'user', content: userMessage }]);
     
-    // If API is not healthy, use fallback mode
-    if (!isApiHealthy || !conversationId) {
+    // If API is not healthy or in mock mode, use fallback mode
+    if (!isApiHealthy || isMockMode || !conversationId) {
       setLoading(true);
       
       // Simulate processing time
@@ -183,7 +246,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
           ...prev, 
           { 
             role: 'assistant', 
-            content: 'Îmi pare rău, momentan funcționez în modul offline și nu pot procesa această cerere. Te rog să încerci din nou mai târziu.' 
+            content: 'Îmi pare rău, momentan funcționez în modul offline și nu pot procesa această cerere în mod personalizat. Te rog să încerci din nou mai târziu când conexiunea cu serverul va fi restabilită.' 
           }
         ]);
         setLoading(false);
@@ -206,12 +269,16 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
 
       // Track message sent
       if (user) {
-        await TavusAnalytics.trackMessageSent(
-          user.id,
-          conversationId,
-          response.id,
-          userMessage
-        );
+        try {
+          await TavusAnalytics.trackMessageSent(
+            user.id,
+            conversationId,
+            response.id,
+            userMessage
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to track message sent:', analyticsError);
+        }
       }
 
       if (response.video_url) {
@@ -229,12 +296,16 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
         
         // Track video viewed
         if (user) {
-          await TavusAnalytics.trackVideoViewed(
-            user.id,
-            conversationId,
-            response.id,
-            0 // Initial view
-          );
+          try {
+            await TavusAnalytics.trackVideoViewed(
+              user.id,
+              conversationId,
+              response.id,
+              0 // Initial view
+            );
+          } catch (analyticsError) {
+            console.warn('Failed to track video viewed:', analyticsError);
+          }
         }
       } else if (response.status === 'processing') {
         await pollForVideoStatus(conversationId, response.id);
@@ -245,6 +316,8 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       
       // Fallback to offline mode
       setVideoUrl(fallbackVideoUrl);
+      setIsMockMode(true);
+      setIsApiHealthy(false);
       setConversationHistory(prev => [
         ...prev, 
         { 
@@ -255,12 +328,16 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       
       // Track error
       if (user && conversationId) {
-        TavusAnalytics.trackError(
-          user.id,
-          conversationId,
-          'message_send_failed',
-          error instanceof Error ? error.message : String(error)
-        );
+        try {
+          TavusAnalytics.trackError(
+            user.id,
+            conversationId,
+            'message_send_failed',
+            error instanceof Error ? error.message : String(error)
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to track error:', analyticsError);
+        }
       }
     } finally {
       setLoading(false);
@@ -286,12 +363,16 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
         
         // Track video viewed
         if (user) {
-          await TavusAnalytics.trackVideoViewed(
-            user.id,
-            convId,
-            messageId,
-            0 // Initial view
-          );
+          try {
+            await TavusAnalytics.trackVideoViewed(
+              user.id,
+              convId,
+              messageId,
+              0 // Initial view
+            );
+          } catch (analyticsError) {
+            console.warn('Failed to track video viewed:', analyticsError);
+          }
         }
       }
     } catch (error) {
@@ -300,6 +381,8 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       
       // Fallback to offline mode
       setVideoUrl(fallbackVideoUrl);
+      setIsMockMode(true);
+      setIsApiHealthy(false);
       setConversationHistory(prev => [
         ...prev, 
         { 
@@ -310,12 +393,16 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
       
       // Track error
       if (user) {
-        TavusAnalytics.trackError(
-          user.id,
-          convId,
-          'video_poll_failed',
-          error instanceof Error ? error.message : String(error)
-        );
+        try {
+          TavusAnalytics.trackError(
+            user.id,
+            convId,
+            'video_poll_failed',
+            error instanceof Error ? error.message : String(error)
+          );
+        } catch (analyticsError) {
+          console.warn('Failed to track error:', analyticsError);
+        }
       }
     }
   };
@@ -332,7 +419,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   };
 
   const handleRetry = () => {
-    if (isApiHealthy) {
+    if (isApiHealthy && !isMockMode) {
       initializeConversation();
     } else {
       // If API is not healthy, just refresh the fallback video
@@ -369,7 +456,7 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
               <div>
                 <h3 className="text-white font-medium text-sm">Profesor Virtual</h3>
                 <p className="text-white/80 text-xs">
-                  {isApiHealthy ? 'Asistent educațional AI' : 'Mod offline'}
+                  {isApiHealthy && !isMockMode ? 'Asistent educațional AI' : 'Mod offline'}
                 </p>
               </div>
             </div>
@@ -438,7 +525,14 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
                 playsInline
                 muted={isMuted}
                 controls={false}
-                loop={retryCount > 0 || !isApiHealthy} // Loop video if we've had to retry or in offline mode
+                loop={retryCount > 0 || isMockMode} // Loop video if we've had to retry or in offline mode
+                onError={(e) => {
+                  console.error('Video error:', e);
+                  setError('Eroare la încărcarea video. Folosim modul offline.');
+                  setVideoUrl(fallbackVideoUrl);
+                  setIsMockMode(true);
+                  setIsApiHealthy(false);
+                }}
               ></video>
             )}
             
@@ -454,13 +548,13 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
                   </div>
                   <h4 className="text-white text-sm font-medium">Profesor Virtual</h4>
                   <p className="text-white/70 text-xs mt-1">
-                    {isApiHealthy ? 'Asistent educațional AI' : 'Mod offline'}
+                    {isApiHealthy && !isMockMode ? 'Asistent educațional AI' : 'Mod offline'}
                   </p>
                 </div>
               </div>
             )}
             
-            {!isApiHealthy && (
+            {(!isApiHealthy || isMockMode) && (
               <div className="absolute top-2 right-2 bg-yellow-500 text-xs text-white px-2 py-1 rounded-full">
                 Mod offline
               </div>

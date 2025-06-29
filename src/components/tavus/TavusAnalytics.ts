@@ -11,6 +11,8 @@ export interface AnalyticsEvent {
 // Analytics service
 export class TavusAnalytics {
   private static instance: TavusAnalytics;
+  private isEnabled: boolean = true;
+  private lastError: Error | null = null;
 
   // Singleton pattern
   public static getInstance(): TavusAnalytics {
@@ -22,12 +24,18 @@ export class TavusAnalytics {
 
   // Track event
   async trackEvent(event: AnalyticsEvent): Promise<void> {
+    if (!this.isEnabled) {
+      console.log(`[Tavus Analytics] Analytics disabled, skipping event: ${event.eventType}`);
+      return;
+    }
+    
     try {
       console.log(`[Tavus Analytics] Tracking event: ${event.eventType}`, event);
       
       // Check if Supabase is available
       if (!supabase) {
         console.warn('[Tavus Analytics] Supabase not available, skipping event tracking');
+        this.isEnabled = false;
         return;
       }
       
@@ -38,12 +46,21 @@ export class TavusAnalytics {
         .limit(1)
         .maybeSingle();
       
-      // If table doesn't exist, log warning and return
+      // If table doesn't exist, log warning and disable analytics
       if (tableCheckError && tableCheckError.code === 'PGRST116') {
         console.warn('[Tavus Analytics] tavus_analytics table does not exist, skipping event tracking');
+        this.isEnabled = false;
         return;
       }
       
+      // If we get a different error, it might be a connection issue
+      if (tableCheckError && tableCheckError.code !== 'PGRST116') {
+        console.warn('[Tavus Analytics] Error checking table existence:', tableCheckError);
+        this.lastError = tableCheckError;
+        // Don't disable analytics yet, try to insert anyway
+      }
+      
+      // Try to insert the event
       const { error } = await supabase
         .from('tavus_analytics')
         .insert([{
@@ -55,9 +72,18 @@ export class TavusAnalytics {
       
       if (error) {
         console.error('[Tavus Analytics] Error tracking event:', error);
+        this.lastError = error;
+        
+        // If we get a 404 error, the table doesn't exist
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          this.isEnabled = false;
+        }
       }
     } catch (error) {
       console.error('[Tavus Analytics] Failed to track event:', error);
+      this.lastError = error instanceof Error ? error : new Error(String(error));
+      
+      // Don't disable analytics on unexpected errors, might be temporary
     }
   }
 
@@ -115,6 +141,11 @@ export class TavusAnalytics {
 
   // Get user engagement metrics
   async getUserEngagementMetrics(userId: string): Promise<any> {
+    if (!this.isEnabled) {
+      console.log('[Tavus Analytics] Analytics disabled, skipping metrics retrieval');
+      return null;
+    }
+    
     try {
       // Check if Supabase is available
       if (!supabase) {
@@ -131,6 +162,7 @@ export class TavusAnalytics {
       
       if (tableCheckError && tableCheckError.code === 'PGRST116') {
         console.warn('[Tavus Analytics] tavus_analytics table does not exist, cannot fetch metrics');
+        this.isEnabled = false;
         return null;
       }
       
@@ -142,6 +174,7 @@ export class TavusAnalytics {
       
       if (error) {
         console.error('[Tavus Analytics] Error fetching metrics:', error);
+        this.lastError = error;
         return null;
       }
       
@@ -157,6 +190,7 @@ export class TavusAnalytics {
       return metrics;
     } catch (error) {
       console.error('[Tavus Analytics] Failed to get user metrics:', error);
+      this.lastError = error instanceof Error ? error : new Error(String(error));
       return null;
     }
   }
@@ -190,6 +224,22 @@ export class TavusAnalytics {
     
     const sum = messagePairs.reduce((acc, time) => acc + time, 0);
     return sum / messagePairs.length;
+  }
+
+  // Reset analytics
+  resetAnalytics(): void {
+    this.isEnabled = true;
+    this.lastError = null;
+  }
+
+  // Get analytics status
+  isAnalyticsEnabled(): boolean {
+    return this.isEnabled;
+  }
+
+  // Get last error
+  getLastError(): Error | null {
+    return this.lastError;
   }
 }
 
