@@ -255,25 +255,25 @@ const LearningAssistant: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="bg-gradient-to-br from-indigo-400/80 via-purple-500/80 to-pink-400/80 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="relative">
-              <div className="p-3 bg-white/15 rounded-xl backdrop-blur-sm">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                 <Bot className="h-6 w-6 text-white" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
             </div>
             <div>
               <h3 className="text-xl font-bold text-white">Asistentul tău AI</h3>
-              <p className="text-white/70 text-sm">Întotdeauna disponibil pentru tine</p>
+              <p className="text-white/80 text-sm">Întotdeauna disponibil pentru tine</p>
             </div>
           </div>
           
           <div className="h-[400px] flex items-center justify-center">
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin text-white mx-auto mb-2" />
-              <p className="text-sm text-white/80">Se încarcă conversația...</p>
+              <p className="text-sm text-white/90">Se încarcă conversația...</p>
             </div>
           </div>
         </div>
@@ -282,15 +282,15 @@ const LearningAssistant: React.FC = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-400/80 via-purple-500/80 to-pink-400/80 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300">
+    <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300">
       {/* Animated background effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-pink-500/15 animate-pulse"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-pulse"></div>
       
       <div className="relative p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="p-3 bg-white/15 rounded-xl backdrop-blur-sm">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                 <Bot className="h-6 w-6 text-white" />
               </div>
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
@@ -300,14 +300,14 @@ const LearningAssistant: React.FC = () => {
                 Asistentul tău AI
                 <Zap className="h-5 w-5 text-yellow-300 animate-pulse" />
               </h3>
-              <p className="text-white/70 text-sm">Întotdeauna disponibil pentru tine</p>
+              <p className="text-white/80 text-sm">Întotdeauna disponibil pentru tine</p>
             </div>
           </div>
           
           <button
             onClick={clearChat}
             disabled={loading || messages.length <= 1}
-            className="p-2 text-white/60 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
+            className="p-2 text-white/70 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
             title="Șterge conversația"
           >
             <Trash2 className="h-4 w-4" />
@@ -315,7 +315,7 @@ const LearningAssistant: React.FC = () => {
         </div>
         
         {/* Enhanced chat container */}
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border border-white/15 shadow-inner">
+        <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border border-white/20 shadow-inner">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -324,14 +324,14 @@ const LearningAssistant: React.FC = () => {
               <div
                 className={`max-w-[80%] rounded-xl p-3 backdrop-blur-sm ${
                   message.isUser
-                    ? 'bg-white text-gray-800 shadow-lg border border-white/20'
-                    : 'bg-white/15 text-white shadow-lg border border-white/10'
+                    ? 'bg-white text-gray-800 shadow-lg border border-white/30'
+                    : 'bg-white/20 text-white shadow-lg border border-white/20'
                 }`}
               >
                 <div className="text-sm">
                   {renderTextWithMath(message.content)}
                 </div>
-                <span className={`text-xs ${message.isUser ? 'text-gray-500' : 'text-white/60'} mt-1 block`}>
+                <span className={`text-xs ${message.isUser ? 'text-gray-500' : 'text-white/70'} mt-1 block`}>
                   {message.timestamp.toLocaleTimeString('ro-RO', { 
                     hour: '2-digit', 
                     minute: '2-digit' 
@@ -343,10 +343,10 @@ const LearningAssistant: React.FC = () => {
           
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-white/15 backdrop-blur-sm text-white border border-white/10 rounded-xl p-3 max-w-[80%] shadow-lg">
+              <div className="bg-white/20 backdrop-blur-sm text-white border border-white/20 rounded-xl p-3 max-w-[80%] shadow-lg">
                 <div className="flex items-center space-x-2">
                   <Loader2 className="h-4 w-4 animate-spin text-white" />
-                  <span className="text-sm text-white/90">AI-ul scrie...</span>
+                  <span className="text-sm text-white">AI-ul scrie...</span>
                 </div>
               </div>
             </div>
@@ -357,19 +357,19 @@ const LearningAssistant: React.FC = () => {
 
         {/* Enhanced input form */}
         <form onSubmit={handleSubmit} className="relative">
-          <div className="relative bg-white/10 backdrop-blur-md rounded-xl border border-white/15 shadow-lg">
+          <div className="relative bg-white/15 backdrop-blur-md rounded-xl border border-white/20 shadow-lg">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Întreabă-mă orice despre lecțiile tale..."
-              className="w-full pr-14 pl-4 py-3 bg-transparent text-white placeholder-white/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/30"
+              className="w-full pr-14 pl-4 py-3 bg-transparent text-white placeholder-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40"
               disabled={loading}
             />
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-white/15 rounded-lg hover:bg-white/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm border border-white/15 hover:scale-105"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-white/20 rounded-lg hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm border border-white/20 hover:scale-105"
             >
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -381,7 +381,7 @@ const LearningAssistant: React.FC = () => {
         </form>
 
         {/* AI capabilities indicator */}
-        <div className="mt-3 flex items-center justify-center gap-2 text-white/50 text-xs">
+        <div className="mt-3 flex items-center justify-center gap-2 text-white/60 text-xs">
           <Sparkles className="h-3 w-3" />
           <span>Pot rezolva probleme de matematică, explica concepte și răspunde la întrebări</span>
           <Sparkles className="h-3 w-3" />
