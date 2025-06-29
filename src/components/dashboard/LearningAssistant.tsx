@@ -255,13 +255,15 @@ const LearningAssistant: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-md overflow-hidden">
+      <div className="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-xl shadow-lg border border-indigo-200 overflow-hidden">
         <div className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-indigo-200 rounded-lg">
-              <Sparkles className="h-5 w-5 text-indigo-600" />
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900">Asistentul tău de învățare</h3>
+            <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Asistentul tău de învățare
+            </h3>
           </div>
           
           <div className="h-[400px] flex items-center justify-center">
@@ -276,14 +278,16 @@ const LearningAssistant: React.FC = () => {
   }
 
   return (
-    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-md overflow-hidden">
+    <div className="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-xl shadow-lg border border-indigo-200 overflow-hidden">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-indigo-200 rounded-lg">
-              <Sparkles className="h-5 w-5 text-indigo-600" />
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900">Asistentul tău de învățare</h3>
+            <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Asistentul tău de învățare
+            </h3>
           </div>
           
           <button
@@ -296,24 +300,24 @@ const LearningAssistant: React.FC = () => {
           </button>
         </div>
         
-        {/* Chat container with light purple background and purple border */}
-        <div className="bg-purple-50 rounded-lg p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border-2 border-purple-200">
+        {/* Chat container with enhanced styling */}
+        <div className="bg-gradient-to-br from-white to-indigo-50 rounded-xl p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border-2 border-indigo-200 shadow-inner">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
+                className={`max-w-[80%] rounded-xl p-4 shadow-md ${
                   message.isUser
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white shadow-sm text-gray-800 border border-gray-200'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
+                    : 'bg-white text-gray-800 border border-indigo-100'
                 }`}
               >
-                <div className="text-sm">
+                <div className="text-sm leading-relaxed">
                   {renderTextWithMath(message.content)}
                 </div>
-                <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-1 block`}>
+                <span className={`text-xs ${message.isUser ? 'text-indigo-200' : 'text-gray-400'} mt-2 block`}>
                   {message.timestamp.toLocaleTimeString('ro-RO', { 
                     hour: '2-digit', 
                     minute: '2-digit' 
@@ -325,7 +329,7 @@ const LearningAssistant: React.FC = () => {
           
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-white shadow-sm text-gray-800 border border-gray-200 rounded-lg p-3 max-w-[80%]">
+              <div className="bg-white shadow-md text-gray-800 border border-indigo-100 rounded-xl p-4 max-w-[80%]">
                 <div className="flex items-center space-x-2">
                   <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
                   <span className="text-sm text-gray-600">AI-ul scrie...</span>
@@ -343,13 +347,13 @@ const LearningAssistant: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Scrie un mesaj..."
-            className="w-full pr-12 pl-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full pr-12 pl-4 py-3 bg-white border-2 border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-indigo-600 rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
           >
             {loading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
