@@ -74,28 +74,10 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   loadUserProfile: async (authUser: AuthUser) => {
-    // If Supabase is not available, create a mock user for development
+    // If Supabase is not available, skip profile loading
     if (!isSupabaseAvailable || !supabase) {
-      console.warn('Supabase not available, creating mock user for development');
-      const mockUser: User = {
-        id: authUser.id || 'mock-user-id',
-        email: authUser.email || 'mock@example.com',
-        name: 'Test User',
-        level: 1,
-        experience: 100,
-        subjects: ['matematica', 'romana'],
-        badges: [],
-        createdAt: new Date().toISOString(),
-        examType: 'bacalaureat',
-        grade: 12
-      };
-      
-      set({
-        user: mockUser,
-        isAuthenticated: true,
-        loading: false,
-        error: null
-      });
+      console.warn('Supabase not available, cannot load user profile');
+      set({ error: 'Database connection not available', loading: false });
       return;
     }
 
@@ -156,32 +138,11 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signUp: async (email: string, password: string) => {
-    // If Supabase is not available, simulate signup with mock data
+    // If Supabase is not available, show appropriate error
     if (!isSupabaseAvailable || !supabase) {
-      console.warn('Supabase not available, simulating signup with mock data');
-      
-      // Simulate loading
-      set({ loading: true, error: null });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: 'mock-' + Math.random().toString(36).substring(2, 15),
-        email: email,
-        name: '',
-        level: 1,
-        experience: 0,
-        subjects: [],
-        badges: [],
-        createdAt: new Date().toISOString(),
-      };
-      
-      set({
-        user: mockUser,
-        isAuthenticated: true,
-        loading: false,
-        error: null
+      set({ 
+        error: 'Authentication service is not available. Please check your configuration.', 
+        loading: false 
       });
       return;
     }
@@ -203,34 +164,11 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signIn: async (email: string, password: string) => {
-    // If Supabase is not available, simulate signin with mock data
+    // If Supabase is not available, show appropriate error
     if (!isSupabaseAvailable || !supabase) {
-      console.warn('Supabase not available, simulating signin with mock data');
-      
-      // Simulate loading
-      set({ loading: true, error: null });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: 'mock-' + Math.random().toString(36).substring(2, 15),
-        email: email,
-        name: 'Test User',
-        level: 1,
-        experience: 100,
-        subjects: ['matematica', 'romana'],
-        badges: [],
-        createdAt: new Date().toISOString(),
-        examType: 'bacalaureat',
-        grade: 12
-      };
-      
-      set({
-        user: mockUser,
-        isAuthenticated: true,
-        loading: false,
-        error: null
+      set({ 
+        error: 'Authentication service is not available. Please check your configuration.', 
+        loading: false 
       });
       return;
     }
@@ -252,34 +190,11 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signInWithGoogle: async () => {
-    // If Supabase is not available, simulate Google signin with mock data
+    // If Supabase is not available, show appropriate error
     if (!isSupabaseAvailable || !supabase) {
-      console.warn('Supabase not available, simulating Google signin with mock data');
-      
-      // Simulate loading
-      set({ loading: true, error: null });
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        id: 'google-mock-' + Math.random().toString(36).substring(2, 15),
-        email: 'google-user@example.com',
-        name: 'Google User',
-        level: 1,
-        experience: 100,
-        subjects: ['matematica', 'romana'],
-        badges: [],
-        createdAt: new Date().toISOString(),
-        examType: 'bacalaureat',
-        grade: 12
-      };
-      
-      set({
-        user: mockUser,
-        isAuthenticated: true,
-        loading: false,
-        error: null
+      set({ 
+        error: 'Authentication service is not available. Please check your configuration.', 
+        loading: false 
       });
       return;
     }

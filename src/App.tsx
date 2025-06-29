@@ -20,13 +20,8 @@ const App: React.FC = () => {
       try {
         // Check if Supabase is available before proceeding
         if (!isSupabaseAvailable || !supabase) {
-          console.warn('Supabase is not available. Running in offline mode.');
-          // For development, we'll create a mock session
-          const mockUser = {
-            id: 'mock-user-id',
-            email: 'mock@example.com'
-          };
-          await loadUserProfile(mockUser);
+          console.warn('Supabase is not available. Please check your environment variables.');
+          clearAuth();
           setAppReady(true);
           return;
         }
@@ -107,7 +102,6 @@ const App: React.FC = () => {
     <Router>
       {/* Only show ElevenLabs widget for authenticated users who completed onboarding */}
       {isAuthenticated && isOnboardingComplete() && <ElevenLabsWidget />}
-      
       <Routes>
         <Route 
           path="/" 
