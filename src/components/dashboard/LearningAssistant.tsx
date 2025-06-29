@@ -283,20 +283,20 @@ const LearningAssistant: React.FC = () => {
 
   return (
     <div className="relative group">
-      {/* Glowing border animation container */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 rounded-xl opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt">
+      {/* Enhanced glowing border animation container with better visibility */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 via-cyan-400 to-purple-500 rounded-xl opacity-90 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt animate-pulse-glow">
         <div className="absolute inset-0 rounded-xl overflow-hidden">
-          {/* Moving light trail */}
+          {/* Enhanced moving light trail with bright colors */}
           <div className="absolute inset-0 rounded-xl">
             <div className="absolute w-full h-full">
-              {/* Top edge */}
-              <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 animate-border-light-top"></div>
-              {/* Right edge */}
-              <div className="absolute top-0 right-0 w-0.5 h-full bg-gradient-to-b from-transparent via-white to-transparent opacity-0 animate-border-light-right"></div>
-              {/* Bottom edge */}
-              <div className="absolute bottom-0 right-0 w-full h-0.5 bg-gradient-to-l from-transparent via-white to-transparent opacity-0 animate-border-light-bottom"></div>
-              {/* Left edge */}
-              <div className="absolute bottom-0 left-0 w-0.5 h-full bg-gradient-to-t from-transparent via-white to-transparent opacity-0 animate-border-light-left"></div>
+              {/* Top edge - Bright Yellow */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-300 to-transparent opacity-0 animate-border-light-top"></div>
+              {/* Right edge - Bright Cyan */}
+              <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-transparent via-cyan-300 to-transparent opacity-0 animate-border-light-right"></div>
+              {/* Bottom edge - Bright Magenta */}
+              <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-l from-transparent via-fuchsia-300 to-transparent opacity-0 animate-border-light-bottom"></div>
+              {/* Left edge - Bright Green */}
+              <div className="absolute bottom-0 left-0 w-1 h-full bg-gradient-to-t from-transparent via-green-300 to-transparent opacity-0 animate-border-light-left"></div>
             </div>
           </div>
         </div>

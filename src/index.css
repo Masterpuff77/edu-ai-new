@@ -37,7 +37,7 @@
   color: #374151 !important;
 }
 
-/* Glowing border animation */
+/* Enhanced Glowing border animation with better visibility */
 @keyframes border-light-top {
   0% {
     opacity: 0;
@@ -116,26 +116,38 @@
 
 .animate-border-light-top {
   animation: border-light-top 3s infinite;
-  filter: blur(1px);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  filter: blur(2px) brightness(1.5);
+  box-shadow: 
+    0 0 20px rgba(255, 255, 0, 0.8),
+    0 0 40px rgba(255, 255, 0, 0.6),
+    0 0 60px rgba(255, 255, 0, 0.4);
 }
 
 .animate-border-light-right {
   animation: border-light-right 3s infinite;
-  filter: blur(1px);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  filter: blur(2px) brightness(1.5);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.8),
+    0 0 40px rgba(0, 255, 255, 0.6),
+    0 0 60px rgba(0, 255, 255, 0.4);
 }
 
 .animate-border-light-bottom {
   animation: border-light-bottom 3s infinite;
-  filter: blur(1px);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  filter: blur(2px) brightness(1.5);
+  box-shadow: 
+    0 0 20px rgba(255, 0, 255, 0.8),
+    0 0 40px rgba(255, 0, 255, 0.6),
+    0 0 60px rgba(255, 0, 255, 0.4);
 }
 
 .animate-border-light-left {
   animation: border-light-left 3s infinite;
-  filter: blur(1px);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  filter: blur(2px) brightness(1.5);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 0, 0.8),
+    0 0 40px rgba(0, 255, 0, 0.6),
+    0 0 60px rgba(0, 255, 0, 0.4);
 }
 
 @keyframes tilt {
@@ -152,4 +164,24 @@
 
 .animate-tilt {
   animation: tilt 10s ease-in-out infinite;
+}
+
+/* Pulsing glow effect for the main border */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(255, 255, 255, 0.3),
+      0 0 40px rgba(255, 255, 255, 0.2),
+      0 0 60px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(255, 255, 255, 0.5),
+      0 0 60px rgba(255, 255, 255, 0.3),
+      0 0 90px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
