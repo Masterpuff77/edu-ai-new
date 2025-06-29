@@ -9,6 +9,7 @@ import useGamificationStore from '../store/gamificationStore';
 import useAuthStore from '../store/authStore';
 import { ArrowLeft, Trophy, AlertCircle, CheckCircle } from 'lucide-react';
 import supabase from '../config/supabase';
+import TavusAvatar from '../components/tavus/TavusAvatar';
 
 const LessonPage: React.FC = () => {
   const { lessonId } = useParams<{ lessonId: string }>();
@@ -18,6 +19,7 @@ const LessonPage: React.FC = () => {
   const { user } = useAuthStore();
   const [showCompletedMessage, setShowCompletedMessage] = useState(false);
   const [isLessonCompleted, setIsLessonCompleted] = useState(false);
+  const [showTavusAvatar, setShowTavusAvatar] = useState(false);
 
   useEffect(() => {
     if (lessonId && user?.id) {
@@ -121,6 +123,10 @@ const LessonPage: React.FC = () => {
     }
   };
 
+  const toggleTavusAvatar = () => {
+    setShowTavusAvatar(!showTavusAvatar);
+  };
+
   if (loading) {
     return (
       <>
@@ -191,24 +197,33 @@ const LessonPage: React.FC = () => {
               </h1>
             </div>
 
-            <button
-              onClick={handleMarkAsComplete}
-              disabled={isLessonCompleted}
-              className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                isLessonCompleted
-                  ? 'bg-green-100 text-green-800 cursor-default'
-                  : 'bg-green-600 text-white hover:bg-green-700'
-              }`}
-            >
-              {isLessonCompleted ? (
-                <>
-                  <CheckCircle className="h-5 w-5 mr-2" />
-                  Lecție parcursă
-                </>
-              ) : (
-                'Marchează parcursă'
-              )}
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={toggleTavusAvatar}
+                className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+              >
+                {showTavusAvatar ? 'Ascunde Profesorul' : 'Arată Profesorul'}
+              </button>
+
+              <button
+                onClick={handleMarkAsComplete}
+                disabled={isLessonCompleted}
+                className={`inline-flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isLessonCompleted
+                    ? 'bg-green-100 text-green-800 cursor-default'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
+              >
+                {isLessonCompleted ? (
+                  <>
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    Lecție parcursă
+                  </>
+                ) : (
+                  'Marchează parcursă'
+                )}
+              </button>
+            </div>
           </div>
 
           {showCompletedMessage && (
@@ -217,6 +232,12 @@ const LessonPage: React.FC = () => {
               <span className="text-green-800 font-medium">
                 Felicitări! Ai completat activitatea și ai câștigat experiență!
               </span>
+            </div>
+          )}
+
+          {showTavusAvatar && (
+            <div className="mb-6">
+              <TavusAvatar onClose={() => setShowTavusAvatar(false)} />
             </div>
           )}
 

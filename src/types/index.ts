@@ -92,3 +92,33 @@ export interface Notification {
   read: boolean;
   createdAt: string;
 }
+
+// Tavus related interfaces
+export interface TavusConversation {
+  id: string;
+  persona_id: string;
+  replica_id: string;
+  created_at: string;
+  metadata?: Record<string, any>;
+}
+
+export interface TavusMessage {
+  id: string;
+  conversation_id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  status: 'created' | 'processing' | 'completed' | 'failed';
+  video_url?: string;
+  transcript?: string;
+  created_at: string;
+  metadata?: Record<string, any>;
+}
+
+export interface TavusAnalyticsEvent {
+  id: string;
+  user_id: string;
+  conversation_id: string;
+  event_type: string;
+  event_data?: Record<string, any>;
+  created_at: string;
+}
