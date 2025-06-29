@@ -211,25 +211,27 @@ const SubjectTabs: React.FC<SubjectTabsProps> = ({ subjects, activeSubject, onSu
   return (
     <div className="mb-6">
       <div className="border-b border-gray-200 relative">
-        {/* Left scroll arrow */}
+        {/* Left scroll arrow - vertically centered with the text */}
         {showLeftArrow && (
           <button 
             onClick={scrollLeft}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-white rounded-full shadow-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 transform hover:scale-110"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 transform hover:scale-110"
             aria-label="Scroll left"
+            style={{ marginTop: '-2px' }} // Fine-tune vertical alignment
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
         )}
         
-        {/* Right scroll arrow */}
+        {/* Right scroll arrow - vertically centered with the text */}
         {showRightArrow && (
           <button 
             onClick={scrollRight}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-white rounded-full shadow-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 transform hover:scale-110"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 transform hover:scale-110"
             aria-label="Scroll right"
+            style={{ marginTop: '-2px' }} // Fine-tune vertical alignment
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         )}
         
@@ -254,7 +256,7 @@ const SubjectTabs: React.FC<SubjectTabsProps> = ({ subjects, activeSubject, onSu
               display: none;
             }
           `}</style>
-          <nav className="flex space-x-2 min-w-max pl-0" aria-label="Materii">
+          <nav className="flex space-x-2 min-w-max pl-0 pr-8" aria-label="Materii">
             {subjects.map((subject) => {
               const config = getSubjectConfig(subject);
               const IconComponent = config.icon;
