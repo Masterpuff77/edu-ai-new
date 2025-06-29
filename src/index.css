@@ -36,3 +36,120 @@
 .bg-white .MathJax {
   color: #374151 !important;
 }
+
+/* Glowing border animation */
+@keyframes border-light-top {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  25% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+  50% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  51%, 100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes border-light-right {
+  0%, 25% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  25% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+  75% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  76%, 100% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@keyframes border-light-bottom {
+  0%, 50% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  50% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  75% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes border-light-left {
+  0%, 75% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  75% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+
+.animate-border-light-top {
+  animation: border-light-top 3s infinite;
+  filter: blur(1px);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.animate-border-light-right {
+  animation: border-light-right 3s infinite;
+  filter: blur(1px);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.animate-border-light-bottom {
+  animation: border-light-bottom 3s infinite;
+  filter: blur(1px);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.animate-border-light-left {
+  animation: border-light-left 3s infinite;
+  filter: blur(1px);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes tilt {
+  0%, 50%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(0.5deg);
+  }
+  75% {
+    transform: rotate(-0.5deg);
+  }
+}
+
+.animate-tilt {
+  animation: tilt 10s ease-in-out infinite;
+}

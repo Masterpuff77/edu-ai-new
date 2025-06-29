@@ -255,7 +255,7 @@ const LearningAssistant: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm">
+      <div className="relative bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="relative">
@@ -282,109 +282,131 @@ const LearningAssistant: React.FC = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300">
-      {/* Animated background effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-pulse"></div>
-      
-      <div className="relative p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                <Bot className="h-6 w-6 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                Asistentul tău AI
-                <Zap className="h-5 w-5 text-yellow-300 animate-pulse" />
-              </h3>
-              <p className="text-white/80 text-sm">Întotdeauna disponibil pentru tine</p>
+    <div className="relative group">
+      {/* Glowing border animation container */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 rounded-xl opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt">
+        <div className="absolute inset-0 rounded-xl overflow-hidden">
+          {/* Moving light trail */}
+          <div className="absolute inset-0 rounded-xl">
+            <div className="absolute w-full h-full">
+              {/* Top edge */}
+              <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 animate-border-light-top"></div>
+              {/* Right edge */}
+              <div className="absolute top-0 right-0 w-0.5 h-full bg-gradient-to-b from-transparent via-white to-transparent opacity-0 animate-border-light-right"></div>
+              {/* Bottom edge */}
+              <div className="absolute bottom-0 right-0 w-full h-0.5 bg-gradient-to-l from-transparent via-white to-transparent opacity-0 animate-border-light-bottom"></div>
+              {/* Left edge */}
+              <div className="absolute bottom-0 left-0 w-0.5 h-full bg-gradient-to-t from-transparent via-white to-transparent opacity-0 animate-border-light-left"></div>
             </div>
           </div>
-          
-          <button
-            onClick={clearChat}
-            disabled={loading || messages.length <= 1}
-            className="p-2 text-white/70 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
-            title="Șterge conversația"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
         </div>
-        
-        {/* Enhanced chat container */}
-        <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border border-white/20 shadow-inner">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[80%] rounded-xl p-3 backdrop-blur-sm ${
-                  message.isUser
-                    ? 'bg-white text-gray-800 shadow-lg border border-white/30'
-                    : 'bg-white/20 text-white shadow-lg border border-white/20'
-                }`}
-              >
-                <div className="text-sm">
-                  {renderTextWithMath(message.content)}
-                </div>
-                <span className={`text-xs ${message.isUser ? 'text-gray-500' : 'text-white/70'} mt-1 block`}>
-                  {message.timestamp.toLocaleTimeString('ro-RO', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </span>
-              </div>
-            </div>
-          ))}
-          
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-white/20 backdrop-blur-sm text-white border border-white/20 rounded-xl p-3 max-w-[80%] shadow-lg">
-                <div className="flex items-center space-x-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-white" />
-                  <span className="text-sm text-white">AI-ul scrie...</span>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
+      </div>
 
-        {/* Enhanced input form */}
-        <form onSubmit={handleSubmit} className="relative">
-          <div className="relative bg-white/15 backdrop-blur-md rounded-xl border border-white/20 shadow-lg">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Întreabă-mă orice despre lecțiile tale..."
-              className="w-full pr-14 pl-4 py-3 bg-transparent text-white placeholder-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40"
-              disabled={loading}
-            />
+      {/* Main content */}
+      <div className="relative bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 rounded-xl shadow-xl overflow-hidden border border-white/20 backdrop-blur-sm transform hover:scale-[1.02] transition-all duration-300">
+        {/* Animated background effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-pulse"></div>
+        
+        <div className="relative p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Bot className="h-6 w-6 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  Asistentul tău AI
+                  <Zap className="h-5 w-5 text-yellow-300 animate-pulse" />
+                </h3>
+                <p className="text-white/80 text-sm">Întotdeauna disponibil pentru tine</p>
+              </div>
+            </div>
+            
             <button
-              type="submit"
-              disabled={!input.trim() || loading}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-white/20 rounded-lg hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm border border-white/20 hover:scale-105"
+              onClick={clearChat}
+              disabled={loading || messages.length <= 1}
+              className="p-2 text-white/70 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
+              title="Șterge conversația"
             >
-              {loading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5" />
-              )}
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
-        </form>
+          
+          {/* Enhanced chat container */}
+          <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border border-white/20 shadow-inner">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-xl p-3 backdrop-blur-sm ${
+                    message.isUser
+                      ? 'bg-white text-gray-800 shadow-lg border border-white/30'
+                      : 'bg-white/20 text-white shadow-lg border border-white/20'
+                  }`}
+                >
+                  <div className="text-sm">
+                    {renderTextWithMath(message.content)}
+                  </div>
+                  <span className={`text-xs ${message.isUser ? 'text-gray-500' : 'text-white/70'} mt-1 block`}>
+                    {message.timestamp.toLocaleTimeString('ro-RO', { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
+                  </span>
+                </div>
+              </div>
+            ))}
+            
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-white/20 backdrop-blur-sm text-white border border-white/20 rounded-xl p-3 max-w-[80%] shadow-lg">
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <span className="text-sm text-white">AI-ul scrie...</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
 
-        {/* AI capabilities indicator */}
-        <div className="mt-3 flex items-center justify-center gap-2 text-white/60 text-xs">
-          <Sparkles className="h-3 w-3" />
-          <span>Pot rezolva probleme de matematică, explica concepte și răspunde la întrebări</span>
-          <Sparkles className="h-3 w-3" />
+          {/* Enhanced input form */}
+          <form onSubmit={handleSubmit} className="relative">
+            <div className="relative bg-white/15 backdrop-blur-md rounded-xl border border-white/20 shadow-lg">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Întreabă-mă orice despre lecțiile tale..."
+                className="w-full pr-14 pl-4 py-3 bg-transparent text-white placeholder-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40"
+                disabled={loading}
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || loading}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white bg-white/20 rounded-lg hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm border border-white/20 hover:scale-105"
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* AI capabilities indicator */}
+          <div className="mt-3 flex items-center justify-center gap-2 text-white/60 text-xs">
+            <Sparkles className="h-3 w-3" />
+            <span>Pot rezolva probleme de matematică, explica concepte și răspunde la întrebări</span>
+            <Sparkles className="h-3 w-3" />
+          </div>
         </div>
       </div>
     </div>
