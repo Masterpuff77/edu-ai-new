@@ -76,9 +76,6 @@ const ElevenLabsWidget: React.FC = () => {
           const widget = document.createElement('elevenlabs-convai');
           widget.setAttribute('agent-id', agentId);
           
-          // Add custom class for styling
-          widget.classList.add('neon-purple-widget');
-          
           // Add widget to body
           document.body.appendChild(widget);
           widgetMounted.current = true;
@@ -92,50 +89,6 @@ const ElevenLabsWidget: React.FC = () => {
           // Add load event listener for debugging
           widget.addEventListener('load', () => {
             console.log('ElevenLabs widget loaded successfully');
-            
-            // Apply neon purple styling to the widget button
-            setTimeout(() => {
-              const widgetButton = document.querySelector('elevenlabs-convai')?.shadowRoot?.querySelector('.convai-widget-button');
-              if (widgetButton) {
-                // Add neon purple glow to the button
-                const style = document.createElement('style');
-                style.textContent = `
-                  .convai-widget-button {
-                    filter: drop-shadow(0 0 15px rgba(147, 51, 234, 0.7)) drop-shadow(0 0 30px rgba(147, 51, 234, 0.4)) !important;
-                    border: 2px solid rgba(147, 51, 234, 0.8) !important;
-                    background: linear-gradient(135deg, rgba(147, 51, 234, 0.9), rgba(168, 85, 247, 0.9)) !important;
-                    transition: all 0.3s ease !important;
-                  }
-                  .convai-widget-button:hover {
-                    filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.9)) drop-shadow(0 0 40px rgba(147, 51, 234, 0.6)) !important;
-                    transform: scale(1.05) !important;
-                  }
-                  .convai-widget-button .convai-widget-icon {
-                    filter: drop-shadow(0 0 5px rgba(147, 51, 234, 0.8)) !important;
-                  }
-                  .convai-widget-button .convai-widget-icon-container {
-                    position: relative;
-                  }
-                  .convai-widget-button .convai-widget-icon-container::before {
-                    content: '';
-                    position: absolute;
-                    top: -2px;
-                    left: -2px;
-                    right: -2px;
-                    bottom: -2px;
-                    border-radius: 50%;
-                    background: transparent;
-                    border: 2px solid rgba(147, 51, 234, 0.6);
-                    animation: neon-spin 2s linear infinite;
-                  }
-                `;
-                
-                const shadowRoot = document.querySelector('elevenlabs-convai')?.shadowRoot;
-                if (shadowRoot) {
-                  shadowRoot.appendChild(style);
-                }
-              }
-            }, 1000);
           });
         }
       } catch (error) {

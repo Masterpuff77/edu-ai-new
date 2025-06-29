@@ -10,7 +10,6 @@ import ProfilePage from './pages/ProfilePage';
 import useAuthStore from './store/authStore';
 import supabase, { isSupabaseAvailable } from './config/supabase';
 import ElevenLabsWidget from './components/chat/ElevenLabsWidget';
-import TavusAvatarPage from './pages/TavusAvatarPage';
 
 const App: React.FC = () => {
   const { user, isAuthenticated, loading, loadUserProfile, clearAuth } = useAuthStore();
@@ -162,11 +161,6 @@ const App: React.FC = () => {
               ? <ProfilePage /> 
               : <Navigate to="/login" />
           } 
-        />
-
-        <Route 
-          path="/tavus-avatar" 
-          element={<TavusAvatarPage />} 
         />
         
         <Route path="*" element={<Navigate to="/" />} />

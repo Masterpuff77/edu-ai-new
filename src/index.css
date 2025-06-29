@@ -37,7 +37,7 @@
   color: #374151 !important;
 }
 
-/* Enhanced Slower Glowing Border Animation with Neon Purple Light */
+/* Enhanced Slower Glowing Border Animation with Pure White Light */
 @keyframes border-light-top {
   0% {
     opacity: 0;
@@ -114,25 +114,45 @@
   }
 }
 
-/* Enhanced Neon Purple Light Beam with Increased Brightness and Slower Speed */
+/* Enhanced Pure White Light Beam with Increased Brightness and Slower Speed */
 .animate-border-light-top {
   animation: border-light-top 6s infinite ease-in-out;
   filter: blur(3px) brightness(2.5) contrast(1.5);
+  box-shadow: 
+    0 0 30px rgba(255, 255, 255, 1),
+    0 0 60px rgba(255, 255, 255, 0.8),
+    0 0 90px rgba(255, 255, 255, 0.6),
+    0 0 120px rgba(255, 255, 255, 0.4);
 }
 
 .animate-border-light-right {
   animation: border-light-right 6s infinite ease-in-out;
   filter: blur(3px) brightness(2.5) contrast(1.5);
+  box-shadow: 
+    0 0 30px rgba(255, 255, 255, 1),
+    0 0 60px rgba(255, 255, 255, 0.8),
+    0 0 90px rgba(255, 255, 255, 0.6),
+    0 0 120px rgba(255, 255, 255, 0.4);
 }
 
 .animate-border-light-bottom {
   animation: border-light-bottom 6s infinite ease-in-out;
   filter: blur(3px) brightness(2.5) contrast(1.5);
+  box-shadow: 
+    0 0 30px rgba(255, 255, 255, 1),
+    0 0 60px rgba(255, 255, 255, 0.8),
+    0 0 90px rgba(255, 255, 255, 0.6),
+    0 0 120px rgba(255, 255, 255, 0.4);
 }
 
 .animate-border-light-left {
   animation: border-light-left 6s infinite ease-in-out;
   filter: blur(3px) brightness(2.5) contrast(1.5);
+  box-shadow: 
+    0 0 30px rgba(255, 255, 255, 1),
+    0 0 60px rgba(255, 255, 255, 0.8),
+    0 0 90px rgba(255, 255, 255, 0.6),
+    0 0 120px rgba(255, 255, 255, 0.4);
 }
 
 @keyframes tilt {
@@ -151,38 +171,26 @@
   animation: tilt 10s ease-in-out infinite;
 }
 
-/* Enhanced Pulsing Glow Effect with Neon Purple Light */
+/* Enhanced Pulsing Glow Effect with Pure White Light */
 @keyframes pulse-glow {
   0%, 100% {
-    filter: brightness(1) drop-shadow(0 0 25px rgba(147, 51, 234, 0.4));
+    box-shadow: 
+      0 0 25px rgba(255, 255, 255, 0.4),
+      0 0 50px rgba(255, 255, 255, 0.3),
+      0 0 75px rgba(255, 255, 255, 0.2),
+      0 0 100px rgba(255, 255, 255, 0.1);
   }
   50% {
-    filter: brightness(1.2) drop-shadow(0 0 40px rgba(147, 51, 234, 0.7));
+    box-shadow: 
+      0 0 40px rgba(255, 255, 255, 0.7),
+      0 0 80px rgba(255, 255, 255, 0.5),
+      0 0 120px rgba(255, 255, 255, 0.3),
+      0 0 160px rgba(255, 255, 255, 0.2);
   }
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* Neon Purple Spinning Animation for Virtual Assistant */
-@keyframes neon-spin {
-  0% {
-    transform: rotate(0deg);
-    filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.7));
-  }
-  100% {
-    transform: rotate(360deg);
-    filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.7));
-  }
-}
-
-.neon-purple-spin {
-  animation: neon-spin 2s linear infinite;
-  border: 2px solid rgba(147, 51, 234, 0.8);
-  border-top-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  filter: drop-shadow(0 0 10px rgba(147, 51, 234, 0.8));
 }
 
 /* ElevenLabs Widget Mobile Responsiveness */

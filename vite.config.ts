@@ -5,7 +5,6 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    include: ['react-dom/client'],
-    exclude: ['lucide-react', '@daily-co/daily-react'],
+    exclude: ['lucide-react'],
   },
 });
