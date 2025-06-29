@@ -470,6 +470,203 @@ export class TavusService {
     // Return a random mock video from the array
     return this.mockVideos[Math.floor(Math.random() * this.mockVideos.length)];
   }
+
+  // Live interaction methods based on Tavus documentation
+  async startLiveInteraction(conversationId: string): Promise<any> {
+    if (this.mockMode) {
+      console.log('[Tavus API] Using mock mode for startLiveInteraction');
+      return {
+        id: `mock-live-${Date.now()}`,
+        conversation_id: conversationId,
+        status: 'active',
+        created_at: new Date().toISOString()
+      };
+    }
+    
+    try {
+      console.log(`[Tavus API] Starting live interaction for conversation ${conversationId}`);
+      const response = await this.axiosInstance.post(`/conversations/${conversationId}/live`, {
+        mode: 'interactive' // Can be 'interactive' or 'streaming'
+      });
+      
+      console.log(`[Tavus API] Live interaction started, ID: ${response.data.id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to start live interaction:', error);
+      
+      // Switch to mock mode on error
+      this.mockMode = true;
+      this.apiHealthStatus = false;
+      
+      // Return a mock live interaction instead of throwing
+      return {
+        id: `mock-live-${Date.now()}`,
+        conversation_id: conversationId,
+        status: 'active',
+        created_at: new Date().toISOString()
+      };
+    }
+  }
+
+  async endLiveInteraction(conversationId: string, liveId: string): Promise<any> {
+    if (this.mockMode) {
+      console.log('[Tavus API] Using mock mode for endLiveInteraction');
+      return {
+        id: liveId,
+        conversation_id: conversationId,
+        status: 'completed',
+        created_at: new Date(Date.now() - 60000).toISOString(),
+        ended_at: new Date().toISOString()
+      };
+    }
+    
+    try {
+      console.log(`[Tavus API] Ending live interaction ${liveId} for conversation ${conversationId}`);
+      const response = await this.axiosInstance.post(`/conversations/${conversationId}/live/${liveId}/end`);
+      
+      console.log(`[Tavus API] Live interaction ended`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to end live interaction:', error);
+      
+      // Switch to mock mode on error
+      this.mockMode = true;
+      this.apiHealthStatus = false;
+      
+      // Return a mock result instead of throwing
+      return {
+        id: liveId,
+        conversation_id: conversationId,
+        status: 'completed',
+        created_at: new Date(Date.now() - 60000).toISOString(),
+        ended_at: new Date().toISOString()
+      };
+    }
+  }
+
+  async sendLiveMessage(conversationId: string, liveId: string, content: string): Promise<any> {
+    if (this.mockMode) {
+      console.log('[Tavus API] Using mock mode for sendLiveMessage');
+      return {
+        id: `mock-live-msg-${Date.now()}`,
+        live_id: liveId,
+        conversation_id: conversationId,
+        content,
+        role: 'assistant',
+        status: 'completed',
+        video_url: this.getMockVideo(),
+        created_at: new Date().toISOString()
+      };
+    }
+    
+    try {
+      console.log(`[Tavus API] Sending live message to interaction ${liveId} for conversation ${conversationId}`);
+      const response = await this.axiosInstance.post(`/conversations/${conversationId}/live/${liveId}/messages`, {
+        content
+      });
+      
+      console.log(`[Tavus API] Live message sent, ID: ${response.data.id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to send live message:', error);
+      
+      // Switch to mock mode on error
+      this.mockMode = true;
+      this.apiHealthStatus = false;
+      
+      // Return a mock message instead of throwing
+      return {
+        id: `mock-live-msg-${Date.now()}`,
+        live_id: liveId,
+        conversation_id: conversationId,
+        content,
+        role: 'assistant',
+        status: 'completed',
+        video_url: this.getMockVideo(),
+        created_at: new Date().toISOString()
+      };
+    }
+  }
+
+  async getLiveStatus(conversationId: string, liveId: string): Promise<any> {
+    if (this.mockMode) {
+      console.log('[Tavus API] Using mock mode for getLiveStatus');
+      return {
+        id: liveId,
+        conversation_id: conversationId,
+        status: 'active',
+        created_at: new Date(Date.now() - 60000).toISOString()
+      };
+    }
+    
+    try {
+      console.log(`[Tavus API] Getting status for live interaction ${liveId} in conversation ${conversationId}`);
+      const response = await this.axiosInstance.get(`/conversations/${conversationId}/live/${liveId}`);
+      
+      console.log(`[Tavus API] Live interaction status: ${response.data.status}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get live interaction status:', error);
+      
+      // Switch to mock mode on error
+      this.mockMode = true;
+      this.apiHealthStatus = false;
+      
+      // Return a mock status instead of throwing
+      return {
+        id: liveId,
+        conversation_id: conversationId,
+        status: 'active',
+        created_at: new Date(Date.now() - 60000).toISOString()
+      };
+    }
+  }
+
+  async getLiveMessages(conversationId: string, liveId: string): Promise<any[]> {
+    if (this.mockMode) {
+      console.log('[Tavus API] Using mock mode for getLiveMessages');
+      return [
+        {
+          id: `mock-live-msg-1`,
+          live_id: liveId,
+          conversation_id: conversationId,
+          content: 'Bună ziua! Sunt profesorul virtual. Cu ce te pot ajuta astăzi?',
+          role: 'assistant',
+          status: 'completed',
+          video_url: this.getMockVideo(),
+          created_at: new Date(Date.now() - 60000).toISOString()
+        }
+      ];
+    }
+    
+    try {
+      console.log(`[Tavus API] Getting messages for live interaction ${liveId} in conversation ${conversationId}`);
+      const response = await this.axiosInstance.get(`/conversations/${conversationId}/live/${liveId}/messages`);
+      
+      console.log(`[Tavus API] Got ${response.data.data.length} live messages`);
+      return response.data.data;
+    } catch (error) {
+      console.error('Failed to get live messages:', error);
+      
+      // Switch to mock mode on error
+      this.mockMode = true;
+      this.apiHealthStatus = false;
+      
+      // Return mock messages instead of throwing
+      return [
+        {
+          id: `mock-live-msg-1`,
+          live_id: liveId,
+          conversation_id: conversationId,
+          content: 'Bună ziua! Sunt profesorul virtual. Cu ce te pot ajuta astăzi?',
+          role: 'assistant',
+          status: 'completed',
+          video_url: this.getMockVideo(),
+          created_at: new Date(Date.now() - 60000).toISOString()
+        }
+      ];
+    }
+  }
 }
 
 // Export singleton instance
