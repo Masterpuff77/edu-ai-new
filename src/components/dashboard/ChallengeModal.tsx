@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calculator, BookOpen, CheckCircle, XCircle, FileText, Shapes } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ConfettiCelebration from '../common/ConfettiCelebration';
 
 interface Question {
   id: string;
@@ -21,6 +22,7 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ challengeId, onComplete
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     // Generate questions based on challenge type
@@ -152,6 +154,11 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ challengeId, onComplete
       });
       setScore(correctAnswers);
       setShowResults(true);
+      
+      // Show confetti if perfect score
+      if (correctAnswers === questions.length) {
+        setShowConfetti(true);
+      }
     }
   };
 
@@ -190,6 +197,11 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ challengeId, onComplete
   return (
     <AnimatePresence>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <ConfettiCelebration 
+          isVisible={showConfetti} 
+          onComplete={() => setShowConfetti(false)} 
+        />
+        
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -299,11 +311,16 @@ const ChallengeModal: React.FC<ChallengeModalProps> = ({ challengeId, onComplete
                 </div>
                 
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  Provocare completă!
+                  {score === questions.length ? 'Scor Perfect! 🎉' : 'Provocare completă!'}
                 </h3>
                 
                 <p className="text-lg text-gray-600 mb-6">
                   Ai răspuns corect la {score} din {questions.length} întrebări
+                  {score === questions.length && (
+                    <span className="block text-green-600 font-semibold mt-2">
+                      Felicitări pentru scorul perfect!
+                    </span>
+                  )}
                 </p>
 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">

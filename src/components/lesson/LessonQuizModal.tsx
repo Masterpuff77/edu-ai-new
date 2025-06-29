@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
 import useGamificationStore from '../../store/gamificationStore';
 import { QuizQuestion } from '../../data/quizQuestions';
+import ConfettiCelebration from '../common/ConfettiCelebration';
 
 interface LessonQuizModalProps {
   lessonTitle: string;
@@ -25,6 +26,7 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (submitted) return;
@@ -50,6 +52,11 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
     
     setScore(correctAnswers);
     setSubmitted(true);
+    
+    // Show confetti if perfect score
+    if (correctAnswers === quizData.length) {
+      setShowConfetti(true);
+    }
   };
 
   const handlePrevious = () => {
@@ -84,6 +91,7 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
     setAnswers(Array(quizData.length).fill(-1));
     setSubmitted(false);
     setScore(0);
+    setShowConfetti(false);
   };
 
   const handleClose = () => {
@@ -103,6 +111,11 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
   return (
     <AnimatePresence>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <ConfettiCelebration 
+          isVisible={showConfetti} 
+          onComplete={() => setShowConfetti(false)} 
+        />
+        
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -213,11 +226,16 @@ const LessonQuizModal: React.FC<LessonQuizModalProps> = ({
                 </div>
                 
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  Quiz completat!
+                  {score === quizData.length ? 'Scor Perfect! 🎉' : 'Quiz completat!'}
                 </h3>
                 
                 <p className="text-lg text-gray-600 mb-6">
                   Ai răspuns corect la {score} din {quizData.length} întrebări
+                  {score === quizData.length && (
+                    <span className="block text-green-600 font-semibold mt-2">
+                      Felicitări pentru scorul perfect!
+                    </span>
+                  )}
                 </p>
 
                 <div className="bg-gray-50 rounded-lg p-4 mb-6">
