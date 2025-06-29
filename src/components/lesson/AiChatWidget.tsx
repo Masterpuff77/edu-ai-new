@@ -191,8 +191,8 @@ const AiChatWidget: React.FC<AiChatWidgetProps> = ({ lessonTitle, subject }) => 
           </button>
         </div>
 
-        {/* Chat Messages Container with light purple background */}
-        <div className="bg-purple-50 rounded-lg p-4 mb-4 h-[400px] overflow-y-auto space-y-4 border-2 border-purple-200">
+        {/* Chat Messages Container with light purple background - REDUCED HEIGHT BY 35% */}
+        <div className="bg-purple-50 rounded-lg p-4 mb-4 h-[260px] overflow-y-auto space-y-4 border-2 border-purple-200">
           {messages.map((message) => (
             <div
               key={message.id}
