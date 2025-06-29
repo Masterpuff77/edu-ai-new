@@ -101,13 +101,13 @@ const ElevenLabsWidget: React.FC = () => {
                 const style = document.createElement('style');
                 style.textContent = `
                   .convai-widget-button {
-                    box-shadow: 0 0 15px rgba(147, 51, 234, 0.7), 0 0 30px rgba(147, 51, 234, 0.4) !important;
+                    filter: drop-shadow(0 0 15px rgba(147, 51, 234, 0.7)) drop-shadow(0 0 30px rgba(147, 51, 234, 0.4)) !important;
                     border: 2px solid rgba(147, 51, 234, 0.8) !important;
                     background: linear-gradient(135deg, rgba(147, 51, 234, 0.9), rgba(168, 85, 247, 0.9)) !important;
                     transition: all 0.3s ease !important;
                   }
                   .convai-widget-button:hover {
-                    box-shadow: 0 0 20px rgba(147, 51, 234, 0.9), 0 0 40px rgba(147, 51, 234, 0.6) !important;
+                    filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.9)) drop-shadow(0 0 40px rgba(147, 51, 234, 0.6)) !important;
                     transform: scale(1.05) !important;
                   }
                   .convai-widget-button .convai-widget-icon {

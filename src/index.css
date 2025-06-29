@@ -118,41 +118,21 @@
 .animate-border-light-top {
   animation: border-light-top 6s infinite ease-in-out;
   filter: blur(3px) brightness(2.5) contrast(1.5);
-  box-shadow: 
-    0 0 30px rgba(147, 51, 234, 1),
-    0 0 60px rgba(147, 51, 234, 0.8),
-    0 0 90px rgba(147, 51, 234, 0.6),
-    0 0 120px rgba(147, 51, 234, 0.4);
 }
 
 .animate-border-light-right {
   animation: border-light-right 6s infinite ease-in-out;
   filter: blur(3px) brightness(2.5) contrast(1.5);
-  box-shadow: 
-    0 0 30px rgba(147, 51, 234, 1),
-    0 0 60px rgba(147, 51, 234, 0.8),
-    0 0 90px rgba(147, 51, 234, 0.6),
-    0 0 120px rgba(147, 51, 234, 0.4);
 }
 
 .animate-border-light-bottom {
   animation: border-light-bottom 6s infinite ease-in-out;
   filter: blur(3px) brightness(2.5) contrast(1.5);
-  box-shadow: 
-    0 0 30px rgba(147, 51, 234, 1),
-    0 0 60px rgba(147, 51, 234, 0.8),
-    0 0 90px rgba(147, 51, 234, 0.6),
-    0 0 120px rgba(147, 51, 234, 0.4);
 }
 
 .animate-border-light-left {
   animation: border-light-left 6s infinite ease-in-out;
   filter: blur(3px) brightness(2.5) contrast(1.5);
-  box-shadow: 
-    0 0 30px rgba(147, 51, 234, 1),
-    0 0 60px rgba(147, 51, 234, 0.8),
-    0 0 90px rgba(147, 51, 234, 0.6),
-    0 0 120px rgba(147, 51, 234, 0.4);
 }
 
 @keyframes tilt {
@@ -174,18 +154,10 @@
 /* Enhanced Pulsing Glow Effect with Neon Purple Light */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 
-      0 0 25px rgba(147, 51, 234, 0.4),
-      0 0 50px rgba(147, 51, 234, 0.3),
-      0 0 75px rgba(147, 51, 234, 0.2),
-      0 0 100px rgba(147, 51, 234, 0.1);
+    filter: brightness(1) drop-shadow(0 0 25px rgba(147, 51, 234, 0.4));
   }
   50% {
-    box-shadow: 
-      0 0 40px rgba(147, 51, 234, 0.7),
-      0 0 80px rgba(147, 51, 234, 0.5),
-      0 0 120px rgba(147, 51, 234, 0.3),
-      0 0 160px rgba(147, 51, 234, 0.2);
+    filter: brightness(1.2) drop-shadow(0 0 40px rgba(147, 51, 234, 0.7));
   }
 }
 
@@ -197,11 +169,11 @@
 @keyframes neon-spin {
   0% {
     transform: rotate(0deg);
-    box-shadow: 0 0 20px rgba(147, 51, 234, 0.7), 0 0 40px rgba(147, 51, 234, 0.5);
+    filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.7));
   }
   100% {
     transform: rotate(360deg);
-    box-shadow: 0 0 20px rgba(147, 51, 234, 0.7), 0 0 40px rgba(147, 51, 234, 0.5);
+    filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.7));
   }
 }
 
