@@ -20,8 +20,8 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<Array<{role: string, content: string}>>([]);
   const [retryCount, setRetryCount] = useState(0);
-  const [isApiHealthy, setIsApiHealthy] = useState(true);
-  const [isMockMode, setIsMockMode] = useState(false);
+  const [isApiHealthy, setIsApiHealthy] = useState(false);
+  const [isMockMode, setIsMockMode] = useState(true);
 
   // Fallback video URL for when API is unavailable
   const fallbackVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
@@ -559,6 +559,22 @@ const TavusAvatar: React.FC<TavusAvatarProps> = ({ onClose }) => {
                 Mod offline
               </div>
             )}
+          </div>
+          
+          {/* Chat history */}
+          <div className="max-h-40 overflow-y-auto bg-gray-50 p-2">
+            {conversationHistory.map((msg, index) => (
+              <div 
+                key={index} 
+                className={`mb-2 p-2 rounded-lg ${
+                  msg.role === 'user' 
+                    ? 'bg-indigo-100 ml-8' 
+                    : 'bg-gray-100 mr-8'
+                }`}
+              >
+                <p className="text-xs text-gray-700">{msg.content}</p>
+              </div>
+            ))}
           </div>
           
           {/* Chat input */}

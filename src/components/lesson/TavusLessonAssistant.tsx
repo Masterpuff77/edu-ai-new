@@ -22,6 +22,7 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isApiHealthy, setIsApiHealthy] = useState(false);
   const [isMockMode, setIsMockMode] = useState(true);
+  const [conversationHistory, setConversationHistory] = useState<Array<{role: string, content: string}>>([]);
 
   // Fallback video URL for when API is unavailable
   const fallbackVideoUrl = 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
@@ -38,6 +39,12 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
           if (!isHealthy) {
             console.warn('Tavus API is not healthy. Using fallback mode.');
             setVideoUrl(fallbackVideoUrl);
+            setConversationHistory([
+              { 
+                role: 'assistant', 
+                content: `Bună ziua! Sunt aici pentru a te ajuta cu lecția "${lessonTitle}" la materia ${subject}. Momentan funcționez în modul offline, dar pot să-ți răspund la întrebări de bază.` 
+              }
+            ]);
           } else {
             // Initialize conversation when API is healthy
             initializeConversation();
@@ -47,6 +54,12 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
           setIsApiHealthy(false);
           setIsMockMode(true);
           setVideoUrl(fallbackVideoUrl);
+          setConversationHistory([
+            { 
+              role: 'assistant', 
+              content: `Bună ziua! Sunt aici pentru a te ajuta cu lecția "${lessonTitle}" la materia ${subject}. Momentan funcționez în modul offline, dar pot să-ți răspund la întrebări de bază.` 
+            }
+          ]);
         }
       };
       
@@ -116,6 +129,14 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
         setVideoUrl(message.video_url);
         console.log("Initial video URL received:", message.video_url);
         
+        // Add assistant response to history
+        setConversationHistory([
+          { 
+            role: 'assistant', 
+            content: message.transcript || `Bună ziua! Sunt aici pentru a te ajuta cu lecția "${lessonTitle}" la materia ${subject}. Cu ce te pot ajuta?` 
+          }
+        ]);
+        
         // Track video viewed
         if (user) {
           try {
@@ -139,6 +160,14 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       setRetryCount(prev => prev + 1);
       setIsApiHealthy(false);
       setIsMockMode(true);
+      
+      // Add default message to conversation history
+      setConversationHistory([
+        { 
+          role: 'assistant', 
+          content: `Bună ziua! Sunt aici pentru a te ajuta cu lecția "${lessonTitle}" la materia ${subject}. Momentan funcționez în modul offline, dar pot să-ți răspund la întrebări de bază.` 
+        }
+      ]);
       
       // Track error
       if (user) {
@@ -166,13 +195,23 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
     const userMessage = message.trim();
     setMessage('');
     
-    // If API is not healthy or no conversation ID, use fallback mode
+    // Add user message to history
+    setConversationHistory(prev => [...prev, { role: 'user', content: userMessage }]);
+    
+    // If API is not healthy or in mock mode, use fallback mode
     if (!isApiHealthy || isMockMode || !conversationId) {
       setLoading(true);
       
       // Simulate processing time
       setTimeout(() => {
         setVideoUrl(fallbackVideoUrl);
+        setConversationHistory(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: `Îmi pare rău, momentan funcționez în modul offline și nu pot procesa această cerere în mod personalizat. Totuși, pot să-ți ofer informații generale despre lecția "${lessonTitle}" sau despre materia ${subject}.` 
+          }
+        ]);
         setLoading(false);
       }, 1500);
       
@@ -211,6 +250,15 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
         setVideoUrl(response.video_url);
         console.log("Video URL received:", response.video_url);
         
+        // Add assistant response to history
+        setConversationHistory(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: response.transcript || 'Răspunsul profesorului virtual' 
+          }
+        ]);
+        
         // Track video viewed
         if (user) {
           try {
@@ -233,6 +281,15 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       setVideoUrl(fallbackVideoUrl);
       setIsMockMode(true);
       setIsApiHealthy(false);
+      
+      // Add error response to history
+      setConversationHistory(prev => [
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: 'Îmi pare rău, a apărut o eroare. Te rog să încerci din nou mai târziu.' 
+        }
+      ]);
       
       // Track error
       if (user && conversationId) {
@@ -260,6 +317,15 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
         setVideoUrl(message.video_url);
         console.log("Video URL received from polling:", message.video_url);
         
+        // Add assistant response to history
+        setConversationHistory(prev => [
+          ...prev, 
+          { 
+            role: 'assistant', 
+            content: message.transcript || 'Răspunsul profesorului virtual' 
+          }
+        ]);
+        
         // Track video viewed
         if (user) {
           try {
@@ -280,6 +346,15 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
       setVideoUrl(fallbackVideoUrl);
       setIsMockMode(true);
       setIsApiHealthy(false);
+      
+      // Add error response to history
+      setConversationHistory(prev => [
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: 'Îmi pare rău, a apărut o eroare. Te rog să încerci din nou mai târziu.' 
+        }
+      ]);
       
       // Track error
       if (user) {
@@ -422,6 +497,22 @@ const TavusLessonAssistant: React.FC<TavusLessonAssistantProps> = ({ lessonTitle
                 Mod offline
               </div>
             )}
+          </div>
+          
+          {/* Chat history */}
+          <div className="max-h-40 overflow-y-auto bg-gray-50 p-2">
+            {conversationHistory.map((msg, index) => (
+              <div 
+                key={index} 
+                className={`mb-2 p-2 rounded-lg ${
+                  msg.role === 'user' 
+                    ? 'bg-indigo-100 ml-8' 
+                    : 'bg-gray-100 mr-8'
+                }`}
+              >
+                <p className="text-xs text-gray-700">{msg.content}</p>
+              </div>
+            ))}
           </div>
           
           <div className="p-3 border-t border-gray-200">

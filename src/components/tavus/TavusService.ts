@@ -53,6 +53,11 @@ export class TavusService {
   private mockMode = true; // Start in mock mode by default for reliability
   private lastError: Error | null = null;
   private apiHealthStatus = false;
+  private mockVideos = [
+    'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4',
+    'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo_2.mp4',
+    'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo_3.mp4'
+  ];
 
   // Singleton pattern
   public static getInstance(): TavusService {
@@ -462,8 +467,8 @@ export class TavusService {
 
   // Fallback method to get a mock video when API is unavailable
   getMockVideo(): string {
-    // Return a publicly accessible video URL for fallback
-    return 'https://storage.googleapis.com/tavus-public-demo-videos/professor_demo.mp4';
+    // Return a random mock video from the array
+    return this.mockVideos[Math.floor(Math.random() * this.mockVideos.length)];
   }
 }
 

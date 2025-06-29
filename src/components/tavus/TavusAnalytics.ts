@@ -13,6 +13,7 @@ export class TavusAnalytics {
   private static instance: TavusAnalytics;
   private isEnabled: boolean = true;
   private lastError: Error | null = null;
+  private tableExists: boolean = false;
 
   // Singleton pattern
   public static getInstance(): TavusAnalytics {
@@ -20,6 +21,39 @@ export class TavusAnalytics {
       TavusAnalytics.instance = new TavusAnalytics();
     }
     return TavusAnalytics.instance;
+  }
+
+  constructor() {
+    // Check if analytics table exists
+    this.checkTableExists();
+  }
+
+  // Check if analytics table exists
+  private async checkTableExists(): Promise<void> {
+    try {
+      if (!supabase) {
+        this.isEnabled = false;
+        return;
+      }
+
+      const { error } = await supabase
+        .from('tavus_analytics')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+
+      if (error && error.code === 'PGRST116') {
+        console.warn('[Tavus Analytics] tavus_analytics table does not exist, analytics disabled');
+        this.isEnabled = false;
+        this.tableExists = false;
+      } else {
+        this.tableExists = true;
+      }
+    } catch (error) {
+      console.warn('[Tavus Analytics] Error checking table existence:', error);
+      this.isEnabled = false;
+      this.tableExists = false;
+    }
   }
 
   // Track event
@@ -40,24 +74,11 @@ export class TavusAnalytics {
       }
       
       // First check if the table exists to avoid 404 errors
-      const { error: tableCheckError } = await supabase
-        .from('tavus_analytics')
-        .select('id')
-        .limit(1)
-        .maybeSingle();
-      
-      // If table doesn't exist, log warning and disable analytics
-      if (tableCheckError && tableCheckError.code === 'PGRST116') {
-        console.warn('[Tavus Analytics] tavus_analytics table does not exist, skipping event tracking');
-        this.isEnabled = false;
-        return;
-      }
-      
-      // If we get a different error, it might be a connection issue
-      if (tableCheckError && tableCheckError.code !== 'PGRST116') {
-        console.warn('[Tavus Analytics] Error checking table existence:', tableCheckError);
-        this.lastError = tableCheckError;
-        // Don't disable analytics yet, try to insert anyway
+      if (!this.tableExists) {
+        await this.checkTableExists();
+        if (!this.tableExists) {
+          return;
+        }
       }
       
       // Try to insert the event
@@ -77,6 +98,7 @@ export class TavusAnalytics {
         // If we get a 404 error, the table doesn't exist
         if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
           this.isEnabled = false;
+          this.tableExists = false;
         }
       }
     } catch (error) {
@@ -154,16 +176,11 @@ export class TavusAnalytics {
       }
       
       // Check if table exists
-      const { error: tableCheckError } = await supabase
-        .from('tavus_analytics')
-        .select('id')
-        .limit(1)
-        .maybeSingle();
-      
-      if (tableCheckError && tableCheckError.code === 'PGRST116') {
-        console.warn('[Tavus Analytics] tavus_analytics table does not exist, cannot fetch metrics');
-        this.isEnabled = false;
-        return null;
+      if (!this.tableExists) {
+        await this.checkTableExists();
+        if (!this.tableExists) {
+          return null;
+        }
       }
       
       const { data, error } = await supabase
@@ -230,6 +247,7 @@ export class TavusAnalytics {
   resetAnalytics(): void {
     this.isEnabled = true;
     this.lastError = null;
+    this.checkTableExists();
   }
 
   // Get analytics status
