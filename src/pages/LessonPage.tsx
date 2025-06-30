@@ -4,7 +4,6 @@ import Navbar from '../components/layout/Navbar';
 import VideoPlayer from '../components/lesson/VideoPlayer';
 import QuizWidget from '../components/lesson/QuizWidget';
 import AiChatWidget from '../components/lesson/AiChatWidget';
-import VirtualTeacherLesson from '../components/lesson/VirtualTeacherLesson';
 import useStudyPlanStore from '../store/studyPlanStore';
 import useGamificationStore from '../store/gamificationStore';
 import useAuthStore from '../store/authStore';
@@ -220,12 +219,6 @@ const LessonPage: React.FC = () => {
               </span>
             </div>
           )}
-
-          {/* Virtual Teacher component for this lesson */}
-          <VirtualTeacherLesson 
-            lessonTitle={currentLesson.title}
-            subject={currentLesson.subject}
-          />
 
           <VideoPlayer 
             videoUrl={currentLesson.videoUrl || 'placeholder'}

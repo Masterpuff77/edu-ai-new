@@ -7,7 +7,6 @@ import NotificationsList from '../components/dashboard/NotificationsList';
 import LearningAssistant from '../components/dashboard/LearningAssistant';
 import WeeklyLeaderboard from '../components/dashboard/WeeklyLeaderboard';
 import KnowledgeTestingBox from '../components/dashboard/KnowledgeTestingBox';
-import VirtualTeacherCard from '../components/dashboard/VirtualTeacherCard';
 import useAuthStore from '../store/authStore';
 import useStudyPlanStore from '../store/studyPlanStore';
 
@@ -211,9 +210,6 @@ const DashboardPage: React.FC = () => {
                 nextLessonId={nextLesson?.id || "1"}
                 nextLessonTitle={nextLesson?.title || defaultLessonTitle}
               />
-              
-              {/* New Virtual Teacher Card */}
-              <VirtualTeacherCard />
               
               <KnowledgeTestingBox />
               

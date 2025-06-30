@@ -7,7 +7,6 @@ import DashboardPage from './pages/DashboardPage';
 import StudyPlanPage from './pages/StudyPlanPage';
 import LessonPage from './pages/LessonPage';
 import ProfilePage from './pages/ProfilePage';
-import VirtualTeacherPage from './pages/VirtualTeacherPage';
 import useAuthStore from './store/authStore';
 import supabase, { isSupabaseAvailable } from './config/supabase';
 import ElevenLabsWidget from './components/chat/ElevenLabsWidget';
@@ -160,17 +159,6 @@ const App: React.FC = () => {
           element={
             isAuthenticated 
               ? <ProfilePage /> 
-              : <Navigate to="/login" />
-          } 
-        />
-
-        <Route 
-          path="/virtual-teacher" 
-          element={
-            isAuthenticated 
-              ? isOnboardingComplete() 
-                ? <VirtualTeacherPage /> 
-                : <Navigate to="/onboarding" />
               : <Navigate to="/login" />
           } 
         />
