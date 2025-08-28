@@ -27,7 +27,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center flex-shrink-0">
-              <span className="text-xl font-bold text-white">EduAI</span>
+              <span className="text-xl font-bold text-white">EduVibe</span>
             </Link>
           </div>
 
