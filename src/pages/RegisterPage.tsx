@@ -21,7 +21,7 @@ const RegisterPage: React.FC = () => {
           <Lightbulb className="h-10 w-10 text-indigo-600" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900">
-          EduAI
+          EduVibe
         </h1>
         <p className="mt-2 text-gray-600">
           Creează-ți contul și începe să înveți inteligent

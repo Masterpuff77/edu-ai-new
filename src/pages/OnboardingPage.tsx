@@ -122,7 +122,7 @@ const OnboardingPage: React.FC = () => {
             <Lightbulb className="h-10 w-10 text-indigo-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {step === 1 && 'Bun venit la EduAI'}
+            {step === 1 && 'Bun venit la EduVibe'}
             {step === 2 && 'Alege tipul de examen'}
             {step === 3 && 'Alege materiile de interes'}
             {step === 4 && 'Evaluare inițială'}
