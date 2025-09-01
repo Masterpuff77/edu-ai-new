@@ -36,7 +36,7 @@ const LoginForm: React.FC = () => {
           <div className="flex flex-col lg:flex-row min-h-[600px]">
             
             {/* LEFT COLUMN - Dark with colorful image */}
-            <div className="lg:w-1/2 bg-gradient-to-br from-slate-800 via-purple-800 to-indigo-800 relative overflow-hidden flex items-center justify-center p-8">
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-800 via-purple-800 to-indigo-800 relative overflow-hidden items-center justify-center p-8">
               {/* Logo at top left */}
               <div className="absolute top-8 left-8">
                 <img 
@@ -69,7 +69,7 @@ const LoginForm: React.FC = () => {
             </div>
 
             {/* RIGHT COLUMN - White with form */}
-            <div className="lg:w-1/2 bg-white p-8 lg:p-12 flex flex-col justify-center">
+            <div className="w-full lg:w-1/2 bg-white p-8 lg:p-12 flex flex-col justify-center">
               {/* Form content */}
               <div className="max-w-md mx-auto w-full">
                 <div className="mb-8">

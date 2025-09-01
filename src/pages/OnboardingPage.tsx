@@ -122,7 +122,7 @@ const OnboardingPage: React.FC = () => {
           <div className="flex flex-col lg:flex-row min-h-[700px]">
             
             {/* LEFT COLUMN - Colorful illustration */}
-            <div className="lg:w-1/2 bg-gradient-to-br from-slate-800 via-purple-800 to-indigo-800 relative overflow-hidden flex items-center justify-center">
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-800 via-purple-800 to-indigo-800 relative overflow-hidden items-center justify-center">
               {/* Animated background elements */}
               <div className="absolute inset-0">
                 <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
@@ -186,18 +186,8 @@ const OnboardingPage: React.FC = () => {
             </div>
 
             {/* RIGHT COLUMN - Form */}
-            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white relative">
+            <div className="w-full lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white relative">
               {/* Back button */}
-              {step > 1 && (
-                <button
-                  onClick={handleBack}
-                  className="absolute top-8 right-8 p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                  aria-label="Înapoi"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </button>
-              )}
-
               {/* Header */}
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
