@@ -28,33 +28,33 @@ const Navbar: React.FC = () => {
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center flex-shrink-0">
               <img 
-                src="/eduvibe-logo.svg" 
+                src="/eduvibe-logo-small.svg" 
                 alt="EduVibe" 
-                className="h-7 w-auto"
-                style={{ width: '169px', height: '28px' }}
+                className="h-6 w-auto"
+                style={{ width: '152px', height: '25px' }}
               />
             </Link>
           </div>
 
-          <nav className="flex items-center space-x-4">
+          <nav className="flex items-center space-x-2 sm:space-x-4">
             {navigationItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors ${
+                className={`px-2 sm:px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors ${
                   location.pathname === item.path
                     ? 'text-white bg-white/20'
                     : 'text-gray-100 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <item.icon className="h-5 w-5 mr-1" />
+                <item.icon className="h-5 w-5 sm:mr-1" />
                 <span className="hidden sm:inline">{item.name}</span>
               </Link>
             ))}
             
             <button
               onClick={handleSignOut}
-              className="ml-2 p-2 rounded-md text-gray-100 hover:text-red-200 hover:bg-white/10 transition-colors"
+              className="ml-1 sm:ml-2 p-2 rounded-md text-gray-100 hover:text-red-200 hover:bg-white/10 transition-colors"
               title="Deconectare"
             >
               <LogOut className="h-5 w-5" />
