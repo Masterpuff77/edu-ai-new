@@ -58,7 +58,7 @@ const RegisterForm: React.FC = () => {
             <div className="relative z-10">
               <div className="w-80 h-80 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20">
                 <img 
-                  src="https://images.pexels.com/photos/5427674/pexels-photo-5427674.jpeg?auto=compress&cs=tinysrgb&w=400" 
+                  src="freepik__candid-photography-with-natural-textures-and-highl__79718.jpeg" 
                   alt="Elevi fericiți la examen"
                   className="w-full h-full object-cover"
                 />
