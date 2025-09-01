@@ -58,7 +58,7 @@ const LoginForm: React.FC = () => {
               <div className="relative z-10">
                 <div className="w-80 h-80 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20">
                   <img 
-                    src="freepik__quare-11-vibrant-celebration-group-of-4-diverse-ro__79717.jpeg&w=400" 
+                    src="freepik__quare-11-vibrant-celebration-group-of-4-diverse-ro__79717.jpeg" 
                     alt="Elevi fericiți învățând"
                     className="w-full h-full object-cover"
                   />
