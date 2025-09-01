@@ -117,7 +117,7 @@ const OnboardingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
       <div className="max-w-7xl w-full">
-        {/* Main container with two columns */}
+        {/* Main container with rounded corners and shadow */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           <div className="flex flex-col lg:flex-row min-h-[700px]">
             
@@ -186,12 +186,12 @@ const OnboardingPage: React.FC = () => {
             </div>
 
             {/* RIGHT COLUMN - Form */}
-            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white">
+            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white relative">
               {/* Back button */}
               {step > 1 && (
                 <button
                   onClick={handleBack}
-                  className="absolute top-8 left-8 lg:left-auto lg:right-8 p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="absolute top-8 right-8 p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                   aria-label="Înapoi"
                 >
                   <ArrowLeft className="h-5 w-5" />
