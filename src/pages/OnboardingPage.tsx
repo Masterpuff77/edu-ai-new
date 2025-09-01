@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lightbulb, ArrowRight, ArrowLeft, GraduationCap, CheckCircle } from 'lucide-react';
+import { ArrowRight, ArrowLeft, GraduationCap, CheckCircle, Trophy } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import AvatarSelector from '../components/onboarding/AvatarSelector';
 import SubjectSelector from '../components/onboarding/SubjectSelector';
@@ -173,26 +173,21 @@ const OnboardingPage: React.FC = () => {
             <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
               {/* Header */}
               <div className="mb-8">
-                <div className="flex items-center mb-6">
-                  <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl mr-4">
-                    <Lightbulb className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-                      {step === 1 && 'Bun venit la EduVibe'}
-                      {step === 2 && 'Alege tipul de examen'}
-                      {step === 3 && 'Alege materiile de interes'}
-                      {step === 4 && 'Evaluare inițială'}
-                      {step === 5 && 'Obiective personale'}
-                    </h1>
-                    <p className="text-gray-600 mt-1">
-                      {step === 1 && 'Hai să începem prin a-ți configura profilul.'}
-                      {step === 2 && 'Pentru ce examen te pregătești?'}
-                      {step === 3 && 'Selectează materiile care te interesează.'}
-                      {step === 4 && 'Un scurt test pentru a identifica nivelul tău.'}
-                      {step === 5 && 'Definește obiectivele tale de învățare.'}
-                    </p>
-                  </div>
+                <div className="mb-6">
+                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                    {step === 1 && 'Configurează-ți profilul'}
+                    {step === 2 && 'Alege tipul de examen'}
+                    {step === 3 && 'Alege materiile de interes'}
+                    {step === 4 && 'Evaluare inițială'}
+                    {step === 5 && 'Obiective personale'}
+                  </h1>
+                  <p className="text-gray-600">
+                    {step === 1 && 'Hai să începem prin a-ți configura profilul.'}
+                    {step === 2 && 'Pentru ce examen te pregătești?'}
+                    {step === 3 && 'Selectează materiile care te interesează.'}
+                    {step === 4 && 'Un scurt test pentru a identifica nivelul tău.'}
+                    {step === 5 && 'Definește obiectivele tale de învățare.'}
+                  </p>
                 </div>
                 
                 {/* Step progress indicator */}
@@ -210,255 +205,255 @@ const OnboardingPage: React.FC = () => {
                 </div>
               </div>
 
-            <motion.div
-              key={`step-${step}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-            >
-              {step === 1 && (
-                <div>
-                  <div className="mb-6">
-                    <label htmlFor="name\" className="block text-sm font-medium text-gray-700 mb-2">
-                      Cum te numești?
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                      placeholder="Nume și prenume"
+              <motion.div
+                key={`step-${step}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="flex-1"
+              >
+                {step === 1 && (
+                  <div>
+                    <div className="mb-6">
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                        Cum te numești?
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                        placeholder="Nume și prenume"
+                      />
+                    </div>
+                    
+                    <AvatarSelector 
+                      selectedAvatar={avatar} 
+                      onSelect={setAvatar}
                     />
                   </div>
-                  
-                  <AvatarSelector 
-                    selectedAvatar={avatar} 
-                    onSelect={setAvatar}
-                  />
-                </div>
-              )}
+                )}
 
-              {step === 2 && (
-                <div>
-                  <div className="mb-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Tipul de examen</h3>
-                    <div className="grid grid-cols-1 gap-4">
-                      <button
-                        onClick={() => setExamType('evaluareNationala')}
-                        className={`p-4 rounded-lg border-2 text-left transition-all ${
-                          examType === 'evaluareNationala'
-                            ? 'border-indigo-600 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center">
-                          <GraduationCap className="h-6 w-6 text-indigo-600 mr-3" />
-                          <div>
-                            <h4 className="font-medium text-gray-900">Evaluarea Națională</h4>
-                            <p className="text-sm text-gray-500">Pregătire pentru examenul de clasa a 8-a</p>
+                {step === 2 && (
+                  <div>
+                    <div className="mb-6">
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">Tipul de examen</h3>
+                      <div className="grid grid-cols-1 gap-4">
+                        <button
+                          onClick={() => setExamType('evaluareNationala')}
+                          className={`p-6 rounded-xl border-2 text-left transition-all transform hover:scale-105 ${
+                            examType === 'evaluareNationala'
+                              ? 'border-indigo-600 bg-indigo-50 shadow-lg'
+                              : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <GraduationCap className="h-8 w-8 text-indigo-600 mr-4" />
+                            <div>
+                              <h4 className="font-semibold text-gray-900 text-lg">Evaluarea Națională</h4>
+                              <p className="text-sm text-gray-500">Pregătire pentru examenul de clasa a 8-a</p>
+                            </div>
                           </div>
-                        </div>
-                      </button>
+                        </button>
 
-                      <button
-                        onClick={() => setExamType('bacalaureat')}
-                        className={`p-4 rounded-lg border-2 text-left transition-all ${
-                          examType === 'bacalaureat'
-                            ? 'border-indigo-600 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center">
-                          <GraduationCap className="h-6 w-6 text-indigo-600 mr-3" />
-                          <div>
-                            <h4 className="font-medium text-gray-900">Bacalaureat</h4>
-                            <p className="text-sm text-gray-500">Pregătire pentru examenul de bacalaureat</p>
+                        <button
+                          onClick={() => setExamType('bacalaureat')}
+                          className={`p-6 rounded-xl border-2 text-left transition-all transform hover:scale-105 ${
+                            examType === 'bacalaureat'
+                              ? 'border-indigo-600 bg-indigo-50 shadow-lg'
+                              : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <GraduationCap className="h-8 w-8 text-indigo-600 mr-4" />
+                            <div>
+                              <h4 className="font-semibold text-gray-900 text-lg">Bacalaureat</h4>
+                              <p className="text-sm text-gray-500">Pregătire pentru examenul de bacalaureat</p>
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
-                  {examType && (
-                    <div className="mt-6">
-                      <h3 className="text-lg font-medium text-gray-900 mb-4">În ce clasă ești?</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {getGradeOptions().map((gradeOption) => (
-                          <button
-                            key={gradeOption}
-                            onClick={() => setGrade(gradeOption)}
-                            className={`p-4 rounded-lg border-2 text-center transition-all ${
-                              grade === gradeOption
-                                ? 'border-indigo-600 bg-indigo-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            <span className="text-lg font-medium">
-                              {gradeOption}
-                            </span>
-                            <span className="block text-sm text-gray-500">
-                              Clasa a {gradeOption}-a
-                            </span>
-                          </button>
-                        ))}
+                        </button>
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
-              
-              {step === 3 && (
-                <SubjectSelector
-                  selectedSubjects={selectedSubjects}
-                  onToggle={handleSubjectToggle}
-                  examType={examType}
-                  grade={grade}
-                />
-              )}
-              
-              {step === 4 && questions.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    {isCompleted ? 'Evaluare completă!' : 'Evaluare inițială'}
-                  </h3>
-                  
-                  {!isCompleted ? (
-                    <div>
-                      <div className="mb-4">
-                        <div className="flex justify-between text-sm text-gray-500 mb-2">
-                          <span>Întrebarea {currentQuestion + 1} din {questions.length}</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5">
-                          <div 
-                            className="bg-indigo-600 h-1.5 rounded-full"
-                            style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-6">
-                        <h4 className="text-base font-medium text-gray-800 mb-4">
-                          {questions[currentQuestion].text}
-                        </h4>
-                        
-                        <div className="space-y-3">
-                          {questions[currentQuestion].options.map((option, index) => (
-                            <div 
-                              key={index}
-                              onClick={() => handleAnswerSelect(index)}
-                              className={`flex items-center p-3 rounded-md border cursor-pointer ${
-                                answers[currentQuestion] === index 
-                                  ? 'bg-indigo-50 border-indigo-600' 
-                                  : 'border-gray-300 hover:bg-gray-50'
+
+                    {examType && (
+                      <div className="mt-6">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">În ce clasă ești?</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {getGradeOptions().map((gradeOption) => (
+                            <button
+                              key={gradeOption}
+                              onClick={() => setGrade(gradeOption)}
+                              className={`p-4 rounded-xl border-2 text-center transition-all transform hover:scale-105 ${
+                                grade === gradeOption
+                                  ? 'border-indigo-600 bg-indigo-50 shadow-lg'
+                                  : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
                               }`}
                             >
-                              <div className={`w-4 h-4 rounded-full border ${
-                                answers[currentQuestion] === index 
-                                  ? 'border-indigo-600 bg-indigo-600' 
-                                  : 'border-gray-400'
-                              }`}>
-                                {answers[currentQuestion] === index && (
-                                  <span className="flex items-center justify-center text-white text-xs">
-                                    ✓
-                                  </span>
-                                )}
-                              </div>
-                              <span className={`ml-3 text-sm ${
-                                answers[currentQuestion] === index 
-                                  ? 'text-indigo-700 font-medium' 
-                                  : 'text-gray-700'
-                              }`}>
-                                {option}
+                              <span className="text-xl font-bold text-indigo-600">
+                                {gradeOption}
                               </span>
-                            </div>
+                              <span className="block text-sm text-gray-500">
+                                Clasa a {gradeOption}-a
+                              </span>
+                            </button>
                           ))}
                         </div>
                       </div>
-                      
-                      <div className="flex justify-between">
-                        <button
-                          onClick={handleBack}
-                          disabled={currentQuestion === 0}
-                          className="px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <ArrowLeft className="h-4 w-4 inline-block mr-1" /> Înapoi
-                        </button>
-                        
-                        <button
-                          onClick={currentQuestion < questions.length - 1 ? nextQuestion : handleContinue}
-                          disabled={answers[currentQuestion] === -1}
-                          className="px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {currentQuestion < questions.length - 1 ? 'Următoarea' : 'Finalizare'} <ArrowRight className="h-4 w-4 inline-block ml-1" />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="w-20 h-20 mx-auto flex items-center justify-center bg-green-100 rounded-full mb-4">
-                        <CheckCircle className="h-10 w-10 text-green-600" />
-                      </div>
-                      <h4 className="text-xl font-medium text-gray-900 mb-2">
-                        Evaluare finalizată!
-                      </h4>
-                      <p className="text-gray-600 mb-6">
-                        Mulțumim pentru completarea evaluării. Am analizat răspunsurile tale și îți vom genera un plan personalizat.
-                      </p>
-                      <button
-                        onClick={handleContinue}
-                        className="px-6 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-                      >
-                        Continuă <ArrowRight className="h-4 w-4 inline-block ml-1" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {step === 5 && (
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">
-                    Care sunt obiectivele tale de învățare?
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Împărtășește cu noi ce vrei să realizezi pentru ca AI-ul să poată crea un plan personalizat pentru tine.
-                  </p>
-                  
-                  <div className="mb-6">
-                    <textarea
-                      value={personalGoals}
-                      onChange={(e) => setPersonalGoals(e.target.value)}
-                      placeholder="Ex: Să învăț tabla înmulțirii până la finalul lunii"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 h-36"
-                    ></textarea>
+                    )}
                   </div>
-                </div>
-              )}
-            </motion.div>
+                )}
+                
+                {step === 3 && (
+                  <SubjectSelector
+                    selectedSubjects={selectedSubjects}
+                    onToggle={handleSubjectToggle}
+                    examType={examType}
+                    grade={grade}
+                  />
+                )}
+                
+                {step === 4 && questions.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      {isCompleted ? 'Evaluare completă!' : 'Evaluare inițială'}
+                    </h3>
+                    
+                    {!isCompleted ? (
+                      <div>
+                        <div className="mb-6">
+                          <div className="flex justify-between text-sm text-gray-500 mb-2">
+                            <span>Întrebarea {currentQuestion + 1} din {questions.length}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-6">
+                          <h4 className="text-base font-medium text-gray-800 mb-4">
+                            {questions[currentQuestion].text}
+                          </h4>
+                          
+                          <div className="space-y-3">
+                            {questions[currentQuestion].options.map((option, index) => (
+                              <div 
+                                key={index}
+                                onClick={() => handleAnswerSelect(index)}
+                                className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all transform hover:scale-105 ${
+                                  answers[currentQuestion] === index 
+                                    ? 'bg-indigo-50 border-indigo-600 shadow-lg' 
+                                    : 'border-gray-300 hover:bg-gray-50 hover:shadow-md'
+                                }`}
+                              >
+                                <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
+                                  answers[currentQuestion] === index 
+                                    ? 'border-indigo-600 bg-indigo-600' 
+                                    : 'border-gray-400'
+                                }`}>
+                                  {answers[currentQuestion] === index && (
+                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                  )}
+                                </div>
+                                <span className={`text-sm ${
+                                  answers[currentQuestion] === index 
+                                    ? 'text-indigo-700 font-medium' 
+                                    : 'text-gray-700'
+                                }`}>
+                                  {option}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                          <button
+                            onClick={handleBack}
+                            disabled={currentQuestion === 0}
+                            className="px-6 py-3 text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center"
+                          >
+                            <ArrowLeft className="h-4 w-4 mr-2" /> Înapoi
+                          </button>
+                          
+                          <button
+                            onClick={currentQuestion < questions.length - 1 ? nextQuestion : handleContinue}
+                            disabled={answers[currentQuestion] === -1}
+                            className="px-6 py-3 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
+                          >
+                            {currentQuestion < questions.length - 1 ? 'Următoarea' : 'Finalizare'} <ArrowRight className="h-4 w-4 ml-2" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <div className="w-20 h-20 mx-auto flex items-center justify-center bg-green-100 rounded-full mb-6">
+                          <CheckCircle className="h-10 w-10 text-green-600" />
+                        </div>
+                        <h4 className="text-xl font-medium text-gray-900 mb-2">
+                          Evaluare finalizată!
+                        </h4>
+                        <p className="text-gray-600 mb-6">
+                          Mulțumim pentru completarea evaluării. Am analizat răspunsurile tale și îți vom genera un plan personalizat.
+                        </p>
+                        <button
+                          onClick={handleContinue}
+                          className="px-8 py-3 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center mx-auto"
+                        >
+                          Continuă <ArrowRight className="h-4 w-4 ml-2" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {step === 5 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Care sunt obiectivele tale de învățare?
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-6">
+                      Împărtășește cu noi ce vrei să realizezi pentru ca AI-ul să poată crea un plan personalizat pentru tine.
+                    </p>
+                    
+                    <div className="mb-6">
+                      <textarea
+                        value={personalGoals}
+                        onChange={(e) => setPersonalGoals(e.target.value)}
+                        placeholder="Ex: Vreau să iau nota maximă la Bacalaureat la matematică și să înțeleg mai bine conceptele de algebră."
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 h-36 transition-all"
+                      ></textarea>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
 
-            <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
-              {step > 1 && (
+              {/* Navigation buttons */}
+              <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
+                {step > 1 && (
+                  <button
+                    onClick={handleBack}
+                    className="px-6 py-3 text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex items-center transform hover:scale-105"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" /> Înapoi
+                  </button>
+                )}
+                
                 <button
-                  onClick={handleBack}
-                  className="px-6 py-3 text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex items-center"
+                  onClick={handleContinue}
+                  disabled={(step === 1 && (!name.trim() || !avatar)) || 
+                          (step === 2 && (!examType || !grade)) ||
+                          (step === 3 && selectedSubjects.length === 0) ||
+                          (step === 4 && !isCompleted && answers[currentQuestion] === -1)}
+                  className="ml-auto px-8 py-3 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
                 >
-                  <ArrowLeft className="h-4 w-4 inline-block mr-1" /> Înapoi
+                  {step < 5 ? 'Continuă' : 'Finalizare'} <ArrowRight className="h-4 w-4 ml-2" />
                 </button>
-              )}
-              
-              <button
-                onClick={handleContinue}
-                disabled={(step === 1 && (!name.trim() || !avatar)) || 
-                        (step === 2 && (!examType || !grade)) ||
-                        (step === 3 && selectedSubjects.length === 0) ||
-                        (step === 4 && !isCompleted && answers[currentQuestion] === -1)}
-                className="ml-auto px-8 py-3 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
-              >
-                {step < 5 ? 'Continuă' : 'Finalizare'} <ArrowRight className="h-4 w-4 inline-block ml-1" />
-              </button>
-            </div>
+              </div>
             </div>
           </div>
         </div>

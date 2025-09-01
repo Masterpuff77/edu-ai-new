@@ -15,18 +15,7 @@ const RegisterPage: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex flex-col justify-center items-center p-4">
-      <div className="mb-8 text-center">
-        <div className="inline-block p-3 bg-indigo-100 rounded-full mb-4">
-          <Lightbulb className="h-10 w-10 text-indigo-600" />
-        </div>
-        <h1 className="text-3xl font-bold text-gray-900">
-          EduVibe
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Creează-ți contul și începe să înveți inteligent
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 flex flex-col justify-center items-center p-4">
       
       <RegisterForm />
 
