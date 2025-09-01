@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowLeft, GraduationCap, CheckCircle, Trophy } from 'lucide-react';
+import { ArrowRight, ArrowLeft, GraduationCap, CheckCircle, Trophy, Star, BookOpen } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import AvatarSelector from '../components/onboarding/AvatarSelector';
 import SubjectSelector from '../components/onboarding/SubjectSelector';
@@ -117,10 +117,12 @@ const OnboardingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
       <div className="max-w-7xl w-full">
+        {/* Main container with two columns */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           <div className="flex flex-col lg:flex-row min-h-[700px]">
-            {/* Left side - Colorful illustration */}
-            <div className="lg:w-1/2 bg-gradient-to-br from-slate-800 via-purple-800 to-indigo-800 relative overflow-hidden">
+            
+            {/* LEFT COLUMN - Colorful illustration */}
+            <div className="lg:w-1/2 bg-gradient-to-br from-slate-800 via-purple-800 to-indigo-800 relative overflow-hidden flex items-center justify-center">
               {/* Animated background elements */}
               <div className="absolute inset-0">
                 <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
@@ -129,70 +131,93 @@ const OnboardingPage: React.FC = () => {
                 <div className="absolute bottom-32 right-12 w-24 h-24 bg-blue-300/20 rounded-full animate-bounce"></div>
               </div>
               
-              {/* Main illustration */}
-              <div className="relative z-10 h-full flex items-center justify-center p-8">
-                <div className="text-center">
-                  {/* Happy students illustration using Pexels image */}
-                  <div className="mb-8">
-                    <img 
-                      src="https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=400" 
-                      alt="Elevi fericiți"
-                      className="w-80 h-80 object-cover rounded-full mx-auto shadow-2xl border-8 border-white/30"
-                    />
+              {/* Logo at top */}
+              <div className="absolute top-8 left-8">
+                <img 
+                  src="/eduvibe-logo-small.svg" 
+                  alt="EduVibe" 
+                  className="h-8 w-auto"
+                />
+              </div>
+              
+              {/* Main content */}
+              <div className="relative z-10 text-center p-8">
+                {/* Happy students illustration */}
+                <div className="mb-8">
+                  <img 
+                    src="https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=400" 
+                    alt="Elevi fericiți"
+                    className="w-80 h-80 object-cover rounded-full mx-auto shadow-2xl border-8 border-white/30"
+                  />
+                </div>
+                
+                {/* Motivational text */}
+                <div className="text-white">
+                  <h2 className="text-3xl font-bold mb-4">
+                    Începe călătoria ta de învățare!
+                  </h2>
+                  <p className="text-lg text-white/90 leading-relaxed">
+                    Alătură-te miilor de elevi care își ating obiectivele cu ajutorul AI-ului nostru educațional.
+                  </p>
+                </div>
+                
+                {/* Floating achievement badges */}
+                <div className="absolute top-20 left-8 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float">
+                  <div className="flex items-center text-white">
+                    <Trophy className="h-5 w-5 mr-2 text-yellow-300" />
+                    <span className="text-sm font-medium">+1000 XP</span>
                   </div>
-                  
-                  {/* Motivational text */}
-                  <div className="text-white">
-                    <h2 className="text-3xl font-bold mb-4">
-                      Începe călătoria ta de învățare!
-                    </h2>
-                    <p className="text-lg text-white/90 leading-relaxed">
-                      Alătură-te miilor de elevi care își ating obiectivele cu ajutorul AI-ului nostru educațional.
-                    </p>
+                </div>
+                
+                <div className="absolute bottom-16 right-8 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float" style={{ animationDelay: '1s' }}>
+                  <div className="flex items-center text-white">
+                    <GraduationCap className="h-5 w-5 mr-2 text-green-300" />
+                    <span className="text-sm font-medium">Succes garantat</span>
                   </div>
-                  
-                  {/* Floating achievement badges */}
-                  <div className="absolute top-16 left-8 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float">
-                    <div className="flex items-center text-white">
-                      <Trophy className="h-5 w-5 mr-2 text-yellow-300" />
-                      <span className="text-sm font-medium">+1000 XP</span>
-                    </div>
-                  </div>
-                  
-                  <div className="absolute bottom-16 right-8 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float" style={{ animationDelay: '1s' }}>
-                    <div className="flex items-center text-white">
-                      <GraduationCap className="h-5 w-5 mr-2 text-green-300" />
-                      <span className="text-sm font-medium">Succes garantat</span>
-                    </div>
+                </div>
+
+                <div className="absolute top-40 right-16 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float" style={{ animationDelay: '2s' }}>
+                  <div className="flex items-center text-white">
+                    <Star className="h-5 w-5 mr-2 text-blue-300" />
+                    <span className="text-sm font-medium">AI Personal</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right side - Form */}
+            {/* RIGHT COLUMN - Form */}
             <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white">
+              {/* Back button */}
+              {step > 1 && (
+                <button
+                  onClick={handleBack}
+                  className="absolute top-8 left-8 lg:left-auto lg:right-8 p-2 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                  aria-label="Înapoi"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+              )}
+
               {/* Header */}
               <div className="mb-8">
-                <div className="mb-6">
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                    {step === 1 && 'Configurează-ți profilul'}
-                    {step === 2 && 'Alege tipul de examen'}
-                    {step === 3 && 'Alege materiile de interes'}
-                    {step === 4 && 'Evaluare inițială'}
-                    {step === 5 && 'Obiective personale'}
-                  </h1>
-                  <p className="text-gray-600">
-                    {step === 1 && 'Hai să începem prin a-ți configura profilul.'}
-                    {step === 2 && 'Pentru ce examen te pregătești?'}
-                    {step === 3 && 'Selectează materiile care te interesează.'}
-                    {step === 4 && 'Un scurt test pentru a identifica nivelul tău.'}
-                    {step === 5 && 'Definește obiectivele tale de învățare.'}
-                  </p>
-                </div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {step === 1 && 'Configurează-ți profilul'}
+                  {step === 2 && 'Alege tipul de examen'}
+                  {step === 3 && 'Alege materiile de interes'}
+                  {step === 4 && 'Evaluare inițială'}
+                  {step === 5 && 'Obiective personale'}
+                </h1>
+                <p className="text-gray-600 text-lg">
+                  {step === 1 && 'Hai să începem prin a-ți configura profilul.'}
+                  {step === 2 && 'Pentru ce examen te pregătești?'}
+                  {step === 3 && 'Selectează materiile care te interesează.'}
+                  {step === 4 && 'Un scurt test pentru a identifica nivelul tău.'}
+                  {step === 5 && 'Definește obiectivele tale de învățare.'}
+                </p>
                 
                 {/* Step progress indicator */}
-                <div className="mb-8">
-                  <div className="flex justify-between text-sm text-gray-600 mb-3">
+                <div className="mt-8">
+                  <div className="flex justify-between text-sm text-gray-500 mb-3">
                     <span>Pasul {step} din 5</span>
                     <span>{Math.round((step / 5) * 100)}% completat</span>
                   </div>
@@ -205,17 +230,18 @@ const OnboardingPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Form content */}
               <motion.div
                 key={`step-${step}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
                 className="flex-1"
               >
                 {step === 1 && (
-                  <div>
-                    <div className="mb-6">
+                  <div className="space-y-6">
+                    <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                         Cum te numești?
                       </label>
@@ -237,13 +263,13 @@ const OnboardingPage: React.FC = () => {
                 )}
 
                 {step === 2 && (
-                  <div>
-                    <div className="mb-6">
+                  <div className="space-y-6">
+                    <div>
                       <h3 className="text-lg font-medium text-gray-900 mb-4">Tipul de examen</h3>
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-4">
                         <button
                           onClick={() => setExamType('evaluareNationala')}
-                          className={`p-6 rounded-xl border-2 text-left transition-all transform hover:scale-105 ${
+                          className={`w-full p-6 rounded-xl border-2 text-left transition-all transform hover:scale-105 ${
                             examType === 'evaluareNationala'
                               ? 'border-indigo-600 bg-indigo-50 shadow-lg'
                               : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
@@ -260,7 +286,7 @@ const OnboardingPage: React.FC = () => {
 
                         <button
                           onClick={() => setExamType('bacalaureat')}
-                          className={`p-6 rounded-xl border-2 text-left transition-all transform hover:scale-105 ${
+                          className={`w-full p-6 rounded-xl border-2 text-left transition-all transform hover:scale-105 ${
                             examType === 'bacalaureat'
                               ? 'border-indigo-600 bg-indigo-50 shadow-lg'
                               : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
@@ -278,7 +304,7 @@ const OnboardingPage: React.FC = () => {
                     </div>
 
                     {examType && (
-                      <div className="mt-6">
+                      <div>
                         <h3 className="text-lg font-medium text-gray-900 mb-4">În ce clasă ești?</h3>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                           {getGradeOptions().map((gradeOption) => (
@@ -425,16 +451,16 @@ const OnboardingPage: React.FC = () => {
                         value={personalGoals}
                         onChange={(e) => setPersonalGoals(e.target.value)}
                         placeholder="Ex: Vreau să iau nota maximă la Bacalaureat la matematică și să înțeleg mai bine conceptele de algebră."
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 h-36 transition-all"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 h-36 transition-all resize-none"
                       ></textarea>
                     </div>
                   </div>
                 )}
               </motion.div>
 
-              {/* Navigation buttons */}
+              {/* Navigation buttons at bottom */}
               <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
-                {step > 1 && (
+                {step > 1 && step !== 4 && (
                   <button
                     onClick={handleBack}
                     className="px-6 py-3 text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex items-center"
