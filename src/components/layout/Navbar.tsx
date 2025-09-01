@@ -41,7 +41,7 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`px-2 sm:px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors ${
+                className={`px-1.5 sm:px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors ${
                   location.pathname === item.path
                     ? 'text-white bg-white/20'
                     : 'text-gray-100 hover:text-white hover:bg-white/10'
@@ -54,7 +54,7 @@ const Navbar: React.FC = () => {
             
             <button
               onClick={handleSignOut}
-              className="ml-1 sm:ml-2 p-2 rounded-md text-gray-100 hover:text-red-200 hover:bg-white/10 transition-colors"
+              className="ml-0.5 sm:ml-2 p-1.5 sm:p-2 rounded-md text-gray-100 hover:text-red-200 hover:bg-white/10 transition-colors"
               title="Deconectare"
             >
               <LogOut className="h-5 w-5" />

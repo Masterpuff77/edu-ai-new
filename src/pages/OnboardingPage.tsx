@@ -115,43 +115,100 @@ const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 flex flex-col justify-center items-center p-4">
-      <div className="max-w-lg w-full">
-        <div className="mb-8 text-center">
-          <div className="inline-block p-3 bg-indigo-100 rounded-full mb-4">
-            <Lightbulb className="h-10 w-10 text-indigo-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {step === 1 && 'Bun venit la EduVibe'}
-            {step === 2 && 'Alege tipul de examen'}
-            {step === 3 && 'Alege materiile de interes'}
-            {step === 4 && 'Evaluare inițială'}
-            {step === 5 && 'Obiective personale'}
-          </h1>
-          <p className="mt-2 text-gray-600">
-            {step === 1 && 'Hai să începem prin a-ți configura profilul.'}
-            {step === 2 && 'Pentru ce examen te pregătești?'}
-            {step === 3 && 'Selectează materiile care te interesează pentru a personaliza experiența.'}
-            {step === 4 && 'Un scurt test pentru a identifica nivelul tău actual.'}
-            {step === 5 && 'Definește obiectivele tale de învățare.'}
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="p-6">
-            {/* Step progress indicator */}
-            <div className="mb-6">
-              <div className="flex justify-between text-xs text-gray-600 mb-2">
-                <span>Pasul {step} din 5</span>
-                <span>{Math.round((step / 5) * 100)}% completat</span>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 flex items-center justify-center p-4">
+      <div className="max-w-6xl w-full">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="flex flex-col lg:flex-row min-h-[600px]">
+            {/* Left side - Colorful illustration */}
+            <div className="lg:w-1/2 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 relative overflow-hidden">
+              {/* Animated background elements */}
+              <div className="absolute inset-0">
+                <div className="absolute top-10 left-10 w-20 h-20 bg-white/20 rounded-full animate-pulse"></div>
+                <div className="absolute top-32 right-16 w-16 h-16 bg-yellow-300/30 rounded-full animate-bounce"></div>
+                <div className="absolute bottom-20 left-20 w-12 h-12 bg-pink-300/40 rounded-full animate-pulse"></div>
+                <div className="absolute bottom-32 right-12 w-24 h-24 bg-blue-300/30 rounded-full animate-bounce"></div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500 ease-in-out"
-                  style={{ width: `${(step / 5) * 100}%` }}
-                ></div>
+              
+              {/* Main illustration */}
+              <div className="relative z-10 h-full flex items-center justify-center p-8">
+                <div className="text-center">
+                  {/* Happy students illustration using Pexels image */}
+                  <div className="mb-8">
+                    <img 
+                      src="https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=400" 
+                      alt="Elevi fericiți"
+                      className="w-80 h-80 object-cover rounded-full mx-auto shadow-2xl border-8 border-white/30"
+                    />
+                  </div>
+                  
+                  {/* Motivational text */}
+                  <div className="text-white">
+                    <h2 className="text-3xl font-bold mb-4">
+                      Începe călătoria ta de învățare!
+                    </h2>
+                    <p className="text-lg text-white/90 leading-relaxed">
+                      Alătură-te miilor de elevi care își ating obiectivele cu ajutorul AI-ului nostru educațional.
+                    </p>
+                  </div>
+                  
+                  {/* Floating achievement badges */}
+                  <div className="absolute top-16 left-8 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float">
+                    <div className="flex items-center text-white">
+                      <Trophy className="h-5 w-5 mr-2 text-yellow-300" />
+                      <span className="text-sm font-medium">+1000 XP</span>
+                    </div>
+                  </div>
+                  
+                  <div className="absolute bottom-16 right-8 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float" style={{ animationDelay: '1s' }}>
+                    <div className="flex items-center text-white">
+                      <GraduationCap className="h-5 w-5 mr-2 text-green-300" />
+                      <span className="text-sm font-medium">Succes garantat</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Right side - Form */}
+            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
+              {/* Header */}
+              <div className="mb-8">
+                <div className="flex items-center mb-6">
+                  <div className="p-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl mr-4">
+                    <Lightbulb className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                      {step === 1 && 'Bun venit la EduVibe'}
+                      {step === 2 && 'Alege tipul de examen'}
+                      {step === 3 && 'Alege materiile de interes'}
+                      {step === 4 && 'Evaluare inițială'}
+                      {step === 5 && 'Obiective personale'}
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                      {step === 1 && 'Hai să începem prin a-ți configura profilul.'}
+                      {step === 2 && 'Pentru ce examen te pregătești?'}
+                      {step === 3 && 'Selectează materiile care te interesează.'}
+                      {step === 4 && 'Un scurt test pentru a identifica nivelul tău.'}
+                      {step === 5 && 'Definește obiectivele tale de învățare.'}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Step progress indicator */}
+                <div className="mb-8">
+                  <div className="flex justify-between text-sm text-gray-600 mb-3">
+                    <span>Pasul {step} din 5</span>
+                    <span>{Math.round((step / 5) * 100)}% completat</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div 
+                      className="bg-gradient-to-r from-indigo-600 to-purple-600 h-3 rounded-full transition-all duration-500 ease-in-out shadow-sm"
+                      style={{ width: `${(step / 5) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
 
             <motion.div
               key={`step-${step}`}
@@ -381,11 +438,11 @@ const OnboardingPage: React.FC = () => {
               )}
             </motion.div>
 
-            <div className="flex justify-between mt-8">
+            <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
               {step > 1 && (
                 <button
                   onClick={handleBack}
-                  className="px-4 py-2 text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200"
+                  className="px-6 py-3 text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex items-center"
                 >
                   <ArrowLeft className="h-4 w-4 inline-block mr-1" /> Înapoi
                 </button>
@@ -397,10 +454,11 @@ const OnboardingPage: React.FC = () => {
                         (step === 2 && (!examType || !grade)) ||
                         (step === 3 && selectedSubjects.length === 0) ||
                         (step === 4 && !isCompleted && answers[currentQuestion] === -1)}
-                className="ml-auto px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="ml-auto px-8 py-3 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
               >
                 {step < 5 ? 'Continuă' : 'Finalizare'} <ArrowRight className="h-4 w-4 inline-block ml-1" />
               </button>
+            </div>
             </div>
           </div>
         </div>
