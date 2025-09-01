@@ -115,18 +115,18 @@ const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 flex items-center justify-center p-4">
-      <div className="max-w-6xl w-full">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
+      <div className="max-w-7xl w-full">
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div className="flex flex-col lg:flex-row min-h-[600px]">
+          <div className="flex flex-col lg:flex-row min-h-[700px]">
             {/* Left side - Colorful illustration */}
-            <div className="lg:w-1/2 bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 relative overflow-hidden">
+            <div className="lg:w-1/2 bg-gradient-to-br from-slate-800 via-purple-800 to-indigo-800 relative overflow-hidden">
               {/* Animated background elements */}
               <div className="absolute inset-0">
-                <div className="absolute top-10 left-10 w-20 h-20 bg-white/20 rounded-full animate-pulse"></div>
-                <div className="absolute top-32 right-16 w-16 h-16 bg-yellow-300/30 rounded-full animate-bounce"></div>
-                <div className="absolute bottom-20 left-20 w-12 h-12 bg-pink-300/40 rounded-full animate-pulse"></div>
-                <div className="absolute bottom-32 right-12 w-24 h-24 bg-blue-300/30 rounded-full animate-bounce"></div>
+                <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
+                <div className="absolute top-32 right-16 w-16 h-16 bg-yellow-300/20 rounded-full animate-bounce"></div>
+                <div className="absolute bottom-20 left-20 w-12 h-12 bg-pink-300/20 rounded-full animate-pulse"></div>
+                <div className="absolute bottom-32 right-12 w-24 h-24 bg-blue-300/20 rounded-full animate-bounce"></div>
               </div>
               
               {/* Main illustration */}
@@ -170,7 +170,7 @@ const OnboardingPage: React.FC = () => {
             </div>
 
             {/* Right side - Form */}
-            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
+            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center bg-white">
               {/* Header */}
               <div className="mb-8">
                 <div className="mb-6">
@@ -433,11 +433,11 @@ const OnboardingPage: React.FC = () => {
               </motion.div>
 
               {/* Navigation buttons */}
-              <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
+              <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
                 {step > 1 && (
                   <button
                     onClick={handleBack}
-                    className="px-6 py-3 text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex items-center transform hover:scale-105"
+                    className="px-6 py-3 text-sm font-medium rounded-xl text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all duration-200 flex items-center"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" /> Înapoi
                   </button>
@@ -449,7 +449,7 @@ const OnboardingPage: React.FC = () => {
                           (step === 2 && (!examType || !grade)) ||
                           (step === 3 && selectedSubjects.length === 0) ||
                           (step === 4 && !isCompleted && answers[currentQuestion] === -1)}
-                  className="ml-auto px-8 py-3 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
+                  className="ml-auto px-8 py-3 text-sm font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex items-center"
                 >
                   {step < 5 ? 'Continuă' : 'Finalizare'} <ArrowRight className="h-4 w-4 ml-2" />
                 </button>
