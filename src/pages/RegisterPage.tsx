@@ -15,8 +15,7 @@ const RegisterPage: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 flex flex-col justify-center items-center p-4">
-      
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-800 flex items-center justify-center p-4">
       <RegisterForm />
 
       <p className="mt-8 text-center text-sm text-gray-500">
