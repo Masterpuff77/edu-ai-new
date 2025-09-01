@@ -169,7 +169,7 @@ const OnboardingPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="absolute bottom-16 right-8 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float" style={{ animationDelay: '1s' }}>
+                <div className="absolute bottom-52 right-8 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float" style={{ animationDelay: '1s' }}>
                   <div className="flex items-center text-white">
                     <GraduationCap className="h-5 w-5 mr-2 text-green-300" />
                     <span className="text-sm font-medium">Succes garantat</span>
