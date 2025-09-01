@@ -86,7 +86,7 @@ const LoginForm: React.FC = () => {
                     Conectare
                   </h2>
                   <p className="text-gray-600">
-                    Ai deja cont? <a href="/register" className="text-indigo-600 hover:text-indigo-500 font-medium underline">Înregistrează-te</a>
+                    Nu ai cont? <a href="/register" className="text-indigo-600 hover:text-indigo-500 font-medium underline">Înregistrează-te</a>
                   </p>
                 </div>
 
