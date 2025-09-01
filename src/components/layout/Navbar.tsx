@@ -53,6 +53,7 @@ const Navbar: React.FC = () => {
               title="Deconectare"
             >
               <LogOut className="h-5 w-5" />
+            </button>
             <img 
               src="/eduvibe-logo.svg" 
               alt="EduVibe" 
