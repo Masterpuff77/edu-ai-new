@@ -27,7 +27,12 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center flex-shrink-0">
-              <span className="text-xl font-bold text-white">EduVibe</span>
+              <img 
+                src="/eduvibe-logo.svg" 
+                alt="EduVibe" 
+                className="h-7 w-auto"
+                style={{ width: '169px', height: '28px' }}
+              />
             </Link>
           </div>
 
@@ -54,12 +59,6 @@ const Navbar: React.FC = () => {
             >
               <LogOut className="h-5 w-5" />
             </button>
-            <img 
-              src="/eduvibe-logo.svg" 
-              alt="EduVibe" 
-              className="h-7 w-auto"
-              style={{ width: '169px', height: '28px' }}
-            />
           </nav>
         </div>
       </div>
