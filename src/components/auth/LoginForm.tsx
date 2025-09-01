@@ -69,16 +69,7 @@ const LoginForm: React.FC = () => {
             </div>
 
             {/* RIGHT COLUMN - White with form */}
-            <div className="lg:w-1/2 bg-white p-8 lg:p-12 flex flex-col justify-center relative">
-              {/* Back button */}
-              <button
-                onClick={() => navigate('/')}
-                className="absolute top-8 left-8 p-2 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                aria-label="Înapoi"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-
+            <div className="lg:w-1/2 bg-white p-8 lg:p-12 flex flex-col justify-center">
               {/* Form content */}
               <div className="max-w-md mx-auto w-full">
                 <div className="mb-8">
