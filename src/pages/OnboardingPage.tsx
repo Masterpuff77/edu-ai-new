@@ -125,7 +125,7 @@ const OnboardingPage: React.FC = () => {
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-800 via-purple-800 to-indigo-800 relative overflow-hidden items-center justify-center">
               {/* Animated background elements */}
               <div className="absolute inset-0">
-                <div className="absolute top-10 left-60 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
+                <div className="absolute top-20 left-60 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
                 <div className="absolute top-32 right-16 w-16 h-16 bg-yellow-300/20 rounded-full animate-bounce"></div>
                 <div className="absolute bottom-20 left-20 w-12 h-12 bg-pink-300/20 rounded-full animate-pulse"></div>
                 <div className="absolute bottom-32 right-12 w-24 h-24 bg-blue-300/20 rounded-full animate-bounce"></div>
