@@ -145,7 +145,7 @@ const OnboardingPage: React.FC = () => {
                 {/* Happy students illustration */}
                 <div className="mb-8">
                   <img 
-                    src="https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=400" 
+                    src="-freepik__candid-photography-with-natural-textures-and-highl__79718_low.jpeg" 
                     alt="Elevi fericiți"
                     className="w-80 h-80 object-cover rounded-full mx-auto shadow-2xl border-8 border-white/30"
                   />
