@@ -48,7 +48,7 @@ const LoginForm: React.FC = () => {
               
               {/* Animated background elements */}
               <div className="absolute inset-0">
-                <div className="absolute top-10 left-22 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
+                <div className="absolute top-12 left-22 w-20 h-20 bg-white/10 rounded-full animate-pulse"></div>
                 <div className="absolute top-32 right-20 w-16 h-16 bg-yellow-300/20 rounded-full animate-bounce"></div>
                 <div className="absolute bottom-24 left-24 w-12 h-12 bg-pink-300/20 rounded-full animate-pulse"></div>
                 <div className="absolute bottom-40 right-16 w-24 h-24 bg-blue-300/20 rounded-full animate-bounce"></div>
