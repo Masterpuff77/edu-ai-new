@@ -152,7 +152,7 @@ Deno.serve(async (req) => {
     messages.push(...recentContext);
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-1106-preview",
+      model: "gpt-5",
       messages: messages,
       temperature: 0.7,
       max_tokens: 1000,
