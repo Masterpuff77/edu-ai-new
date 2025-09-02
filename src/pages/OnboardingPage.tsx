@@ -176,7 +176,7 @@ const OnboardingPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="absolute top-30 right-16 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float" style={{ animationDelay: '2s' }}>
+                <div className="absolute top-20 right-16 bg-white/20 backdrop-blur-sm rounded-xl p-3 animate-float" style={{ animationDelay: '2s' }}>
                   <div className="flex items-center text-white">
                     <Star className="h-5 w-5 mr-2 text-blue-300" />
                     <span className="text-sm font-medium">AI Personal</span>
