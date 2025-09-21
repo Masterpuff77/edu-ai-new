@@ -1,4 +1,25 @@
-import { registerSW } from 'virtual:pwa-register';
+// Disable Service Worker registration in development/StackBlitz environment
+const isStackBlitz = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+
+if (!isStackBlitz) {
+  import('virtual:pwa-register').then(({ registerSW }) => {
+    const updateSW = registerSW({
+      onNeedRefresh() {
+        if (confirm('New content available. Reload?')) {
+          updateSW(true)
+        }
+      },
+      onOfflineReady() {
+        console.log('App ready to work offline')
+      },
+      onRegisterError(error) {
+        console.error('Service Worker registration failed:', error)
+      }
+    })
+  })
+} else {
+  console.log('Service Worker registration skipped in development environment')
+}
 
 /**
  * Service Worker Registration with Update Notification
