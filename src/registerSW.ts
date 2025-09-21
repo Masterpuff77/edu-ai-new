@@ -1,26 +1,3 @@
-// Disable Service Worker registration in development/StackBlitz environment
-const isStackBlitz = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-
-if (!isStackBlitz) {
-  import('virtual:pwa-register').then(({ registerSW }) => {
-    const updateSW = registerSW({
-      onNeedRefresh() {
-        if (confirm('New content available. Reload?')) {
-          updateSW(true)
-        }
-      },
-      onOfflineReady() {
-        console.log('App ready to work offline')
-      },
-      onRegisterError(error) {
-        console.error('Service Worker registration failed:', error)
-      }
-    })
-  })
-} else {
-  console.log('Service Worker registration skipped in development environment')
-}
-
 /**
  * Service Worker Registration with Update Notification
  * 
@@ -128,10 +105,37 @@ const handlePWAEvent = (event: PWAEvent): void => {
 };
 
 /**
+ * Check if we're in a supported environment for Service Workers
+ */
+const isServiceWorkerSupported = (): boolean => {
+  // Check if Service Workers are supported by the browser
+  if (!('serviceWorker' in navigator)) {
+    return false;
+  }
+  
+  // Check if we're in StackBlitz environment
+  const isStackBlitz = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || 
+     window.location.hostname.includes('stackblitz') ||
+     window.location.hostname.includes('webcontainer'));
+  
+  return !isStackBlitz;
+};
+
+/**
  * Register service worker with comprehensive error handling
  */
-export const initializePWA = (): void => {
+export const initializePWA = async (): Promise<void> => {
   try {
+    // Check if Service Workers are supported in this environment
+    if (!isServiceWorkerSupported()) {
+      console.log('Service Worker registration skipped - not supported in this environment');
+      return;
+    }
+
+    // Dynamically import the registerSW function
+    const { registerSW } = await import('virtual:pwa-register');
+    
     updateSW = registerSW({
       immediate: true,
       onNeedRefresh() {
