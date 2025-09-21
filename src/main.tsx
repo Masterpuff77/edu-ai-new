@@ -5,7 +5,6 @@ import './index.css';
 import { isSupabaseAvailable } from './config/supabase';
 import { initMockData } from './data/mockData';
 import supabase from './config/supabase';
-import { initializePWA } from './registerSW';
 
 // Initialize mock data and render the app
 const init = async () => {
@@ -28,9 +27,6 @@ const init = async () => {
         <App />
       </StrictMode>
     );
-    
-    // Initialize PWA features after app is rendered
-    initializePWA();
   }
 };
 
